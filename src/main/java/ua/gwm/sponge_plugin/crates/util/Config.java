@@ -32,7 +32,8 @@ public class Config {
                 ConfigurationLoader<CommentedConfigurationNode> defaultsLoader = HoconConfigurationLoader.builder().setURL(defaultsURL).build();
                 ConfigurationNode defaultsNode = defaultsLoader.load();
                 getNode().mergeValuesFrom(defaultsNode);
-                save();
+                Sponge.getScheduler().createTaskBuilder().delayTicks(1).execute(this::save).
+                        submit(GWMCrates.getInstance());
             }
             if (auto_save) {
                 Sponge.getScheduler().createTaskBuilder().async().execute(this::save).
