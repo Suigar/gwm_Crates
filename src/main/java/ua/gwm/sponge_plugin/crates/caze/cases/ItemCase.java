@@ -15,14 +15,17 @@ import java.util.Optional;
 public class ItemCase extends Case {
 
     protected ItemStack item;
+    protected boolean start_preview_on_left_click = false;
 
     public ItemCase(ConfigurationNode node) {
         super(node);
         ConfigurationNode item_node = node.getNode("ITEM");
+        ConfigurationNode start_preview_on_left_click_node = node.getNode("START_PREVIEW_ON_LEFT_CLICK");
         if (item_node.isVirtual()) {
             throw new RuntimeException("ITEM node does not exist!");
         }
         item = GWMCratesUtils.parseItem(item_node);
+        start_preview_on_left_click = start_preview_on_left_click_node.getBoolean(false);
     }
 
     public ItemCase(Optional<BigDecimal> price, ItemStack item) {

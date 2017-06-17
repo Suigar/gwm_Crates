@@ -28,9 +28,9 @@ public class FirstGuiPreview extends Preview {
 
     public static final HashMap<Container, Pair<FirstGuiPreview, Manager>> FIRST_GUI_CONTAINERS = new HashMap<Container, Pair<FirstGuiPreview, Manager>>();
 
-    private Optional<Text> display_name = Optional.empty();
-    private List<ItemStack> decorative_items;
-    private int scroll_delay;
+    protected Optional<Text> display_name = Optional.empty();
+    protected List<ItemStack> decorative_items;
+    protected int scroll_delay;
 
     public FirstGuiPreview(Optional<Text> display_name, List<ItemStack> decorative_items, int scroll_delay) {
         super();

@@ -12,7 +12,9 @@ import ua.gwm.sponge_plugin.crates.caze.cases.BlockCase;
 import ua.gwm.sponge_plugin.crates.key.Key;
 import ua.gwm.sponge_plugin.crates.manager.Manager;
 import ua.gwm.sponge_plugin.crates.open_manager.OpenManager;
+import ua.gwm.sponge_plugin.crates.preview.Preview;
 import ua.gwm.sponge_plugin.crates.util.LanguageUtils;
+import ua.gwm.sponge_plugin.crates.util.Pair;
 
 import java.util.Collection;
 import java.util.Optional;
@@ -47,6 +49,39 @@ public class BlockCaseListener {
             caze.add(player, -1);
             key.add(player, -1);
             manager.getOpenManager().open(player, manager);
+            break;
+        }
+    }
+
+    @Listener(order = Order.LATE)
+    public void startBlockCasePreview(InteractBlockEvent.Primary.MainHand event) {
+        Optional<Player> optional_player = event.getCause().first(Player.class);
+        if (!optional_player.isPresent()) return;
+        Player player = optional_player.get();
+        Optional<Location<World>> optional_location = event.getTargetBlock().getLocation();
+        if (!optional_location.isPresent()) return;
+        Location<World> location = optional_location.get();
+        for (Manager manager : GWMCrates.getInstance().getCreatedManagers()) {
+            String manager_id = manager.getId();
+            Case caze = manager.getCase();
+            if (!(caze instanceof BlockCase)) continue;
+            Collection<Location<World>> locations = ((BlockCase) caze).getLocations();
+            if (!locations.contains(location)) continue;
+            event.setCancelled(true);
+            Optional<Preview> optional_preview = manager.getPreview();
+            if (!optional_preview.isPresent()) {
+                player.sendMessage(LanguageUtils.getText("PREVIEW_NOT_AVAILABLE",
+                        new Pair<String, String>("%MANAGER%", manager.getName())));
+                return;
+            }
+            Preview preview = optional_preview.get();
+            if (!player.hasPermission("gwm_crates.preview." + manager_id)) {
+                player.sendMessage(LanguageUtils.getText("HAVE_NOT_PERMISSION"));
+                return;
+            }
+            preview.preview(player, manager);
+            player.sendMessage(LanguageUtils.getText("PREVIEW_STARTED",
+                    new Pair<String, String>("%MANAGER%", manager.getName())));
             break;
         }
     }

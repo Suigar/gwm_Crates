@@ -52,7 +52,7 @@ import java.util.Optional;
 @Plugin(
         id = "gwm_crates",
         name = "GWMCrates",
-        version = "1.11",
+        version = "1.12",
         description = "Universal crates plugin for your server!",
         authors = {"GWM"/*My contacts: Skype(nk_gwm), Discord(GWM#2192)*/})
 public class GWMCrates {

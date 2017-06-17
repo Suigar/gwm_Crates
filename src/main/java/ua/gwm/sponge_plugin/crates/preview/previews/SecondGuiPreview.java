@@ -27,8 +27,8 @@ public class SecondGuiPreview extends Preview {
 
     public static final HashMap<Container, Pair<SecondGuiPreview, Manager>> SECOND_GUI_CONTAINERS = new HashMap<Container, Pair<SecondGuiPreview, Manager>>();
 
-    private Optional<Text> display_name = Optional.empty();
-    private boolean show_only_drops_with_drop_item = true;
+    protected Optional<Text> display_name = Optional.empty();
+    protected boolean show_only_drops_with_drop_item = true;
 
     public SecondGuiPreview(Optional<Text> display_name, boolean show_only_drops_with_drop_item) {
         super();

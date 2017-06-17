@@ -15,10 +15,12 @@ import java.util.Optional;
 public class BlockCase extends Case {
 
     protected Collection<Location<World>> locations;
+    protected boolean start_preview_on_left_click = false;
 
     public BlockCase(ConfigurationNode node) {
         super(node);
         ConfigurationNode locations_node = node.getNode("LOCATIONS");
+        ConfigurationNode start_preview_on_left_click_node = node.getNode("START_PREVIEW_ON_LEFT_CLICK");
         if (locations_node.isVirtual()) {
             throw new RuntimeException("LOCATIONS node does not exist!");
         }
@@ -26,6 +28,7 @@ public class BlockCase extends Case {
         for (ConfigurationNode location_node : locations_node.getChildrenList()) {
             locations.add(GWMCratesUtils.parseLocation(location_node));
         }
+        start_preview_on_left_click = start_preview_on_left_click_node.getBoolean(false);
     }
 
     public BlockCase(Optional<BigDecimal> price, Collection<Location<World>> locations) {
