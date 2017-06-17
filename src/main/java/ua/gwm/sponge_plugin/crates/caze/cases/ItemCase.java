@@ -89,4 +89,12 @@ public class ItemCase extends Case {
     public void setItem(ItemStack item) {
         this.item = item;
     }
+
+    public boolean isStartPreviewOnLeftClick() {
+        return start_preview_on_left_click;
+    }
+
+    public void setStartPreviewOnLeftClick(boolean start_preview_on_left_click) {
+        this.start_preview_on_left_click = start_preview_on_left_click;
+    }
 }

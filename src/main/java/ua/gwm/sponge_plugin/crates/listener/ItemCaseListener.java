@@ -64,6 +64,7 @@ public class ItemCaseListener {
             ItemStack case_item = ((ItemCase) caze).getItem();
             if (!GWMCratesUtils.itemStacksEquals(item, case_item)) continue;
             event.setCancelled(true);
+            if (!((ItemCase) caze).isStartPreviewOnLeftClick()) return;
             Optional<Preview> optional_preview = manager.getPreview();
             if (!optional_preview.isPresent()) {
                 player.sendMessage(LanguageUtils.getText("PREVIEW_NOT_AVAILABLE",

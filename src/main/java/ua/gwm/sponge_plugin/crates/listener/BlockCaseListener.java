@@ -9,6 +9,7 @@ import org.spongepowered.api.world.World;
 import ua.gwm.sponge_plugin.crates.GWMCrates;
 import ua.gwm.sponge_plugin.crates.caze.Case;
 import ua.gwm.sponge_plugin.crates.caze.cases.BlockCase;
+import ua.gwm.sponge_plugin.crates.caze.cases.ItemCase;
 import ua.gwm.sponge_plugin.crates.key.Key;
 import ua.gwm.sponge_plugin.crates.manager.Manager;
 import ua.gwm.sponge_plugin.crates.open_manager.OpenManager;
@@ -35,6 +36,7 @@ public class BlockCaseListener {
             Collection<Location<World>> locations = ((BlockCase) caze).getLocations();
             if (!locations.contains(location)) continue;
             event.setCancelled(true);
+            if (!((BlockCase) caze).isStartPreviewOnLeftClick()) return;
             OpenManager open_manager = manager.getOpenManager();
             if (!open_manager.canOpen(player, manager)) {
                 player.sendMessage(LanguageUtils.getText("CAN_NOT_OPEN_CASE"));

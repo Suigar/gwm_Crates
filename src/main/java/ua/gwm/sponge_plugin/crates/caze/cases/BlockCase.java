@@ -52,4 +52,12 @@ public class BlockCase extends Case {
     public void setLocations(Collection<Location<World>> locations) {
         this.locations = locations;
     }
+
+    public boolean isStartPreviewOnLeftClick() {
+        return start_preview_on_left_click;
+    }
+
+    public void setStartPreviewOnLeftClick(boolean start_preview_on_left_click) {
+        this.start_preview_on_left_click = start_preview_on_left_click;
+    }
 }
