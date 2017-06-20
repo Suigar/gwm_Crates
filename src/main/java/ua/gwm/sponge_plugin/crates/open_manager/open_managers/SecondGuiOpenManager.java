@@ -1,6 +1,8 @@
 package ua.gwm.sponge_plugin.crates.open_manager.open_managers;
 
+import com.google.common.reflect.TypeToken;
 import ninja.leaping.configurate.ConfigurationNode;
+import org.spongepowered.api.effect.sound.SoundType;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.item.inventory.Container;
 import org.spongepowered.api.item.inventory.Inventory;
@@ -33,6 +35,7 @@ public class SecondGuiOpenManager extends OpenManager {
     private int close_delay;
     private boolean forbid_close;
     private boolean give_random_on_close;
+    private Optional<SoundType> click_sound = Optional.empty();
 
     public SecondGuiOpenManager(ConfigurationNode node) {
         super(node);
@@ -44,6 +47,7 @@ public class SecondGuiOpenManager extends OpenManager {
         ConfigurationNode close_delay_node = node.getNode("CLOSE_DELAY");
         ConfigurationNode forbid_close_node = node.getNode("FORBID_CLOSE");
         ConfigurationNode give_random_on_close_node = node.getNode("GIVE_RANDOM_ON_CLOSE");
+        ConfigurationNode click_sound_node = node.getNode("CLICK_SOUND");
         try {
             if (!display_name_node.isVirtual()) {
                 display_name = Optional.of(TextSerializers.FORMATTING_CODE.deserialize(display_name_node.getString()));
@@ -62,15 +66,20 @@ public class SecondGuiOpenManager extends OpenManager {
             close_delay = close_delay_node.getInt(20);
             forbid_close = forbid_close_node.getBoolean(true);
             give_random_on_close = give_random_on_close_node.getBoolean(true);
+            if (!click_sound_node.isVirtual()) {
+                click_sound = Optional.of(click_sound_node.getValue(TypeToken.of(SoundType.class)));
+            }
         } catch (Exception e) {
             throw new RuntimeException("Exception creating Second Gui Open Manager!", e);
         }
     }
 
-    public SecondGuiOpenManager(Optional<Text> display_name, ItemStack hidden_item, boolean increase_hidden_item_quantity,
-                                int rows, boolean show_other_items, int close_delay, boolean forbid_close,
-                                boolean give_random_on_close) {
-        super();
+    public SecondGuiOpenManager(Optional<SoundType> open_sound, Optional<SoundType> close_sound,
+                                Optional<Text> display_name, ItemStack hidden_item,
+                                boolean increase_hidden_item_quantity, int rows,
+                                boolean show_other_items, int close_delay, boolean forbid_close,
+                                boolean give_random_on_close, Optional<SoundType> click_sound) {
+        super(open_sound, close_sound);
         this.display_name = display_name;
         this.hidden_item = hidden_item;
         this.increase_hidden_item_quantity = increase_hidden_item_quantity;
@@ -83,6 +92,7 @@ public class SecondGuiOpenManager extends OpenManager {
         this.close_delay = close_delay;
         this.forbid_close = forbid_close;
         this.give_random_on_close = give_random_on_close;
+        this.click_sound = click_sound;
     }
 
     @Override
@@ -102,6 +112,7 @@ public class SecondGuiOpenManager extends OpenManager {
             ordered.getSlot(new SlotIndex(i)).get().set(copy);
         }
         Container container = player.openInventory(inventory, GWMCrates.getInstance().getDefaultCause()).get();
+        getOpenSound().ifPresent(open_sound -> player.playSound(open_sound, player.getLocation().getPosition(), 1.));
         SECOND_GUI_INVENTORIES.put(container, new Pair<SecondGuiOpenManager, Manager>(this, manager));
     }
 
@@ -164,5 +175,13 @@ public class SecondGuiOpenManager extends OpenManager {
 
     public void setGiveRandomOnClose(boolean give_random_on_close) {
         this.give_random_on_close = give_random_on_close;
+    }
+
+    public Optional<SoundType> getClickSound() {
+        return click_sound;
+    }
+
+    public void setClickSound(Optional<SoundType> click_sound) {
+        this.click_sound = click_sound;
     }
 }

@@ -35,7 +35,7 @@ public class TimedKey extends Key {
 
     @Override
     public void add(Player player, int amount) {
-        ConfigurationNode cooldown_node = GWMCrates.getInstance().getTimedKeysCooldownsConfig().
+        ConfigurationNode cooldown_node = GWMCrates.getInstance().getTimedKeysDelaysConfig().
                 getNode(player.getUniqueId().toString(), virtual_name);
         if (amount > 0) {
             cooldown_node.setValue(null);
@@ -46,7 +46,7 @@ public class TimedKey extends Key {
 
     @Override
     public int get(Player player) {
-        ConfigurationNode cooldown_node = GWMCrates.getInstance().getTimedKeysCooldownsConfig().
+        ConfigurationNode cooldown_node = GWMCrates.getInstance().getTimedKeysDelaysConfig().
                 getNode(player.getUniqueId().toString(), virtual_name);
         if (cooldown_node.isVirtual()) {
             return Integer.MAX_VALUE;

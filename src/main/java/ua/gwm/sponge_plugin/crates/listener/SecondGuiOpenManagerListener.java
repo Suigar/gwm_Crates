@@ -60,12 +60,14 @@ public class SecondGuiOpenManagerListener {
                         }
                     }
                     drop.apply(player);
+                    open_manager.getClickSound().ifPresent(click_sound -> player.playSound(click_sound, player.getLocation().getPosition(), 1.));
                     player.sendMessage(LanguageUtils.getText("SUCCESSFULLY_OPENED_MANAGER",
                             new Pair<String, String>("%MANAGER%", manager.getName())));
                     Sponge.getScheduler().createTaskBuilder().delayTicks(open_manager.getCloseDelay()).execute(() -> {
                         Optional<Container> optional_open_inventory = player.getOpenInventory();
                         if (optional_open_inventory.isPresent() && container.equals(optional_open_inventory.get())) {
                             player.closeInventory(GWMCrates.getInstance().getDefaultCause());
+                            open_manager.getCloseSonud().ifPresent(close_sound -> player.playSound(close_sound, player.getLocation().getPosition(), 1.));
                         }
                         SHOWN_GUI.remove(container);
                     }).submit(GWMCrates.getInstance());
@@ -90,6 +92,7 @@ public class SecondGuiOpenManagerListener {
                 event.setCancelled(true);
             } else if (open_manager.isGiveRandomOnClose()) {
                 manager.getRandomDrop().apply(player);
+                open_manager.getCloseSonud().ifPresent(close_sound -> player.playSound(close_sound, player.getLocation().getPosition(), 1.));
                 player.sendMessage(LanguageUtils.getText("SUCCESSFULLY_OPENED_MANAGER",
                         new Pair<String, String>("%MANAGER%", manager.getName())));
             }

@@ -11,49 +11,49 @@ import java.util.Optional;
 public class TimedCase extends Case {
 
     protected String virtual_name;
-    protected long cooldown;
+    protected long delay;
 
     public TimedCase(ConfigurationNode node) {
         super(node);
         ConfigurationNode virtual_name_node = node.getNode("VIRTUAL_NAME");
-        ConfigurationNode cooldown_node = node.getNode("COOLDOWN");
+        ConfigurationNode delay_node = node.getNode("DELAY");
         if (virtual_name_node.isVirtual()) {
             throw new RuntimeException("VIRTUAL_NAME node does not exist!");
         }
-        if (cooldown_node.isVirtual()) {
-            throw new RuntimeException("COOLDOWN node does not exist!");
+        if (delay_node.isVirtual()) {
+            throw new RuntimeException("DELAY node does not exist!");
         }
         virtual_name = virtual_name_node.getString();
-        cooldown = cooldown_node.getLong();
+        delay = delay_node.getLong();
     }
 
-    public TimedCase(Optional<BigDecimal> price, String virtual_name, long cooldown) {
+    public TimedCase(Optional<BigDecimal> price, String virtual_name, long delay) {
         super(price);
         this.virtual_name = virtual_name;
-        this.cooldown = cooldown;
+        this.delay = delay;
     }
 
     @Override
     public void add(Player player, int amount) {
-        ConfigurationNode cooldown_node = GWMCrates.getInstance().getTimedCasesCooldownsConfig().
+        ConfigurationNode delay_node = GWMCrates.getInstance().getTimedCasesDelaysConfig().
                 getNode(player.getUniqueId().toString(), virtual_name);
         if (amount > 0) {
-            cooldown_node.setValue(null);
+            delay_node.setValue(null);
         } else if (amount < 0) {
-            cooldown_node.setValue(System.currentTimeMillis() + cooldown);
+            delay_node.setValue(System.currentTimeMillis() + delay);
         }
     }
 
     @Override
     public int get(Player player) {
-        ConfigurationNode cooldown_node = GWMCrates.getInstance().getTimedCasesCooldownsConfig().
+        ConfigurationNode delay_node = GWMCrates.getInstance().getTimedCasesDelaysConfig().
                 getNode(player.getUniqueId().toString(), virtual_name);
-        if (cooldown_node.isVirtual()) {
+        if (delay_node.isVirtual()) {
             return Integer.MAX_VALUE;
         }
-        long cooldown = cooldown_node.getLong();
-        if (System.currentTimeMillis() >= cooldown) {
-            cooldown_node.setValue(null);
+        long delay = delay_node.getLong();
+        if (System.currentTimeMillis() >= delay) {
+            delay_node.setValue(null);
             return Integer.MAX_VALUE;
         } else {
             return 0;
@@ -68,11 +68,11 @@ public class TimedCase extends Case {
         this.virtual_name = virtual_name;
     }
 
-    public long getCooldown() {
-        return cooldown;
+    public long getDelay() {
+        return delay;
     }
 
-    public void setCooldown(long cooldown) {
-        this.cooldown = cooldown;
+    public void setDelay(long delay) {
+        this.delay = delay;
     }
 }

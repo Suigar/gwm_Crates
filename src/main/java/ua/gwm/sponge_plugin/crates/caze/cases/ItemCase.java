@@ -2,6 +2,7 @@ package ua.gwm.sponge_plugin.crates.caze.cases;
 
 import ninja.leaping.configurate.ConfigurationNode;
 import org.spongepowered.api.entity.living.player.Player;
+import org.spongepowered.api.item.ItemTypes;
 import org.spongepowered.api.item.inventory.Inventory;
 import org.spongepowered.api.item.inventory.ItemStack;
 import org.spongepowered.api.item.inventory.Slot;
@@ -55,7 +56,7 @@ public class ItemCase extends Case {
                             slot.set(item);
                             amount = 0;
                         } else {
-                            slot.set(ItemStack.empty());
+                            slot.set(ItemStack.of(ItemTypes.NONE, 1));
                             amount -= item_quantity;
                         }
                     }

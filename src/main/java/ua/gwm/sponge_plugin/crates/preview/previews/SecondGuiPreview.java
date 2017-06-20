@@ -2,6 +2,7 @@ package ua.gwm.sponge_plugin.crates.preview.previews;
 
 import ninja.leaping.configurate.ConfigurationNode;
 import org.spongepowered.api.entity.living.player.Player;
+import org.spongepowered.api.item.ItemTypes;
 import org.spongepowered.api.item.inventory.Container;
 import org.spongepowered.api.item.inventory.Inventory;
 import org.spongepowered.api.item.inventory.InventoryArchetypes;
@@ -62,7 +63,7 @@ public class SecondGuiPreview extends Preview {
         for (int i = 0; i < size && drop_iterator.hasNext();) {
             Drop next = drop_iterator.next();
             ItemStack drop_item = next.getDropItem();
-            if (drop_item.equalTo(ItemStack.empty())) {
+            if (drop_item.equalTo(ItemStack.of(ItemTypes.NONE, 1))) {
                 continue;
             }
             ordered.getSlot(new SlotIndex(i)).get().set(drop_item);

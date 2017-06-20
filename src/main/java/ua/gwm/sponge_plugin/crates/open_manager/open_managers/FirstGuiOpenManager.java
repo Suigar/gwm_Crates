@@ -2,8 +2,12 @@ package ua.gwm.sponge_plugin.crates.open_manager.open_managers;
 
 import com.google.common.reflect.TypeToken;
 import ninja.leaping.configurate.ConfigurationNode;
+import org.spongepowered.api.Game;
 import org.spongepowered.api.Sponge;
+import org.spongepowered.api.effect.sound.SoundType;
+import org.spongepowered.api.effect.sound.SoundTypes;
 import org.spongepowered.api.entity.living.player.Player;
+import org.spongepowered.api.item.ItemTypes;
 import org.spongepowered.api.item.inventory.Container;
 import org.spongepowered.api.item.inventory.Inventory;
 import org.spongepowered.api.item.inventory.InventoryArchetypes;
@@ -35,6 +39,8 @@ public class FirstGuiOpenManager extends OpenManager {
     private boolean clear_other_items;
     private int close_delay;
     private boolean forbid_close;
+    private Optional<SoundType> scroll_sound = Optional.empty();
+    private Optional<SoundType> win_sound = Optional.empty();
 
     public FirstGuiOpenManager(ConfigurationNode node) {
         super(node);
@@ -45,6 +51,8 @@ public class FirstGuiOpenManager extends OpenManager {
         ConfigurationNode clear_other_items_node = node.getNode("CLEAR_OTHER_ITEMS");
         ConfigurationNode close_delay_node = node.getNode("CLOSE_DELAY");
         ConfigurationNode forbid_close_node = node.getNode("FORBID_CLOSE");
+        ConfigurationNode scroll_sound_node = node.getNode("SCROLL_SOUND");
+        ConfigurationNode win_sound_node = node.getNode("WIN_SOUND");
         try {
             if (!display_name_node.isVirtual()) {
                 display_name = Optional.of(TextSerializers.FORMATTING_CODE.deserialize(display_name_node.getString()));
@@ -70,14 +78,23 @@ public class FirstGuiOpenManager extends OpenManager {
             }
             close_delay = close_delay_node.getInt();
             forbid_close = forbid_close_node.getBoolean(true);
+            if (!scroll_sound_node.isVirtual()) {
+                scroll_sound = Optional.of(scroll_sound_node.getValue(TypeToken.of(SoundType.class)));
+            }
+            if (!win_sound_node.isVirtual()) {
+                win_sound = Optional.of(win_sound_node.getValue(TypeToken.of(SoundType.class)));
+            }
         } catch (Exception e) {
             throw new RuntimeException("Exception creating First Gui Open Manager!", e);
         }
     }
 
-    public FirstGuiOpenManager(Optional<Text> display_name, List<ItemStack> decorative_items, List<Integer> scroll_delays,
-                               boolean clear_decorative_items, boolean clear_other_items, int close_delay) {
-        super();
+    public FirstGuiOpenManager(Optional<SoundType> open_sound, Optional<SoundType> close_sound,
+                               Optional<Text> display_name, List<ItemStack> decorative_items,
+                               List<Integer> scroll_delays, boolean clear_decorative_items,
+                               boolean clear_other_items, int close_delay,
+                               Optional<SoundType> scroll_sound, Optional<SoundType> win_sound) {
+        super(open_sound, close_sound);
         this.display_name = display_name;
         if (decorative_items.size() != 20) {
             throw new RuntimeException("DECORATIVE_ITEMS size must be 20 instead of " + decorative_items.size() + "!");
@@ -87,6 +104,8 @@ public class FirstGuiOpenManager extends OpenManager {
         this.clear_decorative_items = clear_decorative_items;
         this.clear_other_items = clear_other_items;
         this.close_delay = close_delay;
+        this.scroll_sound = scroll_sound;
+        this.win_sound = win_sound;
     }
 
     @Override
@@ -109,36 +128,39 @@ public class FirstGuiOpenManager extends OpenManager {
             ordered.getSlot(new SlotIndex(i)).get().set(decorative_items.get(i - 7));
         }
         Container container = player.openInventory(inventory, GWMCrates.getInstance().getDefaultCause()).get();
+        getOpenSound().ifPresent(open_sound -> player.playSound(open_sound, player.getLocation().getPosition(), 1.));
         FIRST_GUI_CONTAINERS.put(container, new Pair<FirstGuiOpenManager, Manager>(this, manager));
         int wait_time = 0;
         for (int i = 0; i < scroll_delays.size() - 1; i++) {
             wait_time += scroll_delays.get(i);
             Sponge.getScheduler().createTaskBuilder().delayTicks(wait_time).execute(() -> {
                 for (int j = 10; j < 16; j++) {
-                    ordered.getSlot(new SlotIndex(j)).get().set(inventory.query(new SlotIndex(j + 1)).peek().orElse(ItemStack.empty()));
+                    ordered.getSlot(new SlotIndex(j)).get().set(inventory.query(new SlotIndex(j + 1)).peek().orElse(ItemStack.of(ItemTypes.NONE, 1)));
                 }
                 Drop new_drop = manager.getRandomDrop();
                 drop_list.add(new_drop);
                 ordered.getSlot(new SlotIndex(16)).get().set(new_drop.getDropItem());
+                scroll_sound.ifPresent(sound -> player.playSound(sound, player.getLocation().getPosition(), 1.));
             }).submit(GWMCrates.getInstance());
         }
         Sponge.getScheduler().createTaskBuilder().delayTicks(wait_time + scroll_delays.get(scroll_delays.size() - 1)).execute(() -> {
             Drop drop = drop_list.get(drop_list.size() - 4);
             drop.apply(player);
+            win_sound.ifPresent(sound -> player.playSound(sound, player.getLocation().getPosition(), 1.));
             if (clear_decorative_items) {
                 for (int i = 0; i < 10; i++) {
-                    ordered.getSlot(new SlotIndex(i)).get().set(ItemStack.empty());
+                    ordered.getSlot(new SlotIndex(i)).get().set(ItemStack.of(ItemTypes.NONE, 1));
                 }
                 for (int i = 17; i < 17; i++) {
-                    ordered.getSlot(new SlotIndex(i)).get().set(ItemStack.empty());
+                    ordered.getSlot(new SlotIndex(i)).get().set(ItemStack.of(ItemTypes.NONE, 1));
                 }
             }
             if (clear_other_items) {
                 for (int i = 10; i < 13; i++) {
-                    ordered.getSlot(new SlotIndex(i)).get().set(ItemStack.empty());
+                    ordered.getSlot(new SlotIndex(i)).get().set(ItemStack.of(ItemTypes.NONE, 1));
                 }
                 for (int i = 14; i < 17; i++) {
-                    ordered.getSlot(new SlotIndex(i)).get().set(ItemStack.empty());
+                    ordered.getSlot(new SlotIndex(i)).get().set(ItemStack.of(ItemTypes.NONE, 1));
                 }
             }
             SHOWN_GUI.add(container);
@@ -149,6 +171,7 @@ public class FirstGuiOpenManager extends OpenManager {
             Optional<Container> optional_open_inventory = player.getOpenInventory();
             if (optional_open_inventory.isPresent() && container.equals(optional_open_inventory.get())) {
                 player.closeInventory(GWMCrates.getInstance().getDefaultCause());
+                getCloseSonud().ifPresent(close_sound -> player.playSound(close_sound, player.getLocation().getPosition(), 1.));
             }
             SHOWN_GUI.remove(container);
             FIRST_GUI_CONTAINERS.remove(container);

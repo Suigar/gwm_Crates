@@ -8,6 +8,8 @@ import ninja.leaping.configurate.loader.ConfigurationLoader;
 import org.slf4j.Logger;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.config.ConfigDir;
+import org.spongepowered.api.effect.sound.SoundType;
+import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.event.Listener;
 import org.spongepowered.api.event.cause.Cause;
 import org.spongepowered.api.event.cause.NamedCause;
@@ -16,9 +18,12 @@ import org.spongepowered.api.event.game.state.GameConstructionEvent;
 import org.spongepowered.api.event.game.state.GameInitializationEvent;
 import org.spongepowered.api.event.game.state.GamePreInitializationEvent;
 import org.spongepowered.api.event.game.state.GameStartingServerEvent;
+import org.spongepowered.api.event.message.MessageChannelEvent;
+import org.spongepowered.api.item.ItemType;
 import org.spongepowered.api.plugin.Plugin;
 import org.spongepowered.api.plugin.PluginContainer;
 import org.spongepowered.api.service.economy.EconomyService;
+import org.spongepowered.api.text.Text;
 import ua.gwm.sponge_plugin.crates.caze.Case;
 import ua.gwm.sponge_plugin.crates.caze.cases.*;
 import ua.gwm.sponge_plugin.crates.command.GWMCratesCommand;
@@ -52,9 +57,16 @@ import java.util.Optional;
 @Plugin(
         id = "gwm_crates",
         name = "GWMCrates",
-        version = "1.121",
+        version = "1.2",
         description = "Universal crates plugin for your server!",
-        authors = {"GWM"/*My contacts: Skype(nk_gwm), Discord(GWM#2192)*/})
+        authors = {"GWM"
+                /*
+                Nazar Kalinovskiy
+                My contacts:
+                Skype(nk_gwm),
+                Discord(GWM#2192),
+                Telegram(@grewema),
+                Wire(@grewema)*/})
 public class GWMCrates {
 
     private static GWMCrates instance;
@@ -93,8 +105,16 @@ public class GWMCrates {
     private Config language_config;
     private Config virtual_cases_config;
     private Config virtual_keys_config;
-    private Config timed_cases_cooldowns_config;
-    private Config timed_keys_cooldowns_config;
+    private Config timed_cases_delays_config;
+    private Config timed_keys_delays_config;
+
+    @Listener
+    public void getByRegistryChatEvent(MessageChannelEvent.Chat event) {
+        String plain = event.getRawMessage().toPlain();
+        Optional<SoundType> optional = Sponge.getRegistry().getType(SoundType.class, plain);
+        event.getCause().first(Player.class).get().sendMessage(Text.of(
+                optional.isPresent() ? "FOUND" : "NOT FOUND"));
+    }
 
     @Listener
     public void onConstruct(GameConstructionEvent event) {
@@ -107,6 +127,7 @@ public class GWMCrates {
         if (!config_directory.exists()) {
             try {
                 config_directory.mkdirs();
+                logger.info("Config directory successfully created!");
             } catch (Exception e) {
                 logger.warn("Failed creating config directory!", e);
             }
@@ -114,6 +135,7 @@ public class GWMCrates {
         if (!managers_directory.exists()) {
             try {
                 managers_directory.mkdirs();
+                logger.info("Managers directory successfully created!");
             } catch (Exception e) {
                 logger.warn("Failed creating managers config directory!", e);
             }
@@ -122,8 +144,8 @@ public class GWMCrates {
         language_config = new Config("language.conf", false);
         virtual_cases_config = new Config("virtual_cases.conf", true);
         virtual_keys_config = new Config("virtual_keys.conf", true);
-        timed_cases_cooldowns_config = new Config("timed_cases_cooldowns.conf", true);
-        timed_keys_cooldowns_config = new Config("timed_keys_cooldowns.conf", true);
+        timed_cases_delays_config = new Config("timed_cases_delays.conf", true);
+        timed_keys_delays_config = new Config("timed_keys_delays.conf", true);
         logger.info("PreInitialization complete!");
     }
 
@@ -141,8 +163,8 @@ public class GWMCrates {
 
     @Listener
     public void onStarting(GameStartingServerEvent event) {
-        createManagers();
         loadEconomy();
+        createManagers();
     }
 
     @Listener
@@ -155,9 +177,9 @@ public class GWMCrates {
         language_config.save();
         virtual_cases_config.save();
         virtual_keys_config.save();
-        timed_cases_cooldowns_config.save();
-        timed_keys_cooldowns_config.save();
-        logger.info("All plugin configs has been reloaded!");
+        timed_cases_delays_config.save();
+        timed_keys_delays_config.save();
+        logger.info("All plugin configs has been saved!");
     }
 
     public void reload() {
@@ -165,18 +187,18 @@ public class GWMCrates {
         language_config.reload();
         virtual_cases_config.reload();
         virtual_keys_config.reload();
-        timed_cases_cooldowns_config.reload();
-        timed_keys_cooldowns_config.reload();
+        timed_cases_delays_config.reload();
+        timed_keys_delays_config.reload();
         cases.clear();
         keys.clear();
         open_managers.clear();
         drops.clear();
         previews.clear();
         register();
-        created_managers.clear();
-        createManagers();
         optional_economy_service = Optional.empty();
         loadEconomy();
+        created_managers.clear();
+        createManagers();
         logger.info("Plugin has been reloaded.");
     }
 
@@ -357,12 +379,12 @@ public class GWMCrates {
         return virtual_keys_config;
     }
 
-    public Config getTimedCasesCooldownsConfig() {
-        return timed_cases_cooldowns_config;
+    public Config getTimedCasesDelaysConfig() {
+        return timed_cases_delays_config;
     }
 
-    public Config getTimedKeysCooldownsConfig() {
-        return timed_keys_cooldowns_config;
+    public Config getTimedKeysDelaysConfig() {
+        return timed_keys_delays_config;
     }
 
     public boolean isDebugEnabled() {

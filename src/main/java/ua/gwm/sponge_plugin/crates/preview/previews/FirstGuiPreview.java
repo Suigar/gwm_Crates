@@ -3,6 +3,7 @@ package ua.gwm.sponge_plugin.crates.preview.previews;
 import ninja.leaping.configurate.ConfigurationNode;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.entity.living.player.Player;
+import org.spongepowered.api.item.ItemTypes;
 import org.spongepowered.api.item.inventory.Container;
 import org.spongepowered.api.item.inventory.Inventory;
 import org.spongepowered.api.item.inventory.InventoryArchetypes;
@@ -108,7 +109,7 @@ public class FirstGuiPreview extends Preview {
                 return;
             }
             for (int i = 10; i < 16; i++) {
-                inventory.getSlot(new SlotIndex(i)).get().set(inventory.query(new SlotIndex(i + 1)).peek().orElse(ItemStack.empty()));
+                inventory.getSlot(new SlotIndex(i)).get().set(inventory.query(new SlotIndex(i + 1)).peek().orElse(ItemStack.of(ItemTypes.NONE, 1)));
             }
             if (index == drops.size()) {
                 index = 0;

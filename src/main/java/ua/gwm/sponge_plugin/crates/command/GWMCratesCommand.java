@@ -39,6 +39,10 @@ public class GWMCratesCommand implements CommandCallable {
             return CommandResult.empty();
         }
         switch (args[0].toLowerCase()) {
+            case "help": {
+                sendHelp(source);
+                return CommandResult.success();
+            }
             case "save": {
                 if (!source.hasPermission("gwm_crates.command.save")) {
                     source.sendMessage(LanguageUtils.getText("HAVE_NOT_PERMISSION"));
@@ -59,6 +63,7 @@ public class GWMCratesCommand implements CommandCallable {
             }
             case "open": {
                 if (args.length != 2) {
+                    sendHelp(source);
                     return CommandResult.empty();
                 }
                 String manager_id = args[1].toLowerCase();
@@ -101,6 +106,7 @@ public class GWMCratesCommand implements CommandCallable {
             }
             case "force": {
                 if (args.length < 2 || args.length > 3) {
+                    sendHelp(source);
                     return CommandResult.empty();
                 }
                 Optional<Player> optional_target = Optional.empty();
@@ -161,6 +167,7 @@ public class GWMCratesCommand implements CommandCallable {
             }
             case "preview": {
                 if (args.length != 2) {
+                    sendHelp(source);
                     return CommandResult.empty();
                 }
                 String manager_id = args[1].toLowerCase();
@@ -194,6 +201,7 @@ public class GWMCratesCommand implements CommandCallable {
             }
             case "buy": {
                 if (args.length < 3 || args.length > 4) {
+                    sendHelp(source);
                     return CommandResult.empty();
                 }
                 if (!optional_player.isPresent()) {
@@ -227,6 +235,7 @@ public class GWMCratesCommand implements CommandCallable {
                 switch (args[1].toLowerCase()) {
                     case "case": {
                         if (args.length > 3) {
+                            sendHelp(source);
                             return CommandResult.empty();
                         }
                         Case caze = manager.getCase();
@@ -252,6 +261,7 @@ public class GWMCratesCommand implements CommandCallable {
                     }
                     case "key": {
                         if (args.length > 3) {
+                            sendHelp(source);
                             return CommandResult.empty();
                         }
                         Key key = manager.getKey();
@@ -277,6 +287,7 @@ public class GWMCratesCommand implements CommandCallable {
                     }
                     case "drop": {
                         if (args.length != 4) {
+                            sendHelp(source);
                             return CommandResult.empty();
                         }
                         String drop_id = args[3].toLowerCase();
@@ -309,12 +320,14 @@ public class GWMCratesCommand implements CommandCallable {
                         return CommandResult.success();
                     }
                     default: {
+                        sendHelp(source);
                         return CommandResult.empty();
                     }
                 }
             }
             case "give": {
                 if (args.length < 4 || args.length > 5) {
+                    sendHelp(source);
                     return CommandResult.empty();
                 }
                 String manager_id = args[3].toLowerCase();
@@ -336,6 +349,7 @@ public class GWMCratesCommand implements CommandCallable {
                 switch (args[2].toLowerCase()) {
                     case "case": {
                         if (args.length > 4) {
+                            sendHelp(source);
                             return CommandResult.empty();
                         }
                         Case caze = manager.getCase();
@@ -356,6 +370,7 @@ public class GWMCratesCommand implements CommandCallable {
                     }
                     case "key": {
                         if (args.length > 4) {
+                            sendHelp(source);
                             return CommandResult.empty();
                         }
                         Key key = manager.getKey();
@@ -376,6 +391,7 @@ public class GWMCratesCommand implements CommandCallable {
                     }
                     case "drop": {
                         if (args.length != 5) {
+                            sendHelp(source);
                             return CommandResult.empty();
                         }
                         String drop_id = args[4].toLowerCase();
@@ -404,14 +420,20 @@ public class GWMCratesCommand implements CommandCallable {
                         return CommandResult.success();
                     }
                     default: {
+                        sendHelp(source);
                         return CommandResult.empty();
                     }
                 }
             }
             default: {
+                sendHelp(source);
                 return CommandResult.empty();
             }
         }
+    }
+
+    private void sendHelp(CommandSource source) {
+        LanguageUtils.getTextList("HELP_MESSAGE").forEach(source::sendMessage);
     }
 
     @Override
