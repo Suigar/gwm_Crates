@@ -109,14 +109,6 @@ public class GWMCrates {
     private Config timed_keys_delays_config;
 
     @Listener
-    public void getByRegistryChatEvent(MessageChannelEvent.Chat event) {
-        String plain = event.getRawMessage().toPlain();
-        Optional<SoundType> optional = Sponge.getRegistry().getType(SoundType.class, plain);
-        event.getCause().first(Player.class).get().sendMessage(Text.of(
-                optional.isPresent() ? "FOUND" : "NOT FOUND"));
-    }
-
-    @Listener
     public void onConstruct(GameConstructionEvent event) {
         instance = this;
     }
