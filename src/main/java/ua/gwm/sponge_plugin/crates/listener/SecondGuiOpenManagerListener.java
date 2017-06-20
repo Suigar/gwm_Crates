@@ -51,13 +51,15 @@ public class SecondGuiOpenManagerListener {
                     ItemStack drop_item = drop.getDropItem().copy();
                     Sponge.getScheduler().createTaskBuilder().delayTicks(1).execute(() -> slot.set(drop_item)).
                             submit(GWMCrates.getInstance());
-                    if (open_manager.isShowOtherItems()) {
-                        for (Slot next : ordered.<Slot>slots()) {
-                            if (!Objects.equals(next.getProperty(SlotIndex.class, "slotindex").get().getValue(),
-                                    slot.getProperty(SlotIndex.class, "slotindex").get().getValue())) {
-                                next.set(manager.getRandomDrop().getDropItem());
+                    if (open_manager.isShowOtherDrops()) {
+                        Sponge.getScheduler().createTaskBuilder().delayTicks(open_manager.getShowOtherDropsDelay()).execute(() -> {
+                            for (Slot next : ordered.<Slot>slots()) {
+                                if (!Objects.equals(next.getProperty(SlotIndex.class, "slotindex").get().getValue(),
+                                        slot.getProperty(SlotIndex.class, "slotindex").get().getValue())) {
+                                    next.set(manager.getRandomDrop().getDropItem());
+                                }
                             }
-                        }
+                        }).submit(GWMCrates.getInstance());
                     }
                     drop.apply(player);
                     open_manager.getClickSound().ifPresent(click_sound -> player.playSound(click_sound, player.getLocation().getPosition(), 1.));

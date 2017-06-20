@@ -2,10 +2,8 @@ package ua.gwm.sponge_plugin.crates.open_manager.open_managers;
 
 import com.google.common.reflect.TypeToken;
 import ninja.leaping.configurate.ConfigurationNode;
-import org.spongepowered.api.Game;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.effect.sound.SoundType;
-import org.spongepowered.api.effect.sound.SoundTypes;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.item.ItemTypes;
 import org.spongepowered.api.item.inventory.Container;
@@ -36,7 +34,7 @@ public class FirstGuiOpenManager extends OpenManager {
     private List<ItemStack> decorative_items;
     private List<Integer> scroll_delays;
     private boolean clear_decorative_items;
-    private boolean clear_other_items;
+    private boolean clear_other_drops;
     private int close_delay;
     private boolean forbid_close;
     private Optional<SoundType> scroll_sound = Optional.empty();
@@ -48,7 +46,7 @@ public class FirstGuiOpenManager extends OpenManager {
         ConfigurationNode decorative_items_node = node.getNode("DECORATIVE_ITEMS");
         ConfigurationNode scroll_delays_node = node.getNode("SCROLL_DELAYS");
         ConfigurationNode clear_decorative_items_node = node.getNode("CLEAR_DECORATIVE_ITEMS");
-        ConfigurationNode clear_other_items_node = node.getNode("CLEAR_OTHER_ITEMS");
+        ConfigurationNode clear_other_drops_node = node.getNode("CLEAR_OTHER_DROPS");
         ConfigurationNode close_delay_node = node.getNode("CLOSE_DELAY");
         ConfigurationNode forbid_close_node = node.getNode("FORBID_CLOSE");
         ConfigurationNode scroll_sound_node = node.getNode("SCROLL_SOUND");
@@ -72,7 +70,7 @@ public class FirstGuiOpenManager extends OpenManager {
             }
             scroll_delays = scroll_delays_node.getList(TypeToken.of(Integer.class));
             clear_decorative_items = clear_decorative_items_node.getBoolean(false);
-            clear_other_items = clear_other_items_node.getBoolean(true);
+            clear_other_drops = clear_other_drops_node.getBoolean(true);
             if (close_delay_node.isVirtual()) {
                 throw new RuntimeException("CLOSE_DELAY node does not exist!");
             }
@@ -92,7 +90,7 @@ public class FirstGuiOpenManager extends OpenManager {
     public FirstGuiOpenManager(Optional<SoundType> open_sound, Optional<SoundType> close_sound,
                                Optional<Text> display_name, List<ItemStack> decorative_items,
                                List<Integer> scroll_delays, boolean clear_decorative_items,
-                               boolean clear_other_items, int close_delay,
+                               boolean clear_other_drops, int close_delay,
                                Optional<SoundType> scroll_sound, Optional<SoundType> win_sound) {
         super(open_sound, close_sound);
         this.display_name = display_name;
@@ -102,7 +100,7 @@ public class FirstGuiOpenManager extends OpenManager {
         this.decorative_items = decorative_items;
         this.scroll_delays = scroll_delays;
         this.clear_decorative_items = clear_decorative_items;
-        this.clear_other_items = clear_other_items;
+        this.clear_other_drops = clear_other_drops;
         this.close_delay = close_delay;
         this.scroll_sound = scroll_sound;
         this.win_sound = win_sound;
@@ -155,7 +153,7 @@ public class FirstGuiOpenManager extends OpenManager {
                     ordered.getSlot(new SlotIndex(i)).get().set(ItemStack.of(ItemTypes.NONE, 1));
                 }
             }
-            if (clear_other_items) {
+            if (clear_other_drops) {
                 for (int i = 10; i < 13; i++) {
                     ordered.getSlot(new SlotIndex(i)).get().set(ItemStack.of(ItemTypes.NONE, 1));
                 }
@@ -207,12 +205,12 @@ public class FirstGuiOpenManager extends OpenManager {
         this.clear_decorative_items = clear_decorative_items;
     }
 
-    public boolean isClearOtherItems() {
-        return clear_other_items;
+    public boolean isClearOtherDrops() {
+        return clear_other_drops;
     }
 
-    public void setClearOtherItems(boolean clear_other_items) {
-        this.clear_other_items = clear_other_items;
+    public void setClearOtherDrops(boolean clear_other_drops) {
+        this.clear_other_drops = clear_other_drops;
     }
 
     public int getCloseCooldown() {

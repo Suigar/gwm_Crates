@@ -31,7 +31,8 @@ public class SecondGuiOpenManager extends OpenManager {
     private ItemStack hidden_item;
     private boolean increase_hidden_item_quantity;
     private int rows;
-    private boolean show_other_items;
+    private boolean show_other_drops;
+    private int show_other_drops_delay = 0;
     private int close_delay;
     private boolean forbid_close;
     private boolean give_random_on_close;
@@ -43,7 +44,8 @@ public class SecondGuiOpenManager extends OpenManager {
         ConfigurationNode hidden_item_node = node.getNode("HIDDEN_ITEM");
         ConfigurationNode increase_hidden_item_quantity_node = node.getNode("INCREASE_HIDDEN_ITEM_QUANTITY");
         ConfigurationNode rows_node = node.getNode("ROWS");
-        ConfigurationNode show_other_items_node = node.getNode("SHOW_OTHER_ITEMS");
+        ConfigurationNode show_other_drops_node = node.getNode("SHOW_OTHER_DROPS");
+        ConfigurationNode show_other_drops_delay_node = node.getNode("SHOW_OTHER_DROPS_DELAY");
         ConfigurationNode close_delay_node = node.getNode("CLOSE_DELAY");
         ConfigurationNode forbid_close_node = node.getNode("FORBID_CLOSE");
         ConfigurationNode give_random_on_close_node = node.getNode("GIVE_RANDOM_ON_CLOSE");
@@ -62,8 +64,13 @@ public class SecondGuiOpenManager extends OpenManager {
                 GWMCrates.getInstance().getLogger().info("ROWS value more than 6 or less than 1! Force set it to 3!");
                 rows = 3;
             }
-            show_other_items = show_other_items_node.getBoolean(true);
+            show_other_drops = show_other_drops_node.getBoolean(true);
+            show_other_drops_delay = show_other_drops_delay_node.getInt(0);
             close_delay = close_delay_node.getInt(20);
+            if (close_delay <= show_other_drops_delay) {
+                GWMCrates.getInstance().getLogger().info("SHOW OTHER DROPS DELAY more or equal to CLOSE DELAY! Force set it to 0!");
+                show_other_drops_delay = 0;
+            }
             forbid_close = forbid_close_node.getBoolean(true);
             give_random_on_close = give_random_on_close_node.getBoolean(true);
             if (!click_sound_node.isVirtual()) {
@@ -77,7 +84,7 @@ public class SecondGuiOpenManager extends OpenManager {
     public SecondGuiOpenManager(Optional<SoundType> open_sound, Optional<SoundType> close_sound,
                                 Optional<Text> display_name, ItemStack hidden_item,
                                 boolean increase_hidden_item_quantity, int rows,
-                                boolean show_other_items, int close_delay, boolean forbid_close,
+                                boolean show_other_drops, int close_delay, boolean forbid_close,
                                 boolean give_random_on_close, Optional<SoundType> click_sound) {
         super(open_sound, close_sound);
         this.display_name = display_name;
@@ -88,8 +95,12 @@ public class SecondGuiOpenManager extends OpenManager {
             rows = 3;
         }
         this.rows = rows;
-        this.show_other_items = show_other_items;
+        this.show_other_drops = show_other_drops;
         this.close_delay = close_delay;
+        if (close_delay <= show_other_drops_delay) {
+            GWMCrates.getInstance().getLogger().info("SHOW OTHER DROPS DELAY more or equal to CLOSE DELAY! Force set it to 0!");
+            show_other_drops_delay = 0;
+        }
         this.forbid_close = forbid_close;
         this.give_random_on_close = give_random_on_close;
         this.click_sound = click_sound;
@@ -145,12 +156,20 @@ public class SecondGuiOpenManager extends OpenManager {
         this.rows = rows;
     }
 
-    public boolean isShowOtherItems() {
-        return show_other_items;
+    public boolean isShowOtherDrops() {
+        return show_other_drops;
     }
 
-    public void setShowOtherItems(boolean show_other_items) {
-        this.show_other_items = show_other_items;
+    public void setShowOtherDrops(boolean show_other_drops) {
+        this.show_other_drops = show_other_drops;
+    }
+
+    public int getShowOtherDropsDelay() {
+        return show_other_drops_delay;
+    }
+
+    public void setShowOtherDropsDelay(int show_other_drops_delay) {
+        this.show_other_drops_delay = show_other_drops_delay;
     }
 
     public int getCloseDelay() {
