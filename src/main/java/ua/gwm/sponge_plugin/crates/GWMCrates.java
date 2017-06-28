@@ -66,6 +66,9 @@ import java.util.*;
                 Wire(@grewema)*/})
 public class GWMCrates {
 
+    public static final UUID PLUGIN_UUID = UUID.nameUUIDFromBytes(new byte[]
+            {'G', 'W', 'M', 'C', 'r', 'a', 't', 'e', 's'});
+
     private static GWMCrates instance;
 
     public static GWMCrates getInstance() {
@@ -147,6 +150,7 @@ public class GWMCrates {
         Sponge.getEventManager().registerListeners(this, new SecondGuiOpenManagerListener());
         Sponge.getEventManager().registerListeners(this, new PreviewListener());
         Sponge.getEventManager().registerListeners(this, new Animation1Listener());
+        Sponge.getEventManager().registerListeners(this, new HologramListener());
         Sponge.getCommandManager().register(this, new GWMCratesCommand(), "gwmcrates", "crates");
         register();
         logger.info("Initialization complete!");

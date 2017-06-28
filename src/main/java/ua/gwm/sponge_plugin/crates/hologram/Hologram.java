@@ -38,6 +38,7 @@ public class Hologram {
         entity.offer(Keys.DISPLAY_NAME, name);
         entity.offer(Keys.CUSTOM_NAME_VISIBLE, true);
         entity.offer(Keys.INVISIBLE, true);
+        entity.setCreator(GWMCrates.PLUGIN_UUID);
         world.spawnEntity(entity, GWMCrates.getInstance().getDefaultCause());
         Hologram hologram = new Hologram(entity);
         HOLOGRAMS.add(hologram);
