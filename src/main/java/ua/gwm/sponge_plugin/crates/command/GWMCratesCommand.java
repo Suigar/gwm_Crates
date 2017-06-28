@@ -200,7 +200,7 @@ public class GWMCratesCommand implements CommandCallable {
                 return CommandResult.success();
             }
             case "buy": {
-                if (args.length < 3 || args.length > 4) {
+                if (args.length < 3 || args.length > 5) {
                     sendHelp(source);
                     return CommandResult.empty();
                 }
@@ -234,9 +234,18 @@ public class GWMCratesCommand implements CommandCallable {
                 Manager manager = optional_manager.get();
                 switch (args[1].toLowerCase()) {
                     case "case": {
-                        if (args.length > 3) {
+                        if (args.length > 4) {
                             sendHelp(source);
                             return CommandResult.empty();
+                        }
+                        BigDecimal amount = new BigDecimal("1");
+                        if (args.length == 4) {
+                            try {
+                                amount = new BigDecimal(args[3]);
+                            } catch (Exception e) {
+                                sendHelp(source);
+                                return CommandResult.empty();
+                            }
                         }
                         Case caze = manager.getCase();
                         Optional<BigDecimal> optional_price = caze.getPrice();
@@ -248,21 +257,30 @@ public class GWMCratesCommand implements CommandCallable {
                             source.sendMessage(LanguageUtils.getText("HAVE_NOT_PERMISSION"));
                             return CommandResult.success();
                         }
-                        BigDecimal price = optional_price.get();
+                        BigDecimal price = optional_price.get().multiply(amount);
                         if (price.compareTo(money) > 0) {
                             source.sendMessage(LanguageUtils.getText("NOT_ENOUGH_MONEY"));
                             return CommandResult.success();
                         }
                         player_account.withdraw(currency, price, GWMCrates.getInstance().getDefaultCause());
-                        caze.add(player, 1);
+                        caze.add(player, amount.intValue());
                         player.sendMessage(LanguageUtils.getText("SUCCESSFULLY_BOUGHT_CASE",
                                 new Pair<String, String>("%MANAGER%", manager.getName())));
                         return CommandResult.success();
                     }
                     case "key": {
-                        if (args.length > 3) {
+                        if (args.length > 4) {
                             sendHelp(source);
                             return CommandResult.empty();
+                        }
+                        BigDecimal amount = new BigDecimal("1");
+                        if (args.length == 4) {
+                            try {
+                                amount = new BigDecimal(args[3]);
+                            } catch (Exception e) {
+                                sendHelp(source);
+                                return CommandResult.empty();
+                            }
                         }
                         Key key = manager.getKey();
                         Optional<BigDecimal> optional_price = key.getPrice();
@@ -274,21 +292,30 @@ public class GWMCratesCommand implements CommandCallable {
                             source.sendMessage(LanguageUtils.getText("HAVE_NOT_PERMISSION"));
                             return CommandResult.success();
                         }
-                        BigDecimal price = optional_price.get();
+                        BigDecimal price = optional_price.get().multiply(amount);
                         if (price.compareTo(money) > 0) {
                             source.sendMessage(LanguageUtils.getText("NOT_ENOUGH_MONEY"));
                             return CommandResult.success();
                         }
                         player_account.withdraw(currency, price, GWMCrates.getInstance().getDefaultCause());
-                        key.add(player, 1);
+                        key.add(player, amount.intValue());
                         player.sendMessage(LanguageUtils.getText("SUCCESSFULLY_BOUGHT_KEY",
                                 new Pair<String, String>("%MANAGER%", manager.getName())));
                         return CommandResult.success();
                     }
                     case "drop": {
-                        if (args.length != 4) {
+                        if (args.length > 5) {
                             sendHelp(source);
                             return CommandResult.empty();
+                        }
+                        BigDecimal amount = new BigDecimal("1");
+                        if (args.length == 5) {
+                            try {
+                                amount = new BigDecimal(args[4]);
+                            } catch (Exception e) {
+                                sendHelp(source);
+                                return CommandResult.empty();
+                            }
                         }
                         String drop_id = args[3].toLowerCase();
                         Optional<Drop> optional_drop = manager.getDropById(drop_id);
@@ -307,15 +334,17 @@ public class GWMCratesCommand implements CommandCallable {
                             source.sendMessage(LanguageUtils.getText("DROP_NOT_FOR_SALE"));
                             return CommandResult.success();
                         }
-                        BigDecimal price = optional_price.get();
+                        BigDecimal price = optional_price.get().multiply(amount);
                         if (price.compareTo(money) > 0) {
                             source.sendMessage(LanguageUtils.getText("NOT_ENOUGH_MONEY"));
                             return CommandResult.success();
                         }
                         player_account.withdraw(currency, price, GWMCrates.getInstance().getDefaultCause());
-                        drop.apply(player);
+                        for (int i = 0; i < amount.intValue(); i++) {
+                            drop.apply(player);
+                        }
                         player.sendMessage(LanguageUtils.getText("SUCCESSFULLY_BOUGHT_DROP",
-                                new Pair<String, String>("%DROP_ID%", drop.getId()),
+                                new Pair<String, String>("%DROP_ID%", drop_id),
                                 new Pair<String, String>("%MANAGER%", manager.getName())));
                         return CommandResult.success();
                     }
@@ -326,7 +355,7 @@ public class GWMCratesCommand implements CommandCallable {
                 }
             }
             case "give": {
-                if (args.length < 4 || args.length > 5) {
+                if (args.length < 4 || args.length > 6) {
                     sendHelp(source);
                     return CommandResult.empty();
                 }
@@ -348,16 +377,25 @@ public class GWMCratesCommand implements CommandCallable {
                 Player target = optional_target.get();
                 switch (args[2].toLowerCase()) {
                     case "case": {
-                        if (args.length > 4) {
+                        if (args.length > 5) {
                             sendHelp(source);
                             return CommandResult.empty();
+                        }
+                        BigDecimal amount = new BigDecimal("1");
+                        if (args.length == 5) {
+                            try {
+                                amount = new BigDecimal(args[4]);
+                            } catch (Exception e) {
+                                sendHelp(source);
+                                return CommandResult.empty();
+                            }
                         }
                         Case caze = manager.getCase();
                         if (!source.hasPermission("gwm_crates.give." + manager_id + ".case")) {
                             source.sendMessage(LanguageUtils.getText("HAVE_NOT_PERMISSION"));
                             return CommandResult.success();
                         }
-                        caze.add(target, 1);
+                        caze.add(target, amount.intValue());
                         source.sendMessage(LanguageUtils.getText("SUCCESSFULLY_GIVE_CASE",
                                 new Pair<String, String>("%MANAGER%", manager.getName()),
                                 new Pair<String, String>("%PLAYER%", target_name)));
@@ -369,16 +407,25 @@ public class GWMCratesCommand implements CommandCallable {
                         return CommandResult.success();
                     }
                     case "key": {
-                        if (args.length > 4) {
+                        if (args.length > 5) {
                             sendHelp(source);
                             return CommandResult.empty();
+                        }
+                        BigDecimal amount = new BigDecimal("1");
+                        if (args.length == 5) {
+                            try {
+                                amount = new BigDecimal(args[4]);
+                            } catch (Exception e) {
+                                sendHelp(source);
+                                return CommandResult.empty();
+                            }
                         }
                         Key key = manager.getKey();
                         if (!source.hasPermission("gwm_crates.give." + manager_id + ".key")) {
                             source.sendMessage(LanguageUtils.getText("HAVE_NOT_PERMISSION"));
                             return CommandResult.success();
                         }
-                        key.add(target, 1);
+                        key.add(target, amount.intValue());
                         source.sendMessage(LanguageUtils.getText("SUCCESSFULLY_GIVE_KEY",
                                 new Pair<String, String>("%MANAGER%", manager.getName()),
                                 new Pair<String, String>("%PLAYER%", target_name)));
@@ -390,9 +437,18 @@ public class GWMCratesCommand implements CommandCallable {
                         return CommandResult.success();
                     }
                     case "drop": {
-                        if (args.length != 5) {
+                        if (args.length > 6) {
                             sendHelp(source);
                             return CommandResult.empty();
+                        }
+                        BigDecimal amount = new BigDecimal("1");
+                        if (args.length == 6) {
+                            try {
+                                amount = new BigDecimal(args[5]);
+                            } catch (Exception e) {
+                                sendHelp(source);
+                                return CommandResult.empty();
+                            }
                         }
                         String drop_id = args[4].toLowerCase();
                         Optional<Drop> optional_drop = manager.getDropById(drop_id);
@@ -406,7 +462,9 @@ public class GWMCratesCommand implements CommandCallable {
                             source.sendMessage(LanguageUtils.getText("HAVE_NOT_PERMISSION"));
                             return CommandResult.success();
                         }
-                        drop.apply(target);
+                        for (int i = 0; i < amount.intValue(); i++) {
+                            drop.apply(target);
+                        }
                         source.sendMessage(LanguageUtils.getText("SUCCESSFULLY_GIVE_DROP",
                                 new Pair<String, String>("%DROP_ID%", drop_id),
                                 new Pair<String, String>("%MANAGER%", manager.getName()),

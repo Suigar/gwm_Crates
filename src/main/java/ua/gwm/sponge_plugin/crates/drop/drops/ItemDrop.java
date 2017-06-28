@@ -24,7 +24,7 @@ public class ItemDrop extends Drop {
         item = GWMCratesUtils.parseItem(item_node);
     }
 
-    public ItemDrop(String id, Optional<BigDecimal> price, Optional<ItemStack> drop_item, int level,
+    public ItemDrop(Optional<String> id, Optional<BigDecimal> price, Optional<ItemStack> drop_item, int level,
                     ItemStack item) {
         super(id, price, drop_item, level);
         this.item = item;

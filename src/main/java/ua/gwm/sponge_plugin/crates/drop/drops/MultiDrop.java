@@ -41,7 +41,7 @@ public class MultiDrop extends Drop {
         }
     }
 
-    public MultiDrop(String id, Optional<BigDecimal> price, Optional<ItemStack> drop_item, int level,
+    public MultiDrop(Optional<String> id, Optional<BigDecimal> price, Optional<ItemStack> drop_item, int level,
                      List<Drop> drops) {
         super(id, price, drop_item, level);
         this.drops = drops;

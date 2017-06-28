@@ -2,6 +2,7 @@ package ua.gwm.sponge_plugin.crates.open_manager.open_managers;
 
 import com.google.common.reflect.TypeToken;
 import ninja.leaping.configurate.ConfigurationNode;
+import org.spongepowered.api.Sponge;
 import org.spongepowered.api.effect.sound.SoundType;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.item.inventory.Container;
@@ -15,6 +16,7 @@ import org.spongepowered.api.item.inventory.type.OrderedInventory;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.serializer.TextSerializers;
 import ua.gwm.sponge_plugin.crates.GWMCrates;
+import ua.gwm.sponge_plugin.crates.event.PlayerOpenCrateEvent;
 import ua.gwm.sponge_plugin.crates.manager.Manager;
 import ua.gwm.sponge_plugin.crates.open_manager.OpenManager;
 import ua.gwm.sponge_plugin.crates.util.GWMCratesUtils;
@@ -81,12 +83,12 @@ public class SecondGuiOpenManager extends OpenManager {
         }
     }
 
-    public SecondGuiOpenManager(Optional<SoundType> open_sound, Optional<SoundType> close_sound,
-                                Optional<Text> display_name, ItemStack hidden_item,
-                                boolean increase_hidden_item_quantity, int rows,
-                                boolean show_other_drops, int close_delay, boolean forbid_close,
-                                boolean give_random_on_close, Optional<SoundType> click_sound) {
-        super(open_sound, close_sound);
+    public SecondGuiOpenManager(Optional<SoundType> open_sound, Optional<Text> display_name,
+                                ItemStack hidden_item, boolean increase_hidden_item_quantity,
+                                int rows, boolean show_other_drops, int close_delay,
+                                boolean forbid_close, boolean give_random_on_close,
+                                Optional<SoundType> click_sound) {
+        super(open_sound);
         this.display_name = display_name;
         this.hidden_item = hidden_item;
         this.increase_hidden_item_quantity = increase_hidden_item_quantity;
@@ -108,6 +110,9 @@ public class SecondGuiOpenManager extends OpenManager {
 
     @Override
     public void open(Player player, Manager manager) {
+        PlayerOpenCrateEvent open_event = new PlayerOpenCrateEvent(player, manager);
+        Sponge.getEventManager().post(open_event);
+        if (open_event.isCancelled()) return;
         Inventory inventory = display_name.map(text -> Inventory.builder().of(InventoryArchetypes.CHEST).
                 property(InventoryDimension.PROPERTY_NAME, new InventoryDimension(9, rows)).
                 property(InventoryTitle.PROPERTY_NAME, new InventoryTitle(text)).

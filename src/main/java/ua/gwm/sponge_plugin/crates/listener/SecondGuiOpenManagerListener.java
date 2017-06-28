@@ -13,6 +13,7 @@ import org.spongepowered.api.item.inventory.transaction.SlotTransaction;
 import org.spongepowered.api.item.inventory.type.OrderedInventory;
 import ua.gwm.sponge_plugin.crates.GWMCrates;
 import ua.gwm.sponge_plugin.crates.drop.Drop;
+import ua.gwm.sponge_plugin.crates.event.PlayerOpenedCrateEvent;
 import ua.gwm.sponge_plugin.crates.manager.Manager;
 import ua.gwm.sponge_plugin.crates.open_manager.open_managers.SecondGuiOpenManager;
 import ua.gwm.sponge_plugin.crates.util.GWMCratesUtils;
@@ -63,13 +64,15 @@ public class SecondGuiOpenManagerListener {
                     }
                     drop.apply(player);
                     open_manager.getClickSound().ifPresent(click_sound -> player.playSound(click_sound, player.getLocation().getPosition(), 1.));
-                    player.sendMessage(LanguageUtils.getText("SUCCESSFULLY_OPENED_MANAGER",
-                            new Pair<String, String>("%MANAGER%", manager.getName())));
+                    PlayerOpenedCrateEvent opened_event = new PlayerOpenedCrateEvent(player, manager,
+                            LanguageUtils.getText("SUCCESSFULLY_OPENED_MANAGER",
+                                    new Pair<String, String>("%MANAGER%", manager.getName())));
+                    Sponge.getEventManager().post(opened_event);
+                    player.sendMessage(opened_event.getMessage());
                     Sponge.getScheduler().createTaskBuilder().delayTicks(open_manager.getCloseDelay()).execute(() -> {
                         Optional<Container> optional_open_inventory = player.getOpenInventory();
                         if (optional_open_inventory.isPresent() && container.equals(optional_open_inventory.get())) {
                             player.closeInventory(GWMCrates.getInstance().getDefaultCause());
-                            open_manager.getCloseSonud().ifPresent(close_sound -> player.playSound(close_sound, player.getLocation().getPosition(), 1.));
                         }
                         SHOWN_GUI.remove(container);
                     }).submit(GWMCrates.getInstance());
@@ -94,9 +97,11 @@ public class SecondGuiOpenManagerListener {
                 event.setCancelled(true);
             } else if (open_manager.isGiveRandomOnClose()) {
                 manager.getRandomDrop().apply(player);
-                open_manager.getCloseSonud().ifPresent(close_sound -> player.playSound(close_sound, player.getLocation().getPosition(), 1.));
-                player.sendMessage(LanguageUtils.getText("SUCCESSFULLY_OPENED_MANAGER",
-                        new Pair<String, String>("%MANAGER%", manager.getName())));
+                PlayerOpenedCrateEvent opened_event = new PlayerOpenedCrateEvent(player, manager,
+                        LanguageUtils.getText("SUCCESSFULLY_OPENED_MANAGER",
+                                new Pair<String, String>("%MANAGER%", manager.getName())));
+                Sponge.getEventManager().post(opened_event);
+                player.sendMessage(opened_event.getMessage());
             }
         }
     }

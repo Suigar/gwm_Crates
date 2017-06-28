@@ -2,6 +2,7 @@ package ua.gwm.sponge_plugin.crates.drop;
 
 import ninja.leaping.configurate.ConfigurationNode;
 import org.spongepowered.api.entity.living.player.Player;
+import org.spongepowered.api.item.ItemTypes;
 import org.spongepowered.api.item.inventory.ItemStack;
 import ua.gwm.sponge_plugin.crates.util.GWMCratesUtils;
 
@@ -10,12 +11,12 @@ import java.util.Optional;
 
 public abstract class Drop {
 
-    protected String id;
+    protected Optional<String> id;
     protected Optional<BigDecimal> price = Optional.empty();
     protected Optional<ItemStack> drop_item = Optional.empty();
     protected int level;
 
-    protected Drop(String id, Optional<BigDecimal> price, Optional<ItemStack> drop_item, int level) {
+    protected Drop(Optional<String> id, Optional<BigDecimal> price, Optional<ItemStack> drop_item, int level) {
         this.id = id;
         this.price = price;
         this.drop_item = drop_item;
@@ -27,8 +28,8 @@ public abstract class Drop {
         ConfigurationNode price_node = node.getNode("PRICE");
         ConfigurationNode drop_item_node = node.getNode("DROP_ITEM");
         ConfigurationNode level_node = node.getNode("LEVEL");
-        if (id_node.isVirtual()) {
-            throw new RuntimeException("ID node does not exist!");
+        if (!id_node.isVirtual()) {
+            id = Optional.of(id_node.getString());
         }
         if (!price_node.isVirtual()) {
             price = Optional.of(new BigDecimal(price_node.getString("0")));
@@ -41,7 +42,7 @@ public abstract class Drop {
 
     public abstract void apply(Player player);
 
-    public String getId() {
+    public Optional<String> getId() {
         return id;
     }
 
@@ -54,7 +55,7 @@ public abstract class Drop {
     }
 
     public ItemStack getDropItem() {
-        return drop_item.orElseGet(ItemStack::empty);
+        return drop_item.orElse(ItemStack.of(ItemTypes.NONE, 1));
     }
 
     public void setDropItem(Optional<ItemStack> drop_item) {

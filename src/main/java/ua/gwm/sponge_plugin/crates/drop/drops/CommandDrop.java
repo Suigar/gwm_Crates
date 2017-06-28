@@ -29,7 +29,7 @@ public class CommandDrop extends Drop {
         }
     }
 
-    public CommandDrop(String id, Optional<BigDecimal> price, Optional<ItemStack> drop_item, int level,
+    public CommandDrop(Optional<String> id, Optional<BigDecimal> price, Optional<ItemStack> drop_item, int level,
                        Collection<Command> commands) {
         super(id, price, drop_item, level);
         this.commands = commands;
@@ -39,9 +39,9 @@ public class CommandDrop extends Drop {
     public void apply(Player player) {
         ConsoleSource console_source = Sponge.getServer().getConsole();
         for (Command command : commands) {
-            String cmd = command.getCmd().replace("%PLAYER%", player.getName());
+            String cmd = command.getCmd().replace("%PLAYER%", player.getName()).replace('&', '§');
             boolean console = command.isConsole();
-            Sponge.getCommandManager().process(console ? console_source : player, cmd);
+            Sponge.getCommandManager().process(console ? console_source : player, cmd); //44
         }
     }
 

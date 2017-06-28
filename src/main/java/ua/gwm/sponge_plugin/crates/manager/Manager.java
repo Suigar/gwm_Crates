@@ -73,7 +73,7 @@ public class Manager {
         }
         String key_type = key_type_node.getString();
         if (!GWMCrates.getInstance().getKeys().containsKey(key_type)) {
-            throw new RuntimeException("Key type \"" + case_type + "\" not found!");
+            throw new RuntimeException("Key type \"" + key_type + "\" not found!");
         }
         try {
             Class<? extends Key> key_class = GWMCrates.getInstance().getKeys().get(key_type);
@@ -89,7 +89,7 @@ public class Manager {
         }
         String open_manager_type = open_manager_type_node.getString();
         if (!GWMCrates.getInstance().getOpenManagers().containsKey(open_manager_type)) {
-            throw new RuntimeException("Open Manager type \"" + case_type + "\" not found!");
+            throw new RuntimeException("Open Manager type \"" + open_manager_type + "\" not found!");
         }
         try {
             Class<? extends OpenManager> open_manager_class = GWMCrates.getInstance().getOpenManagers().get(open_manager_type);
@@ -183,7 +183,7 @@ public class Manager {
 
     public Optional<Drop> getDropById(String id) {
         for (Drop drop : drops) {
-            if (drop.getId().equalsIgnoreCase(id)) {
+            if (drop.getId().isPresent() && drop.getId().get().equals(id)) {
                 return Optional.of(drop);
             }
         }

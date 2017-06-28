@@ -3,8 +3,13 @@ package ua.gwm.sponge_plugin.crates.open_manager.open_managers;
 import com.google.common.reflect.TypeToken;
 import ninja.leaping.configurate.ConfigurationNode;
 import org.spongepowered.api.Sponge;
+import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.effect.sound.SoundType;
+import org.spongepowered.api.entity.EntityTypes;
 import org.spongepowered.api.entity.living.player.Player;
+import org.spongepowered.api.entity.projectile.Firework;
+import org.spongepowered.api.event.cause.NamedCause;
+import org.spongepowered.api.item.FireworkEffect;
 import org.spongepowered.api.item.ItemTypes;
 import org.spongepowered.api.item.inventory.Container;
 import org.spongepowered.api.item.inventory.Inventory;
@@ -15,8 +20,11 @@ import org.spongepowered.api.item.inventory.property.SlotIndex;
 import org.spongepowered.api.item.inventory.type.OrderedInventory;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.serializer.TextSerializers;
+import org.spongepowered.api.util.Color;
 import ua.gwm.sponge_plugin.crates.GWMCrates;
 import ua.gwm.sponge_plugin.crates.drop.Drop;
+import ua.gwm.sponge_plugin.crates.event.PlayerOpenCrateEvent;
+import ua.gwm.sponge_plugin.crates.event.PlayerOpenedCrateEvent;
 import ua.gwm.sponge_plugin.crates.manager.Manager;
 import ua.gwm.sponge_plugin.crates.open_manager.OpenManager;
 import ua.gwm.sponge_plugin.crates.util.GWMCratesUtils;
@@ -87,12 +95,12 @@ public class FirstGuiOpenManager extends OpenManager {
         }
     }
 
-    public FirstGuiOpenManager(Optional<SoundType> open_sound, Optional<SoundType> close_sound,
-                               Optional<Text> display_name, List<ItemStack> decorative_items,
-                               List<Integer> scroll_delays, boolean clear_decorative_items,
-                               boolean clear_other_drops, int close_delay,
-                               Optional<SoundType> scroll_sound, Optional<SoundType> win_sound) {
-        super(open_sound, close_sound);
+    public FirstGuiOpenManager(Optional<SoundType> open_sound, Optional<Text> display_name,
+                               List<ItemStack> decorative_items, List<Integer> scroll_delays,
+                               boolean clear_decorative_items, boolean clear_other_drops,
+                               int close_delay, Optional<SoundType> scroll_sound,
+                               Optional<SoundType> win_sound) {
+        super(open_sound);
         this.display_name = display_name;
         if (decorative_items.size() != 20) {
             throw new RuntimeException("DECORATIVE_ITEMS size must be 20 instead of " + decorative_items.size() + "!");
@@ -108,6 +116,9 @@ public class FirstGuiOpenManager extends OpenManager {
 
     @Override
     public void open(Player player, Manager manager) {
+        PlayerOpenCrateEvent open_event = new PlayerOpenCrateEvent(player, manager);
+        Sponge.getEventManager().post(open_event);
+        if (open_event.isCancelled()) return;
         Inventory inventory = display_name.map(text -> Inventory.builder().of(InventoryArchetypes.CHEST).
                 property(InventoryTitle.PROPERTY_NAME, new InventoryTitle(text)).
                 build(GWMCrates.getInstance())).orElseGet(() -> Inventory.builder().of(InventoryArchetypes.CHEST).
@@ -162,14 +173,16 @@ public class FirstGuiOpenManager extends OpenManager {
                 }
             }
             SHOWN_GUI.add(container);
-            player.sendMessage(LanguageUtils.getText("SUCCESSFULLY_OPENED_MANAGER",
-                    new Pair<String, String>("%MANAGER%", manager.getName())));
+            PlayerOpenedCrateEvent opened_event = new PlayerOpenedCrateEvent(player, manager,
+                    LanguageUtils.getText("SUCCESSFULLY_OPENED_MANAGER",
+                            new Pair<String, String>("%MANAGER%", manager.getName())));
+            Sponge.getEventManager().post(opened_event);
+            player.sendMessage(opened_event.getMessage());
         }).submit(GWMCrates.getInstance());
         Sponge.getScheduler().createTaskBuilder().delayTicks(wait_time + scroll_delays.get(scroll_delays.size() - 1) + close_delay).execute(() -> {
             Optional<Container> optional_open_inventory = player.getOpenInventory();
             if (optional_open_inventory.isPresent() && container.equals(optional_open_inventory.get())) {
                 player.closeInventory(GWMCrates.getInstance().getDefaultCause());
-                getCloseSonud().ifPresent(close_sound -> player.playSound(close_sound, player.getLocation().getPosition(), 1.));
             }
             SHOWN_GUI.remove(container);
             FIRST_GUI_CONTAINERS.remove(container);
@@ -189,12 +202,12 @@ public class FirstGuiOpenManager extends OpenManager {
         this.decorative_items = decorative_items;
     }
 
-    public List<Integer> getScrollCooldowns() {
+    public List<Integer> getScrollDelays() {
         return scroll_delays;
     }
 
-    public void setScrollCooldowns(List<Integer> scroll_cooldowns) {
-        this.scroll_delays = scroll_cooldowns;
+    public void setScrollDelays(List<Integer> scroll_delays) {
+        this.scroll_delays = scroll_delays;
     }
 
     public boolean isClearDecorativeItems() {

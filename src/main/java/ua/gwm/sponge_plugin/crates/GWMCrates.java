@@ -7,23 +7,21 @@ import ninja.leaping.configurate.hocon.HoconConfigurationLoader;
 import ninja.leaping.configurate.loader.ConfigurationLoader;
 import org.slf4j.Logger;
 import org.spongepowered.api.Sponge;
+import org.spongepowered.api.block.BlockTypes;
 import org.spongepowered.api.config.ConfigDir;
-import org.spongepowered.api.effect.sound.SoundType;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.event.Listener;
 import org.spongepowered.api.event.cause.Cause;
 import org.spongepowered.api.event.cause.NamedCause;
 import org.spongepowered.api.event.game.GameReloadEvent;
-import org.spongepowered.api.event.game.state.GameConstructionEvent;
-import org.spongepowered.api.event.game.state.GameInitializationEvent;
-import org.spongepowered.api.event.game.state.GamePreInitializationEvent;
-import org.spongepowered.api.event.game.state.GameStartingServerEvent;
+import org.spongepowered.api.event.game.state.*;
 import org.spongepowered.api.event.message.MessageChannelEvent;
-import org.spongepowered.api.item.ItemType;
 import org.spongepowered.api.plugin.Plugin;
 import org.spongepowered.api.plugin.PluginContainer;
 import org.spongepowered.api.service.economy.EconomyService;
 import org.spongepowered.api.text.Text;
+import org.spongepowered.api.world.Location;
+import org.spongepowered.api.world.World;
 import ua.gwm.sponge_plugin.crates.caze.Case;
 import ua.gwm.sponge_plugin.crates.caze.cases.*;
 import ua.gwm.sponge_plugin.crates.command.GWMCratesCommand;
@@ -32,6 +30,7 @@ import ua.gwm.sponge_plugin.crates.drop.drops.CommandDrop;
 import ua.gwm.sponge_plugin.crates.drop.drops.ItemDrop;
 import ua.gwm.sponge_plugin.crates.drop.drops.MultiDrop;
 import ua.gwm.sponge_plugin.crates.event.GWMCratesRegistrationEvent;
+import ua.gwm.sponge_plugin.crates.hologram.Hologram;
 import ua.gwm.sponge_plugin.crates.key.Key;
 import ua.gwm.sponge_plugin.crates.key.keys.EmptyKey;
 import ua.gwm.sponge_plugin.crates.key.keys.ItemKey;
@@ -40,6 +39,7 @@ import ua.gwm.sponge_plugin.crates.key.keys.VirtualKey;
 import ua.gwm.sponge_plugin.crates.listener.*;
 import ua.gwm.sponge_plugin.crates.manager.Manager;
 import ua.gwm.sponge_plugin.crates.open_manager.OpenManager;
+import ua.gwm.sponge_plugin.crates.open_manager.open_managers.Animation1OpenManager;
 import ua.gwm.sponge_plugin.crates.open_manager.open_managers.FirstGuiOpenManager;
 import ua.gwm.sponge_plugin.crates.open_manager.open_managers.NoGuiOpenManager;
 import ua.gwm.sponge_plugin.crates.open_manager.open_managers.SecondGuiOpenManager;
@@ -49,20 +49,17 @@ import ua.gwm.sponge_plugin.crates.preview.previews.SecondGuiPreview;
 import ua.gwm.sponge_plugin.crates.util.Config;
 
 import java.io.File;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 
 @Plugin(
         id = "gwm_crates",
         name = "GWMCrates",
-        version = "1.2",
+        version = "1.3",
         description = "Universal crates plugin for your server!",
-        authors = {"GWM"
-                /*
+        authors = {"GWM"/*
                 Nazar Kalinovskiy
                 My contacts:
+                email(nkGreWeMa@gmail.com),
                 Skype(nk_gwm),
                 Discord(GWM#2192),
                 Telegram(@grewema),
@@ -78,7 +75,7 @@ public class GWMCrates {
         return instance;
     }
 
-    private Cause default_cause = Cause.of(NamedCause.source(this));
+    private Cause default_cause;
 
     @Inject
     @ConfigDir(sharedRoot = false)
@@ -132,6 +129,7 @@ public class GWMCrates {
                 logger.warn("Failed creating managers config directory!", e);
             }
         }
+        default_cause = Cause.of(NamedCause.of("root", plugin_container));
         config = new Config("config.conf", false);
         language_config = new Config("language.conf", false);
         virtual_cases_config = new Config("virtual_cases.conf", true);
@@ -148,6 +146,7 @@ public class GWMCrates {
         Sponge.getEventManager().registerListeners(this, new FirstGuiOpenManagerListener());
         Sponge.getEventManager().registerListeners(this, new SecondGuiOpenManagerListener());
         Sponge.getEventManager().registerListeners(this, new PreviewListener());
+        Sponge.getEventManager().registerListeners(this, new Animation1Listener());
         Sponge.getCommandManager().register(this, new GWMCratesCommand(), "gwmcrates", "crates");
         register();
         logger.info("Initialization complete!");
@@ -157,6 +156,12 @@ public class GWMCrates {
     public void onStarting(GameStartingServerEvent event) {
         loadEconomy();
         createManagers();
+    }
+
+    @Listener
+    public void onStopping(GameStoppingServerEvent event) {
+        Hologram.deleteHolograms();
+        save();
     }
 
     @Listener
@@ -175,6 +180,7 @@ public class GWMCrates {
     }
 
     public void reload() {
+        Hologram.deleteHolograms();
         config.reload();
         language_config.reload();
         virtual_cases_config.reload();
@@ -211,6 +217,7 @@ public class GWMCrates {
         registration_event.getOpenManagers().put("NO-GUI", NoGuiOpenManager.class);
         registration_event.getOpenManagers().put("FIRST", FirstGuiOpenManager.class);
         registration_event.getOpenManagers().put("SECOND", SecondGuiOpenManager.class);
+        registration_event.getOpenManagers().put("ANIMATION1", Animation1OpenManager.class);
         registration_event.getPreviews().put("FIRST", FirstGuiPreview.class);
         registration_event.getPreviews().put("SECOND", SecondGuiPreview.class);
         Sponge.getEventManager().post(registration_event);

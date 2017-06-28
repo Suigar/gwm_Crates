@@ -5,6 +5,7 @@ import ninja.leaping.configurate.ConfigurationNode;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.meta.ItemEnchantment;
+import org.spongepowered.api.entity.Transform;
 import org.spongepowered.api.item.Enchantment;
 import org.spongepowered.api.item.inventory.Container;
 import org.spongepowered.api.item.inventory.ItemStack;
@@ -12,6 +13,8 @@ import org.spongepowered.api.item.inventory.Slot;
 import org.spongepowered.api.item.inventory.property.SlotIndex;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.serializer.TextSerializers;
+import org.spongepowered.api.util.rotation.Rotation;
+import org.spongepowered.api.util.rotation.Rotations;
 import org.spongepowered.api.world.Location;
 import org.spongepowered.api.world.World;
 import ua.gwm.sponge_plugin.crates.drop.drops.CommandDrop;
@@ -157,5 +160,17 @@ public class GWMCratesUtils {
             return 6;
         }
         return height;
+    }
+
+    public static boolean isLocationChanged(Transform<World> from, Transform<World> to, boolean y_sensitive) {
+        Location<World> location_from = from.getLocation();
+        Location<World> location_to = to.getLocation();
+        int x_from = location_from.getBlockX();
+        int y_from = location_from.getBlockY();
+        int z_from = location_from.getBlockZ();
+        int x_to = location_to.getBlockX();
+        int y_to = location_to.getBlockY();
+        int z_to = location_to.getBlockZ();
+        return x_from != x_to || z_from != z_to || (y_sensitive && y_from != y_to);
     }
 }
