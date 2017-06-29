@@ -11,7 +11,7 @@ import java.util.Optional;
 
 public abstract class Drop {
 
-    protected Optional<String> id;
+    protected Optional<String> id = Optional.empty();
     protected Optional<BigDecimal> price = Optional.empty();
     protected Optional<ItemStack> drop_item = Optional.empty();
     protected int level;
