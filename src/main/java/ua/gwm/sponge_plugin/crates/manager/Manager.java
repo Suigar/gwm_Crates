@@ -137,13 +137,14 @@ public class Manager {
         }
     }
 
-    public Manager(String id, String name, Case caze, Key key, List<Drop> drops, OpenManager open_manager) {
+    public Manager(String id, String name, Case caze, Key key, List<Drop> drops, OpenManager open_manager, Optional<Preview> preview) {
         this.id = id;
         this.name = name;
         this.caze = caze;
         this.key = key;
         this.drops = drops;
         this.open_manager = open_manager;
+        this.preview = preview;
     }
 
     public Drop getRandomDrop() {
