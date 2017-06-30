@@ -36,7 +36,6 @@ public class BlockCaseListener {
             Collection<Location<World>> locations = ((BlockCase) caze).getLocations();
             if (!locations.contains(location)) continue;
             event.setCancelled(true);
-            if (!((BlockCase) caze).isStartPreviewOnLeftClick()) return;
             OpenManager open_manager = manager.getOpenManager();
             if (!open_manager.canOpen(player, manager)) {
                 player.sendMessage(LanguageUtils.getText("CAN_NOT_OPEN_CASE"));
@@ -68,6 +67,7 @@ public class BlockCaseListener {
             Collection<Location<World>> locations = ((BlockCase) caze).getLocations();
             if (!locations.contains(location)) continue;
             event.setCancelled(true);
+            if (!((BlockCase) caze).isStartPreviewOnLeftClick()) return;
             Optional<Preview> optional_preview = manager.getPreview();
             if (!optional_preview.isPresent()) {
                 player.sendMessage(LanguageUtils.getText("PREVIEW_NOT_AVAILABLE",

@@ -28,7 +28,7 @@ public class MultiDrop extends Drop {
             }
             String drop_type = drop_type_node.getString();
             if (!GWMCrates.getInstance().getDrops().containsKey(drop_type)) {
-                throw new RuntimeException("Drop type \"" + drop_type + "\" not found!");
+                throw new RuntimeException("Drop entity_type \"" + drop_type + "\" not found!");
             }
             try {
                 Class<? extends Drop> drop_class = GWMCrates.getInstance().getDrops().get(drop_type);

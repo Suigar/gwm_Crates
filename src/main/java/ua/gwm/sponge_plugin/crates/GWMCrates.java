@@ -8,6 +8,7 @@ import ninja.leaping.configurate.loader.ConfigurationLoader;
 import org.slf4j.Logger;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.config.ConfigDir;
+import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.event.Listener;
 import org.spongepowered.api.event.cause.Cause;
 import org.spongepowered.api.event.cause.NamedCause;
@@ -48,7 +49,7 @@ import java.util.*;
 @Plugin(
         id = "gwm_crates",
         name = "GWMCrates",
-        version = "1.32",
+        version = "1.33",
         description = "Universal crates plugin for your server!",
         authors = {"GWM"/*
                 Nazar Kalinovskiy
@@ -144,7 +145,8 @@ public class GWMCrates {
         Sponge.getEventManager().registerListeners(this, new SecondGuiOpenManagerListener());
         Sponge.getEventManager().registerListeners(this, new PreviewListener());
         Sponge.getEventManager().registerListeners(this, new Animation1Listener());
-        Sponge.getEventManager().registerListeners(this, new HologramListener());
+        Sponge.getEventManager().registerListeners(this, new ExtraEntityRemover());
+        Sponge.getEventManager().registerListeners(this, new EntityCaseListener());
         Sponge.getCommandManager().register(this, new GWMCratesCommand(), "gwmcrates", "crates");
         register();
         logger.info("Initialization complete!");
@@ -179,6 +181,10 @@ public class GWMCrates {
 
     public void reload() {
         Hologram.deleteHolograms();
+        created_managers.stream().
+                filter(manager -> manager.getCase() instanceof EntityCase).
+                forEach(manager -> ((EntityCase)manager.getCase()).getEntities().
+                        forEach(Entity::remove));
         config.reload();
         language_config.reload();
         virtual_cases_config.reload();
@@ -202,6 +208,7 @@ public class GWMCrates {
         GWMCratesRegistrationEvent registration_event = new GWMCratesRegistrationEvent();
         registration_event.getCases().put("ITEM", ItemCase.class);
         registration_event.getCases().put("BLOCK", BlockCase.class);
+        registration_event.getCases().put("ENTITY", EntityCase.class);
         registration_event.getCases().put("VIRTUAL", VirtualCase.class);
         registration_event.getCases().put("TIMED", TimedCase.class);
         registration_event.getCases().put("EMPTY", EmptyCase.class);
@@ -224,10 +231,10 @@ public class GWMCrates {
             Class<? extends Case> case_class = entry.getValue();
             String class_name = case_class.getSimpleName();
             if (cases.containsKey(name)) {
-                logger.warn("Trying to add Case type " + name + " (" + class_name + ".class) which already exist!");
+                logger.warn("Trying to add Case entity_type " + name + " (" + class_name + ".class) which already exist!");
             } else {
                 cases.put(name, case_class);
-                logger.info("Successfully added Case type " + name + " (" + class_name + ".class)!");
+                logger.info("Successfully added Case entity_type " + name + " (" + class_name + ".class)!");
             }
         }
         for (Map.Entry<String, Class<? extends Key>> entry : registration_event.getKeys().entrySet()) {
@@ -235,10 +242,10 @@ public class GWMCrates {
             Class<? extends Key> key_class = entry.getValue();
             String class_name = key_class.getSimpleName();
             if (keys.containsKey(name)) {
-                logger.warn("Trying to add Key type " + name + " (" + class_name + ".class) which already exist!");
+                logger.warn("Trying to add Key entity_type " + name + " (" + class_name + ".class) which already exist!");
             } else {
                 keys.put(name, key_class);
-                logger.info("Successfully added Key type " + name + " (" + class_name + ".class)!");
+                logger.info("Successfully added Key entity_type " + name + " (" + class_name + ".class)!");
             }
         }
         for (Map.Entry<String, Class<? extends Drop>> entry : registration_event.getDrops().entrySet()) {
@@ -246,10 +253,10 @@ public class GWMCrates {
             Class<? extends Drop> drop_class = entry.getValue();
             String class_name = drop_class.getSimpleName();
             if (drops.containsKey(name)) {
-                logger.warn("Trying to add Drop type " + name + " (" + class_name + ".class) which already exist!");
+                logger.warn("Trying to add Drop entity_type " + name + " (" + class_name + ".class) which already exist!");
             } else {
                 drops.put(name, drop_class);
-                logger.info("Successfully added Drop type " + name + " (" + class_name + ".class)!");
+                logger.info("Successfully added Drop entity_type " + name + " (" + class_name + ".class)!");
             }
         }
         for (Map.Entry<String, Class<? extends OpenManager>> entry : registration_event.getOpenManagers().entrySet()) {
@@ -257,10 +264,10 @@ public class GWMCrates {
             Class<? extends OpenManager> open_manager_class = entry.getValue();
             String class_name = open_manager_class.getSimpleName();
             if (open_managers.containsKey(name)) {
-                logger.warn("Trying to add Open Manager type " + name + " (" + class_name + ".class) which already exist!");
+                logger.warn("Trying to add Open Manager entity_type " + name + " (" + class_name + ".class) which already exist!");
             } else {
                 open_managers.put(name, open_manager_class);
-                logger.info("Successfully added Open Manager type " + name + " (" + class_name + ".class)!");
+                logger.info("Successfully added Open Manager entity_type " + name + " (" + class_name + ".class)!");
             }
         }
         for (Map.Entry<String, Class<? extends Preview>> entry : registration_event.getPreviews().entrySet()) {
@@ -268,10 +275,10 @@ public class GWMCrates {
             Class<? extends Preview> preview_class = entry.getValue();
             String class_name = preview_class.getSimpleName();
             if (previews.containsKey(name)) {
-                logger.warn("Trying to add Preview type " + name + " (" + class_name + ".class) which already exist!");
+                logger.warn("Trying to add Preview entity_type " + name + " (" + class_name + ".class) which already exist!");
             } else {
                 previews.put(name, preview_class);
-                logger.info("Successfully added Preview type " + name + " (" + class_name + ".class)!");
+                logger.info("Successfully added Preview entity_type " + name + " (" + class_name + ".class)!");
             }
         }
         logger.info("Registration complete!");

@@ -57,7 +57,7 @@ public class Manager {
         }
         String case_type = case_type_node.getString();
         if (!GWMCrates.getInstance().getCases().containsKey(case_type)) {
-            throw new RuntimeException("Case type \"" + case_type + "\" not found!");
+            throw new RuntimeException("Case entity_type \"" + case_type + "\" not found!");
         }
         try {
             Class<? extends Case> case_class = GWMCrates.getInstance().getCases().get(case_type);
@@ -73,7 +73,7 @@ public class Manager {
         }
         String key_type = key_type_node.getString();
         if (!GWMCrates.getInstance().getKeys().containsKey(key_type)) {
-            throw new RuntimeException("Key type \"" + key_type + "\" not found!");
+            throw new RuntimeException("Key entity_type \"" + key_type + "\" not found!");
         }
         try {
             Class<? extends Key> key_class = GWMCrates.getInstance().getKeys().get(key_type);
@@ -89,7 +89,7 @@ public class Manager {
         }
         String open_manager_type = open_manager_type_node.getString();
         if (!GWMCrates.getInstance().getOpenManagers().containsKey(open_manager_type)) {
-            throw new RuntimeException("Open Manager type \"" + open_manager_type + "\" not found!");
+            throw new RuntimeException("Open Manager entity_type \"" + open_manager_type + "\" not found!");
         }
         try {
             Class<? extends OpenManager> open_manager_class = GWMCrates.getInstance().getOpenManagers().get(open_manager_type);
@@ -107,7 +107,7 @@ public class Manager {
             }
             String drop_type = drop_type_node.getString();
             if (!GWMCrates.getInstance().getDrops().containsKey(drop_type)) {
-                throw new RuntimeException("Drop type \"" + drop_type + "\" not found!");
+                throw new RuntimeException("Drop entity_type \"" + drop_type + "\" not found!");
             }
             try {
                 Class<? extends Drop> drop_class = GWMCrates.getInstance().getDrops().get(drop_type);
@@ -125,7 +125,7 @@ public class Manager {
             }
             String preview_type = preview_type_node.getString();
             if (!GWMCrates.getInstance().getPreviews().containsKey(preview_type)) {
-                throw new RuntimeException("Preview type \"" + preview_type + "\" not found!");
+                throw new RuntimeException("Preview entity_type \"" + preview_type + "\" not found!");
             }
             try {
                 Class<? extends Preview> preview_class = GWMCrates.getInstance().getPreviews().get(preview_type);
