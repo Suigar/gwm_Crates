@@ -93,11 +93,15 @@ public class Animation1OpenManager extends OpenManager {
     }
 
     public Animation1OpenManager(Optional<SoundType> open_sound, BlockType floor_block_type,
-                                 BlockType fence_block_type, BlockType crate_block_type) {
+                                 BlockType fence_block_type, BlockType crate_block_type, OpenManager open_manager,
+                                 Optional<Text> hologram, int close_delay) {
         super(open_sound);
         this.floor_block_type = floor_block_type;
         this.fence_block_type = fence_block_type;
         this.crate_block_type = crate_block_type;
+        this.open_manager = open_manager;
+        this.hologram = hologram;
+        this.close_delay = close_delay;
     }
 
     @Override

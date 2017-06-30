@@ -31,12 +31,6 @@ public class SecondGuiPreview extends Preview {
     protected Optional<Text> display_name = Optional.empty();
     protected boolean show_only_drops_with_drop_item = true;
 
-    public SecondGuiPreview(Optional<Text> display_name, boolean show_only_drops_with_drop_item) {
-        super();
-        this.display_name = display_name;
-        this.show_only_drops_with_drop_item = show_only_drops_with_drop_item;
-    }
-
     public SecondGuiPreview(ConfigurationNode node) {
         super(node);
         ConfigurationNode display_name_node = node.getNode("DISPLAY_NAME");
@@ -46,6 +40,12 @@ public class SecondGuiPreview extends Preview {
         }
         display_name = Optional.of(TextSerializers.FORMATTING_CODE.deserialize(display_name_node.getString()));
         show_only_drops_with_drop_item = show_only_drops_with_drop_item_node.getBoolean(true);
+    }
+
+    public SecondGuiPreview(Optional<Text> display_name, boolean show_only_drops_with_drop_item) {
+        super();
+        this.display_name = display_name;
+        this.show_only_drops_with_drop_item = show_only_drops_with_drop_item;
     }
 
     @Override

@@ -33,13 +33,6 @@ public class FirstGuiPreview extends Preview {
     protected List<ItemStack> decorative_items;
     protected int scroll_delay;
 
-    public FirstGuiPreview(Optional<Text> display_name, List<ItemStack> decorative_items, int scroll_delay) {
-        super();
-        this.display_name = display_name;
-        this.decorative_items = decorative_items;
-        this.scroll_delay = scroll_delay;
-    }
-
     public FirstGuiPreview(ConfigurationNode node) {
         super(node);
         ConfigurationNode display_name_node = node.getNode("DISPLAY_NAME");
@@ -61,6 +54,12 @@ public class FirstGuiPreview extends Preview {
         scroll_delay = scroll_delay_node.getInt(10);
     }
 
+    public FirstGuiPreview(Optional<Text> display_name, List<ItemStack> decorative_items, int scroll_delay) {
+        super();
+        this.display_name = display_name;
+        this.decorative_items = decorative_items;
+        this.scroll_delay = scroll_delay;
+    }
     @Override
     public void preview(Player player, Manager manager) {
         Inventory inventory = display_name.map(text -> Inventory.builder().of(InventoryArchetypes.CHEST).

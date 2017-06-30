@@ -29,9 +29,10 @@ public class ItemCase extends Case {
         start_preview_on_left_click = start_preview_on_left_click_node.getBoolean(false);
     }
 
-    public ItemCase(Optional<BigDecimal> price, ItemStack item) {
+    public ItemCase(Optional<BigDecimal> price, ItemStack item, boolean start_preview_on_left_click) {
         super(price);
         this.item = item;
+        this.start_preview_on_left_click = start_preview_on_left_click;
     }
 
     @Override

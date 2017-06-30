@@ -43,12 +43,10 @@ public class BlockCaseListener {
                 return;
             }
             Key key = manager.getKey();
-            key.add(player, 10);
             if (key.get(player) < 1) {
                 player.sendMessage(LanguageUtils.getText("HAVE_NOT_KEY"));
                 return;
             }
-            caze.add(player, -1);
             key.add(player, -1);
             manager.getOpenManager().open(player, manager);
             break;

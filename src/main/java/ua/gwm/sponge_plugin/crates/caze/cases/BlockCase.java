@@ -33,11 +33,11 @@ public class BlockCase extends Case {
                 throw new RuntimeException("LOCATIONS node does not exist!");
             }
             locations = new HashSet<Location<World>>();
-            if (!hologram_node.isVirtual()) {
-                hologram = Optional.of(TextSerializers.FORMATTING_CODE.deserialize(hologram_node.getString()));
-            }
             for (ConfigurationNode location_node : locations_node.getChildrenList()) {
                 locations.add(GWMCratesUtils.parseLocation(location_node));
+            }
+            if (!hologram_node.isVirtual()) {
+                hologram = Optional.of(TextSerializers.FORMATTING_CODE.deserialize(hologram_node.getString()));
             }
             hologram.ifPresent(name -> locations.forEach(location -> Hologram.createHologram(location.add(0.5, -1.2, 0.5), name)));
             start_preview_on_left_click = start_preview_on_left_click_node.getBoolean(false);
@@ -46,9 +46,12 @@ public class BlockCase extends Case {
         }
     }
 
-    public BlockCase(Optional<BigDecimal> price, Collection<Location<World>> locations) {
+    public BlockCase(Optional<BigDecimal> price, Collection<Location<World>> locations, Optional<Text> hologram,
+                     boolean start_preview_on_left_click) {
         super(price);
         this.locations = locations;
+        this.hologram = hologram;
+        this.start_preview_on_left_click = start_preview_on_left_click;
     }
 
     @Override
