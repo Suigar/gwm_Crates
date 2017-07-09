@@ -8,19 +8,19 @@ import org.spongepowered.api.text.Text;
 import ua.gwm.sponge_plugin.crates.GWMCrates;
 import ua.gwm.sponge_plugin.crates.manager.Manager;
 
-import java.util.Optional;
-
 public class PlayerOpenedCrateEvent implements Event {
 
     private final Player player;
     private final Manager manager;
+    private final Text original_message;
     private Text message;
     private NamedCause[] additional_causes = new NamedCause[0];
 
     public PlayerOpenedCrateEvent(Player player, Manager manager, Text message, NamedCause... additional_causes) {
         this.player = player;
         this.manager = manager;
-        this.message = message;
+        this.original_message = message;
+        this.message = original_message;
         this.additional_causes = additional_causes;
     }
 
@@ -44,5 +44,9 @@ public class PlayerOpenedCrateEvent implements Event {
 
     public Text getMessage() {
         return message;
+    }
+
+    public Text getOriginalMessage() {
+        return original_message;
     }
 }

@@ -9,7 +9,6 @@ import org.spongepowered.api.world.World;
 import ua.gwm.sponge_plugin.crates.GWMCrates;
 import ua.gwm.sponge_plugin.crates.caze.Case;
 import ua.gwm.sponge_plugin.crates.caze.cases.BlockCase;
-import ua.gwm.sponge_plugin.crates.caze.cases.ItemCase;
 import ua.gwm.sponge_plugin.crates.key.Key;
 import ua.gwm.sponge_plugin.crates.manager.Manager;
 import ua.gwm.sponge_plugin.crates.open_manager.OpenManager;
@@ -17,7 +16,6 @@ import ua.gwm.sponge_plugin.crates.preview.Preview;
 import ua.gwm.sponge_plugin.crates.util.LanguageUtils;
 import ua.gwm.sponge_plugin.crates.util.Pair;
 
-import java.util.Collection;
 import java.util.Optional;
 
 public class BlockCaseListener {
@@ -33,8 +31,8 @@ public class BlockCaseListener {
         for (Manager manager : GWMCrates.getInstance().getCreatedManagers()) {
             Case caze = manager.getCase();
             if (!(caze instanceof BlockCase)) continue;
-            Collection<Location<World>> locations = ((BlockCase) caze).getLocations();
-            if (!locations.contains(location)) continue;
+            Location<World> block_case_location = ((BlockCase) caze).getLocation();
+            if (!block_case_location.equals(location)) continue;
             event.setCancelled(true);
             OpenManager open_manager = manager.getOpenManager();
             if (!open_manager.canOpen(player, manager)) {
@@ -64,8 +62,8 @@ public class BlockCaseListener {
             String manager_id = manager.getId();
             Case caze = manager.getCase();
             if (!(caze instanceof BlockCase)) continue;
-            Collection<Location<World>> locations = ((BlockCase) caze).getLocations();
-            if (!locations.contains(location)) continue;
+            Location<World> block_case_location = ((BlockCase) caze).getLocation();
+            if (!block_case_location.equals(location)) continue;
             event.setCancelled(true);
             if (!((BlockCase) caze).isStartPreviewOnLeftClick()) return;
             Optional<Preview> optional_preview = manager.getPreview();

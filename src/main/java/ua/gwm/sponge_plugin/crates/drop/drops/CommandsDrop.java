@@ -9,28 +9,30 @@ import ua.gwm.sponge_plugin.crates.drop.Drop;
 import ua.gwm.sponge_plugin.crates.util.GWMCratesUtils;
 
 import java.math.BigDecimal;
-import java.util.Collection;
-import java.util.HashSet;
-import java.util.Optional;
+import java.util.*;
 
-public class CommandDrop extends Drop {
+public class CommandsDrop extends Drop {
 
-    protected Collection<Command> commands;
+    private List<Command> commands;
 
-    public CommandDrop(ConfigurationNode node) {
+    public CommandsDrop(ConfigurationNode node) {
         super(node);
-        ConfigurationNode commands_node = node.getNode("COMMANDS");
-        if (commands_node.isVirtual()) {
-            throw new RuntimeException("COMMANDS node does not exist!");
-        }
-        commands = new HashSet<Command>();
-        for (ConfigurationNode command_node : commands_node.getChildrenList()) {
-            commands.add(GWMCratesUtils.parseCommand(command_node));
+        try {
+            ConfigurationNode commands_node = node.getNode("COMMANDS");
+            if (commands_node.isVirtual()) {
+                throw new RuntimeException("COMMANDS node does not exist!");
+            }
+            commands = new ArrayList<Command>();
+            for (ConfigurationNode command_node : commands_node.getChildrenList()) {
+                commands.add(GWMCratesUtils.parseCommand(command_node));
+            }
+        } catch (Exception e) {
+            throw new RuntimeException("Exception creating Commands Drop!", e);
         }
     }
 
-    public CommandDrop(Optional<String> id, Optional<BigDecimal> price, Optional<ItemStack> drop_item, int level,
-                       Collection<Command> commands) {
+    public CommandsDrop(Optional<String> id, Optional<BigDecimal> price, Optional<ItemStack> drop_item, int level,
+                        List<Command> commands) {
         super(id, price, drop_item, level);
         this.commands = commands;
     }
@@ -39,9 +41,9 @@ public class CommandDrop extends Drop {
     public void apply(Player player) {
         ConsoleSource console_source = Sponge.getServer().getConsole();
         for (Command command : commands) {
-            String cmd = command.getCmd().replace("%PLAYER%", player.getName()).replace('&', '§');
+            String cmd = command.getCmd().replace("%PLAYER%", player.getName());
             boolean console = command.isConsole();
-            Sponge.getCommandManager().process(console ? console_source : player, cmd); //44
+            Sponge.getCommandManager().process(console ? console_source : player, cmd);
         }
     }
 
@@ -72,11 +74,11 @@ public class CommandDrop extends Drop {
         }
     }
 
-    public Collection<Command> getCommands() {
+    public List<Command> getCommands() {
         return commands;
     }
 
-    public void setCommands(Collection<Command> commands) {
+    public void setCommands(List<Command> commands) {
         this.commands = commands;
     }
 }

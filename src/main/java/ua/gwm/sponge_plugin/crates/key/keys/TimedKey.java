@@ -10,21 +10,25 @@ import java.util.Optional;
 
 public class TimedKey extends Key {
 
-    protected String virtual_name;
-    protected long delay;
+    private String virtual_name;
+    private long delay;
 
     public TimedKey(ConfigurationNode node) {
         super(node);
-        ConfigurationNode virtual_name_node = node.getNode("VIRTUAL_NAME");
-        ConfigurationNode delay_node = node.getNode("DELAY");
-        if (virtual_name_node.isVirtual()) {
-            throw new RuntimeException("VIRTUAL_NAME node does not exist!");
+        try {
+            ConfigurationNode virtual_name_node = node.getNode("VIRTUAL_NAME");
+            ConfigurationNode delay_node = node.getNode("DELAY");
+            if (virtual_name_node.isVirtual()) {
+                throw new RuntimeException("VIRTUAL_NAME node does not exist!");
+            }
+            if (delay_node.isVirtual()) {
+                throw new RuntimeException("DELAY node does not exist!");
+            }
+            virtual_name = virtual_name_node.getString();
+            delay = delay_node.getLong();
+        } catch (Exception e) {
+            throw new RuntimeException("Exception creating Timed Key!", e);
         }
-        if (delay_node.isVirtual()) {
-            throw new RuntimeException("DELAY node does not exist!");
-        }
-        virtual_name = virtual_name_node.getString();
-        delay = delay_node.getLong();
     }
 
     public TimedKey(Optional<BigDecimal> price, String virtual_name, long delay) {
@@ -35,7 +39,7 @@ public class TimedKey extends Key {
 
     @Override
     public void add(Player player, int amount) {
-        ConfigurationNode delay_node = GWMCrates.getInstance().getTimedCasesDelaysConfig().
+        ConfigurationNode delay_node = GWMCrates.getInstance().getTimedKeysDelaysConfig().
                 getNode(player.getUniqueId().toString(), virtual_name);
         if (amount > 0) {
             delay_node.setValue(null);
@@ -46,7 +50,7 @@ public class TimedKey extends Key {
 
     @Override
     public int get(Player player) {
-        ConfigurationNode delay_node = GWMCrates.getInstance().getTimedCasesDelaysConfig().
+        ConfigurationNode delay_node = GWMCrates.getInstance().getTimedKeysDelaysConfig().
                 getNode(player.getUniqueId().toString(), virtual_name);
         if (delay_node.isVirtual()) {
             return Integer.MAX_VALUE;

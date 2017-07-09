@@ -2,7 +2,6 @@ package ua.gwm.sponge_plugin.crates.drop;
 
 import ninja.leaping.configurate.ConfigurationNode;
 import org.spongepowered.api.entity.living.player.Player;
-import org.spongepowered.api.item.ItemTypes;
 import org.spongepowered.api.item.inventory.ItemStack;
 import ua.gwm.sponge_plugin.crates.util.GWMCratesUtils;
 
@@ -11,33 +10,43 @@ import java.util.Optional;
 
 public abstract class Drop {
 
-    protected Optional<String> id = Optional.empty();
-    protected Optional<BigDecimal> price = Optional.empty();
-    protected Optional<ItemStack> drop_item = Optional.empty();
-    protected int level;
+    private Optional<String> id = Optional.empty();
+    private Optional<BigDecimal> price = Optional.empty();
+    private Optional<ItemStack> drop_item = Optional.empty();
+    private int level;
 
-    protected Drop(Optional<String> id, Optional<BigDecimal> price, Optional<ItemStack> drop_item, int level) {
+    public Drop(ConfigurationNode node) {
+        try {
+            ConfigurationNode id_node = node.getNode("ID");
+            ConfigurationNode price_node = node.getNode("PRICE");
+            ConfigurationNode drop_item_node = node.getNode("DROP_ITEM");
+            ConfigurationNode level_node = node.getNode("LEVEL");
+            if (!id_node.isVirtual()) {
+                id = Optional.of(id_node.getString());
+            }
+            if (!price_node.isVirtual()) {
+                price = Optional.of(new BigDecimal(price_node.getString("0")));
+            }
+            if (!drop_item_node.isVirtual()) {
+                drop_item = Optional.of(GWMCratesUtils.parseItem(drop_item_node));
+            }
+            level = level_node.getInt(1);
+            if (level < 1) {
+                level = 1;
+            }
+        } catch (Exception e) {
+            throw new RuntimeException("Exception creating Drop!", e);
+        }
+    }
+
+    public Drop(Optional<String> id, Optional<BigDecimal> price, Optional<ItemStack> drop_item, int level) {
         this.id = id;
         this.price = price;
         this.drop_item = drop_item;
+        if (level < 1) {
+            level = 1;
+        }
         this.level = level;
-    }
-
-    public Drop(ConfigurationNode node) {
-        ConfigurationNode id_node = node.getNode("ID");
-        ConfigurationNode price_node = node.getNode("PRICE");
-        ConfigurationNode drop_item_node = node.getNode("DROP_ITEM");
-        ConfigurationNode level_node = node.getNode("LEVEL");
-        if (!id_node.isVirtual()) {
-            id = Optional.of(id_node.getString());
-        }
-        if (!price_node.isVirtual()) {
-            price = Optional.of(new BigDecimal(price_node.getString("0")));
-        }
-        if (!drop_item_node.isVirtual()) {
-            drop_item = Optional.of(GWMCratesUtils.parseItem(drop_item_node));
-        }
-        level = level_node.getInt(1);
     }
 
     public abstract void apply(Player player);
@@ -54,8 +63,8 @@ public abstract class Drop {
         this.price = price;
     }
 
-    public ItemStack getDropItem() {
-        return drop_item.orElse(ItemStack.of(ItemTypes.NONE, 1));
+    public Optional<ItemStack> getDropItem() {
+        return drop_item;
     }
 
     public void setDropItem(Optional<ItemStack> drop_item) {

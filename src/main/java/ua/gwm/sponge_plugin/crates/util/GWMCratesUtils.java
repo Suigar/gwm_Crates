@@ -3,6 +3,8 @@ package ua.gwm.sponge_plugin.crates.util;
 import com.google.common.reflect.TypeToken;
 import ninja.leaping.configurate.ConfigurationNode;
 import org.spongepowered.api.Sponge;
+import org.spongepowered.api.data.DataContainer;
+import org.spongepowered.api.data.DataQuery;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.meta.ItemEnchantment;
 import org.spongepowered.api.entity.Transform;
@@ -15,12 +17,9 @@ import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.serializer.TextSerializers;
 import org.spongepowered.api.world.Location;
 import org.spongepowered.api.world.World;
-import ua.gwm.sponge_plugin.crates.drop.drops.CommandDrop;
+import ua.gwm.sponge_plugin.crates.drop.drops.CommandsDrop;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
-import java.util.Random;
+import java.util.*;
 import java.util.stream.Collectors;
 
 public class GWMCratesUtils {
@@ -75,6 +74,7 @@ public class GWMCratesUtils {
             ConfigurationNode item_type_node = node.getNode("ITEM_TYPE");
             ConfigurationNode quantity_node = node.getNode("QUANTITY");
             ConfigurationNode sub_id_node = node.getNode("SUB_ID");
+            ConfigurationNode nbt_node = node.getNode("NBT");
             ConfigurationNode durability_node = node.getNode("DURABILITY");
             ConfigurationNode display_name_node = node.getNode("DISPLAY_NAME");
             ConfigurationNode lore_node = node.getNode("LORE");
@@ -89,7 +89,17 @@ public class GWMCratesUtils {
             temp_node.getNode("Count").setValue(quantity_node.getInt(1));
             ItemStack item = temp_node.getValue(TypeToken.of(ItemStack.class));
             temp_node.setValue(null);
-            //Mega-shit-code end
+            //Mega-shit-code end : another not good code start
+            if (!nbt_node.isVirtual()) {
+                LinkedHashMap nbt_map = (LinkedHashMap) nbt_node.getValue();
+                if (item.toContainer().get(DataQuery.of("UnsafeData")).isPresent()) {
+                    Map unsafe_data_map = item.toContainer().getMap(DataQuery.of("UnsafeData")).get();
+                    nbt_map.putAll(unsafe_data_map);
+                }
+                DataContainer container = item.toContainer().set(DataQuery.of("UnsafeData"), nbt_map);
+                item = ItemStack.builder().fromContainer(container).build();
+            }
+            //Another not good code end
             if (!durability_node.isVirtual()) {
                 int durability = durability_node.getInt();
                 item.offer(Keys.ITEM_DURABILITY, durability);
@@ -132,7 +142,7 @@ public class GWMCratesUtils {
         }
     }
 
-    public static CommandDrop.Command parseCommand(ConfigurationNode node) {
+    public static CommandsDrop.Command parseCommand(ConfigurationNode node) {
         ConfigurationNode cmd_node = node.getNode("CMD");
         ConfigurationNode console_node = node.getNode("CONSOLE");
         if (cmd_node.isVirtual()) {
@@ -140,7 +150,7 @@ public class GWMCratesUtils {
         }
         String cmd = cmd_node.getString();
         boolean console = console_node.getBoolean(true);
-        return new CommandDrop.Command(cmd, console);
+        return new CommandsDrop.Command(cmd, console);
     }
 
     public static boolean isFirstInventory(Container container, Slot slot) {

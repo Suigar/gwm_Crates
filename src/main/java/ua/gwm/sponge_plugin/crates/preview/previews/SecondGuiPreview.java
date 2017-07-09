@@ -28,24 +28,24 @@ public class SecondGuiPreview extends Preview {
 
     public static final HashMap<Container, Pair<SecondGuiPreview, Manager>> SECOND_GUI_CONTAINERS = new HashMap<Container, Pair<SecondGuiPreview, Manager>>();
 
-    protected Optional<Text> display_name = Optional.empty();
-    protected boolean show_only_drops_with_drop_item = true;
+    private Optional<Text> display_name = Optional.empty();
 
     public SecondGuiPreview(ConfigurationNode node) {
         super(node);
-        ConfigurationNode display_name_node = node.getNode("DISPLAY_NAME");
-        ConfigurationNode show_only_drops_with_drop_item_node = node.getNode("SHOW_ONLY_DROPS_WITH_DROP_ITEM_NODE");
-        if (display_name_node.isVirtual()) {
-            throw new RuntimeException("DISPLAY_NAME node does not exist!");
+        try {
+            ConfigurationNode display_name_node = node.getNode("DISPLAY_NAME");
+            if (display_name_node.isVirtual()) {
+                throw new RuntimeException("DISPLAY_NAME node does not exist!");
+            }
+            display_name = Optional.of(TextSerializers.FORMATTING_CODE.deserialize(display_name_node.getString()));
+        } catch (Exception e) {
+            throw new RuntimeException("Exception creating Second Gui Preview!", e);
         }
-        display_name = Optional.of(TextSerializers.FORMATTING_CODE.deserialize(display_name_node.getString()));
-        show_only_drops_with_drop_item = show_only_drops_with_drop_item_node.getBoolean(true);
     }
 
     public SecondGuiPreview(Optional<Text> display_name, boolean show_only_drops_with_drop_item) {
         super();
         this.display_name = display_name;
-        this.show_only_drops_with_drop_item = show_only_drops_with_drop_item;
     }
 
     @Override
@@ -62,7 +62,7 @@ public class SecondGuiPreview extends Preview {
         int size = 9 * dimension.getRows();
         for (int i = 0; i < size && drop_iterator.hasNext();) {
             Drop next = drop_iterator.next();
-            ItemStack drop_item = next.getDropItem();
+            ItemStack drop_item = next.getDropItem().orElse(ItemStack.of(ItemTypes.NONE, 1));
             if (drop_item.equalTo(ItemStack.of(ItemTypes.NONE, 1))) {
                 continue;
             }

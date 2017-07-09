@@ -1,32 +1,27 @@
 package ua.gwm.sponge_plugin.crates.open_manager.open_managers;
 
-import com.flowpowered.math.vector.Vector3d;
 import com.flowpowered.math.vector.Vector3i;
-import com.google.common.collect.HashBasedTable;
 import com.google.common.reflect.TypeToken;
 import ninja.leaping.configurate.ConfigurationNode;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.block.BlockType;
 import org.spongepowered.api.block.BlockTypes;
-import org.spongepowered.api.block.tileentity.carrier.Chest;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.effect.sound.SoundType;
 import org.spongepowered.api.entity.living.player.Player;
-import org.spongepowered.api.event.block.NotifyNeighborBlockEvent;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.serializer.TextSerializers;
 import org.spongepowered.api.util.Direction;
-import org.spongepowered.api.util.rotation.Rotations;
 import org.spongepowered.api.world.BlockChangeFlag;
 import org.spongepowered.api.world.Location;
 import org.spongepowered.api.world.World;
 import ua.gwm.sponge_plugin.crates.GWMCrates;
 import ua.gwm.sponge_plugin.crates.event.PlayerOpenCrateEvent;
 import ua.gwm.sponge_plugin.crates.hologram.Hologram;
+import ua.gwm.sponge_plugin.crates.listener.Animation1Listener;
 import ua.gwm.sponge_plugin.crates.manager.Manager;
 import ua.gwm.sponge_plugin.crates.open_manager.OpenManager;
-import ua.gwm.sponge_plugin.crates.util.Pair;
 
 import java.lang.reflect.Constructor;
 import java.util.*;
@@ -44,22 +39,22 @@ public class Animation1OpenManager extends OpenManager {
 
     public Animation1OpenManager(ConfigurationNode node) {
         super(node);
-        ConfigurationNode floor_block_type_node = node.getNode("FLOOR_BLOCK_TYPE");
-        ConfigurationNode fence_block_type_node = node.getNode("FENCE_BLOCK_TYPE");
-        ConfigurationNode crate_block_type_node = node.getNode("CRATE_BLOCK_TYPE");
-        ConfigurationNode hologram_node = node.getNode("HOLOGRAM");
-        ConfigurationNode close_delay_node = node.getNode("CLOSE_DELAY");
-        ConfigurationNode open_manager_node = node.getNode("OPEN_MANAGER");
-        if (floor_block_type_node.isVirtual()) {
-            throw new RuntimeException("FLOOR_BLOCK_TYPE node does not exist!");
-        }
-        if (fence_block_type_node.isVirtual()) {
-            throw new RuntimeException("FENCE_BLOCK_TYPE node does not exist!");
-        }
-        if (crate_block_type_node.isVirtual()) {
-            throw new RuntimeException("CRATE_BLOCK_TYPE node does not exist!");
-        }
         try {
+            ConfigurationNode floor_block_type_node = node.getNode("FLOOR_BLOCK_TYPE");
+            ConfigurationNode fence_block_type_node = node.getNode("FENCE_BLOCK_TYPE");
+            ConfigurationNode crate_block_type_node = node.getNode("CRATE_BLOCK_TYPE");
+            ConfigurationNode hologram_node = node.getNode("HOLOGRAM");
+            ConfigurationNode close_delay_node = node.getNode("CLOSE_DELAY");
+            ConfigurationNode open_manager_node = node.getNode("OPEN_MANAGER");
+            if (floor_block_type_node.isVirtual()) {
+                throw new RuntimeException("FLOOR_BLOCK_TYPE node does not exist!");
+            }
+            if (fence_block_type_node.isVirtual()) {
+                throw new RuntimeException("FENCE_BLOCK_TYPE node does not exist!");
+            }
+            if (crate_block_type_node.isVirtual()) {
+                throw new RuntimeException("CRATE_BLOCK_TYPE node does not exist!");
+            }
             floor_block_type = floor_block_type_node.getValue(TypeToken.of(BlockType.class));
             fence_block_type = fence_block_type_node.getValue(TypeToken.of(BlockType.class));
             crate_block_type = crate_block_type_node.getValue(TypeToken.of(BlockType.class));
@@ -70,7 +65,6 @@ public class Animation1OpenManager extends OpenManager {
                 close_delay = close_delay_node.getLong();
             }
             if (!open_manager_node.isVirtual()) {
-                System.out.println("Опен Менеджер не виртуал!");
                 ConfigurationNode open_manager_type_node = open_manager_node.getNode("TYPE");
                 if (open_manager_type_node.isVirtual()) {
                     throw new RuntimeException("TYPE node for Open Manager does not exist!");
@@ -88,7 +82,7 @@ public class Animation1OpenManager extends OpenManager {
                 }
             }
         } catch (Exception e) {
-            GWMCrates.getInstance().getLogger().info("Exception creating Animation Open Manager!");
+            GWMCrates.getInstance().getLogger().info("Exception creating Animation1 Open Manager!");
         }
     }
 
@@ -183,11 +177,19 @@ public class Animation1OpenManager extends OpenManager {
 
     @Override
     public boolean canOpen(Player player, Manager manager) {
-        return super.canOpen(player, manager) && !PLAYERS_OPENING_ANIMATION1.containsKey(player) && !containsNearPlayers(player);
+        return super.canOpen(player, manager) &&
+                !PLAYERS_OPENING_ANIMATION1.containsKey(player) &&
+                !Animation1Listener.OPENED_PLAYERS.containsKey(player) &&
+                !containsNearPlayers(player);
     }
 
     private boolean containsNearPlayers(Player player) {
         for (Player p : PLAYERS_OPENING_ANIMATION1.keySet()) {
+            if (p.getLocation().getPosition().distance(player.getLocation().getPosition()) < 5) {
+                return true;
+            }
+        }
+        for (Player p : Animation1Listener.OPENED_PLAYERS.keySet()) {
             if (p.getLocation().getPosition().distance(player.getLocation().getPosition()) < 5) {
                 return true;
             }

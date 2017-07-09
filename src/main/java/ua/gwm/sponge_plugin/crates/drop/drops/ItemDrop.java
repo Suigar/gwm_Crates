@@ -11,15 +11,19 @@ import java.util.Optional;
 
 public class ItemDrop extends Drop {
 
-    protected ItemStack item;
+    private ItemStack item;
 
     public ItemDrop(ConfigurationNode node) {
         super(node);
-        ConfigurationNode item_node = node.getNode("ITEM");
-        if (item_node.isVirtual()) {
-            throw new RuntimeException("ITEM node does not exist!");
+        try {
+            ConfigurationNode item_node = node.getNode("ITEM");
+            if (item_node.isVirtual()) {
+                throw new RuntimeException("ITEM node does not exist!");
+            }
+            item = GWMCratesUtils.parseItem(item_node);
+        } catch (Exception e) {
+            throw new RuntimeException("Exception creating Item Drop!", e);
         }
-        item = GWMCratesUtils.parseItem(item_node);
     }
 
     public ItemDrop(Optional<String> id, Optional<BigDecimal> price, Optional<ItemStack> drop_item, int level,
@@ -34,8 +38,9 @@ public class ItemDrop extends Drop {
     }
 
     @Override
-    public ItemStack getDropItem() {
-        return drop_item.orElse(item);
+    public Optional<ItemStack> getDropItem() {
+        Optional<ItemStack> super_drop_item = super.getDropItem();
+        return super_drop_item.isPresent() ? super_drop_item : Optional.of(item.copy());
     }
 
     public ItemStack getItem() {

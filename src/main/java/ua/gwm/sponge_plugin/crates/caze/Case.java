@@ -8,16 +8,20 @@ import java.util.Optional;
 
 public abstract class Case {
 
-    protected Optional<BigDecimal> price = Optional.empty();
+    private Optional<BigDecimal> price = Optional.empty();
 
     public Case(ConfigurationNode node) {
-        ConfigurationNode price_node = node.getNode("PRICE");
-        if (!price_node.isVirtual()) {
-            price = Optional.of(new BigDecimal(price_node.getString("0")));
+        try {
+            ConfigurationNode price_node = node.getNode("PRICE");
+            if (!price_node.isVirtual()) {
+                price = Optional.of(new BigDecimal(price_node.getString("0")));
+            }
+        } catch (Exception e) {
+            throw new RuntimeException("Exception creating Case!", e);
         }
     }
 
-    protected Case(Optional<BigDecimal> price) {
+    public Case(Optional<BigDecimal> price) {
         this.price = price;
     }
 

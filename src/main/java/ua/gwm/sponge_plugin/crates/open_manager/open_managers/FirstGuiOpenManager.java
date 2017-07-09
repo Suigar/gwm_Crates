@@ -3,13 +3,8 @@ package ua.gwm.sponge_plugin.crates.open_manager.open_managers;
 import com.google.common.reflect.TypeToken;
 import ninja.leaping.configurate.ConfigurationNode;
 import org.spongepowered.api.Sponge;
-import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.effect.sound.SoundType;
-import org.spongepowered.api.entity.EntityTypes;
 import org.spongepowered.api.entity.living.player.Player;
-import org.spongepowered.api.entity.projectile.Firework;
-import org.spongepowered.api.event.cause.NamedCause;
-import org.spongepowered.api.item.FireworkEffect;
 import org.spongepowered.api.item.ItemTypes;
 import org.spongepowered.api.item.inventory.Container;
 import org.spongepowered.api.item.inventory.Inventory;
@@ -20,7 +15,6 @@ import org.spongepowered.api.item.inventory.property.SlotIndex;
 import org.spongepowered.api.item.inventory.type.OrderedInventory;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.serializer.TextSerializers;
-import org.spongepowered.api.util.Color;
 import ua.gwm.sponge_plugin.crates.GWMCrates;
 import ua.gwm.sponge_plugin.crates.drop.Drop;
 import ua.gwm.sponge_plugin.crates.event.PlayerOpenCrateEvent;
@@ -50,16 +44,16 @@ public class FirstGuiOpenManager extends OpenManager {
 
     public FirstGuiOpenManager(ConfigurationNode node) {
         super(node);
-        ConfigurationNode display_name_node = node.getNode("DISPLAY_NAME");
-        ConfigurationNode decorative_items_node = node.getNode("DECORATIVE_ITEMS");
-        ConfigurationNode scroll_delays_node = node.getNode("SCROLL_DELAYS");
-        ConfigurationNode clear_decorative_items_node = node.getNode("CLEAR_DECORATIVE_ITEMS");
-        ConfigurationNode clear_other_drops_node = node.getNode("CLEAR_OTHER_DROPS");
-        ConfigurationNode close_delay_node = node.getNode("CLOSE_DELAY");
-        ConfigurationNode forbid_close_node = node.getNode("FORBID_CLOSE");
-        ConfigurationNode scroll_sound_node = node.getNode("SCROLL_SOUND");
-        ConfigurationNode win_sound_node = node.getNode("WIN_SOUND");
         try {
+            ConfigurationNode display_name_node = node.getNode("DISPLAY_NAME");
+            ConfigurationNode decorative_items_node = node.getNode("DECORATIVE_ITEMS");
+            ConfigurationNode scroll_delays_node = node.getNode("SCROLL_DELAYS");
+            ConfigurationNode clear_decorative_items_node = node.getNode("CLEAR_DECORATIVE_ITEMS");
+            ConfigurationNode clear_other_drops_node = node.getNode("CLEAR_OTHER_DROPS");
+            ConfigurationNode close_delay_node = node.getNode("CLOSE_DELAY");
+            ConfigurationNode forbid_close_node = node.getNode("FORBID_CLOSE");
+            ConfigurationNode scroll_sound_node = node.getNode("SCROLL_SOUND");
+            ConfigurationNode win_sound_node = node.getNode("WIN_SOUND");
             if (!display_name_node.isVirtual()) {
                 display_name = Optional.of(TextSerializers.FORMATTING_CODE.deserialize(display_name_node.getString()));
             }
@@ -131,7 +125,7 @@ public class FirstGuiOpenManager extends OpenManager {
         for (int i = 10; i < 17; i++) {
             Drop new_drop = manager.getRandomDrop();
             drop_list.add(new_drop);
-            ordered.getSlot(new SlotIndex(i)).get().set(new_drop.getDropItem());
+            ordered.getSlot(new SlotIndex(i)).get().set(new_drop.getDropItem().orElse(ItemStack.of(ItemTypes.NONE, 1)));
         }
         for (int i = 17; i < 27; i++) {
             ordered.getSlot(new SlotIndex(i)).get().set(decorative_items.get(i - 7));
@@ -148,7 +142,7 @@ public class FirstGuiOpenManager extends OpenManager {
                 }
                 Drop new_drop = manager.getRandomDrop();
                 drop_list.add(new_drop);
-                ordered.getSlot(new SlotIndex(16)).get().set(new_drop.getDropItem());
+                ordered.getSlot(new SlotIndex(16)).get().set(new_drop.getDropItem().orElse(ItemStack.of(ItemTypes.NONE, 1)));
                 scroll_sound.ifPresent(sound -> player.playSound(sound, player.getLocation().getPosition(), 1.));
             }).submit(GWMCrates.getInstance());
         }

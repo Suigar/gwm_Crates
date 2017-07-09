@@ -10,15 +10,19 @@ import java.util.Optional;
 
 public class VirtualKey extends Key {
 
-    protected String virtual_name;
+    private String virtual_name;
 
     public VirtualKey(ConfigurationNode node) {
         super(node);
-        ConfigurationNode virtual_name_node = node.getNode("VIRTUAL_NAME");
-        if (virtual_name_node.isVirtual()) {
-            throw new RuntimeException("VIRTUAL_NAME node does not exist!");
+        try {
+            ConfigurationNode virtual_name_node = node.getNode("VIRTUAL_NAME");
+            if (virtual_name_node.isVirtual()) {
+                throw new RuntimeException("VIRTUAL_NAME node does not exist!");
+            }
+            virtual_name = virtual_name_node.getString();
+        } catch (Exception e) {
+            throw new RuntimeException("Exception creating Virtual Key!", e);
         }
-        virtual_name = virtual_name_node.getString();
     }
 
     public VirtualKey(Optional<BigDecimal> price, String virtual_name) {

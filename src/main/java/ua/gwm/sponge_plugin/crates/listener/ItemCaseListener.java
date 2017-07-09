@@ -1,6 +1,5 @@
 package ua.gwm.sponge_plugin.crates.listener;
 
-import org.spongepowered.api.command.CommandResult;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.event.Listener;
 import org.spongepowered.api.event.Order;

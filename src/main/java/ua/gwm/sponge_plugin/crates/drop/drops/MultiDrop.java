@@ -12,32 +12,36 @@ import java.util.*;
 
 public class MultiDrop extends Drop {
 
-    protected List<Drop> drops;
+    private List<Drop> drops;
 
     public MultiDrop(ConfigurationNode node) {
         super(node);
-        ConfigurationNode drops_node = node.getNode("DROPS");
-        if (drops_node.isVirtual()) {
-            throw new RuntimeException("DROPS node does not exist");
-        }
-        drops = new ArrayList<Drop>();
-        for (ConfigurationNode drop_node : drops_node.getChildrenList()) {
-            ConfigurationNode drop_type_node = drop_node.getNode("TYPE");
-            if (drop_type_node.isVirtual()) {
-                throw new RuntimeException("TYPE node does not exist!");
+        try {
+            ConfigurationNode drops_node = node.getNode("DROPS");
+            if (drops_node.isVirtual()) {
+                throw new RuntimeException("DROPS node does not exist");
             }
-            String drop_type = drop_type_node.getString();
-            if (!GWMCrates.getInstance().getDrops().containsKey(drop_type)) {
-                throw new RuntimeException("Drop entity_type \"" + drop_type + "\" not found!");
+            drops = new ArrayList<Drop>();
+            for (ConfigurationNode drop_node : drops_node.getChildrenList()) {
+                ConfigurationNode drop_type_node = drop_node.getNode("TYPE");
+                if (drop_type_node.isVirtual()) {
+                    throw new RuntimeException("TYPE node does not exist!");
+                }
+                String drop_type = drop_type_node.getString();
+                if (!GWMCrates.getInstance().getDrops().containsKey(drop_type)) {
+                    throw new RuntimeException("Drop type \"" + drop_type + "\" not found!");
+                }
+                try {
+                    Class<? extends Drop> drop_class = GWMCrates.getInstance().getDrops().get(drop_type);
+                    Constructor<? extends Drop> drop_constructor = drop_class.getConstructor(ConfigurationNode.class);
+                    Drop drop = drop_constructor.newInstance(drop_node);
+                    drops.add(drop);
+                } catch (Exception e) {
+                    throw new RuntimeException("Exception creating drop (part of Multi Drop)!", e);
+                }
             }
-            try {
-                Class<? extends Drop> drop_class = GWMCrates.getInstance().getDrops().get(drop_type);
-                Constructor<? extends Drop> drop_constructor = drop_class.getConstructor(ConfigurationNode.class);
-                Drop drop = drop_constructor.newInstance(drop_node);
-                drops.add(drop);
-            } catch (Exception e) {
-                throw new RuntimeException("Exception creating drop!", e);
-            }
+        } catch (Exception e) {
+            throw new RuntimeException("Exception creating Multi Drop!", e);
         }
     }
 

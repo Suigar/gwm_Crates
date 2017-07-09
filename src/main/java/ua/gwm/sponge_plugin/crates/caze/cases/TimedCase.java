@@ -10,21 +10,25 @@ import java.util.Optional;
 
 public class TimedCase extends Case {
 
-    protected String virtual_name;
-    protected long delay;
+    private String virtual_name;
+    private long delay;
 
     public TimedCase(ConfigurationNode node) {
         super(node);
-        ConfigurationNode virtual_name_node = node.getNode("VIRTUAL_NAME");
-        ConfigurationNode delay_node = node.getNode("DELAY");
-        if (virtual_name_node.isVirtual()) {
-            throw new RuntimeException("VIRTUAL_NAME node does not exist!");
+        try {
+            ConfigurationNode virtual_name_node = node.getNode("VIRTUAL_NAME");
+            ConfigurationNode delay_node = node.getNode("DELAY");
+            if (virtual_name_node.isVirtual()) {
+                throw new RuntimeException("VIRTUAL_NAME node does not exist!");
+            }
+            if (delay_node.isVirtual()) {
+                throw new RuntimeException("DELAY node does not exist!");
+            }
+            virtual_name = virtual_name_node.getString();
+            delay = delay_node.getLong();
+        } catch (Exception e) {
+            throw new RuntimeException("Exception creating Timed Case!", e);
         }
-        if (delay_node.isVirtual()) {
-            throw new RuntimeException("DELAY node does not exist!");
-        }
-        virtual_name = virtual_name_node.getString();
-        delay = delay_node.getLong();
     }
 
     public TimedCase(Optional<BigDecimal> price, String virtual_name, long delay) {

@@ -42,17 +42,17 @@ public class SecondGuiOpenManager extends OpenManager {
 
     public SecondGuiOpenManager(ConfigurationNode node) {
         super(node);
-        ConfigurationNode display_name_node = node.getNode("DISPLAY_NAME");
-        ConfigurationNode hidden_item_node = node.getNode("HIDDEN_ITEM");
-        ConfigurationNode increase_hidden_item_quantity_node = node.getNode("INCREASE_HIDDEN_ITEM_QUANTITY");
-        ConfigurationNode rows_node = node.getNode("ROWS");
-        ConfigurationNode show_other_drops_node = node.getNode("SHOW_OTHER_DROPS");
-        ConfigurationNode show_other_drops_delay_node = node.getNode("SHOW_OTHER_DROPS_DELAY");
-        ConfigurationNode close_delay_node = node.getNode("CLOSE_DELAY");
-        ConfigurationNode forbid_close_node = node.getNode("FORBID_CLOSE");
-        ConfigurationNode give_random_on_close_node = node.getNode("GIVE_RANDOM_ON_CLOSE");
-        ConfigurationNode click_sound_node = node.getNode("CLICK_SOUND");
         try {
+            ConfigurationNode display_name_node = node.getNode("DISPLAY_NAME");
+            ConfigurationNode hidden_item_node = node.getNode("HIDDEN_ITEM");
+            ConfigurationNode increase_hidden_item_quantity_node = node.getNode("INCREASE_HIDDEN_ITEM_QUANTITY");
+            ConfigurationNode rows_node = node.getNode("ROWS");
+            ConfigurationNode show_other_drops_node = node.getNode("SHOW_OTHER_DROPS");
+            ConfigurationNode show_other_drops_delay_node = node.getNode("SHOW_OTHER_DROPS_DELAY");
+            ConfigurationNode close_delay_node = node.getNode("CLOSE_DELAY");
+            ConfigurationNode forbid_close_node = node.getNode("FORBID_CLOSE");
+            ConfigurationNode give_random_on_close_node = node.getNode("GIVE_RANDOM_ON_CLOSE");
+            ConfigurationNode click_sound_node = node.getNode("CLICK_SOUND");
             if (!display_name_node.isVirtual()) {
                 display_name = Optional.of(TextSerializers.FORMATTING_CODE.deserialize(display_name_node.getString()));
             }

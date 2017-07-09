@@ -1,6 +1,5 @@
 package ua.gwm.sponge_plugin.crates.caze.cases;
 
-import com.google.common.reflect.TypeToken;
 import ninja.leaping.configurate.ConfigurationNode;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.text.Text;
@@ -13,43 +12,38 @@ import ua.gwm.sponge_plugin.crates.hologram.Hologram;
 import ua.gwm.sponge_plugin.crates.util.GWMCratesUtils;
 
 import java.math.BigDecimal;
-import java.util.Collection;
-import java.util.HashSet;
 import java.util.Optional;
 
 public class BlockCase extends Case {
 
-    protected Collection<Location<World>> locations;
-    protected Optional<Text> hologram = Optional.empty();
-    protected boolean start_preview_on_left_click = false;
+    private Location<World> location;
+    private Optional<Text> hologram = Optional.empty();
+    private boolean start_preview_on_left_click = false;
 
     public BlockCase(ConfigurationNode node) {
         super(node);
-        ConfigurationNode locations_node = node.getNode("LOCATIONS");
-        ConfigurationNode hologram_node = node.getNode("HOLOGRAM");
-        ConfigurationNode start_preview_on_left_click_node = node.getNode("START_PREVIEW_ON_LEFT_CLICK");
         try {
-            if (locations_node.isVirtual()) {
-                throw new RuntimeException("LOCATIONS node does not exist!");
+            ConfigurationNode location_node = node.getNode("LOCATION");
+            ConfigurationNode hologram_node = node.getNode("HOLOGRAM");
+            ConfigurationNode start_preview_on_left_click_node = node.getNode("START_PREVIEW_ON_LEFT_CLICK");
+            if (location_node.isVirtual()) {
+                throw new RuntimeException("LOCATION node does not exist!");
             }
-            locations = new HashSet<Location<World>>();
-            for (ConfigurationNode location_node : locations_node.getChildrenList()) {
-                locations.add(GWMCratesUtils.parseLocation(location_node));
-            }
+            location = GWMCratesUtils.parseLocation(location_node);
             if (!hologram_node.isVirtual()) {
                 hologram = Optional.of(TextSerializers.FORMATTING_CODE.deserialize(hologram_node.getString()));
             }
-            hologram.ifPresent(name -> locations.forEach(location -> Hologram.createHologram(location.add(0.5, -1.2, 0.5), name)));
+            hologram.ifPresent(name -> Hologram.createHologram(location.add(0.5, -1.2, 0.5), name));
             start_preview_on_left_click = start_preview_on_left_click_node.getBoolean(false);
         } catch (Exception e) {
             GWMCrates.getInstance().getLogger().warn("Exception creating Block Case!", e);
         }
     }
 
-    public BlockCase(Optional<BigDecimal> price, Collection<Location<World>> locations, Optional<Text> hologram,
+    public BlockCase(Optional<BigDecimal> price, Location<World> location, Optional<Text> hologram,
                      boolean start_preview_on_left_click) {
         super(price);
-        this.locations = locations;
+        this.location = location;
         this.hologram = hologram;
         this.start_preview_on_left_click = start_preview_on_left_click;
     }
@@ -63,12 +57,12 @@ public class BlockCase extends Case {
         return Integer.MAX_VALUE;
     }
 
-    public Collection<Location<World>> getLocations() {
-        return locations;
+    public Location<World> getLocation() {
+        return location;
     }
 
-    public void setLocations(Collection<Location<World>> locations) {
-        this.locations = locations;
+    public void setLocation(Location<World> location) {
+        this.location = location;
     }
 
     public Optional<Text> getHologram() {

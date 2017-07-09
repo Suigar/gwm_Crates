@@ -9,7 +9,6 @@ import org.spongepowered.api.event.entity.InteractEntityEvent;
 import org.spongepowered.api.event.entity.MoveEntityEvent;
 import ua.gwm.sponge_plugin.crates.GWMCrates;
 import ua.gwm.sponge_plugin.crates.caze.Case;
-import ua.gwm.sponge_plugin.crates.caze.cases.BlockCase;
 import ua.gwm.sponge_plugin.crates.caze.cases.EntityCase;
 import ua.gwm.sponge_plugin.crates.key.Key;
 import ua.gwm.sponge_plugin.crates.manager.Manager;
@@ -33,7 +32,7 @@ public class EntityCaseListener {
             if (!(caze instanceof EntityCase)) {
                 continue;
             }
-            if (((EntityCase) caze).getEntities().contains(entity)) {
+            if (((EntityCase) caze).getEntity().equals(entity)) {
                 event.setCancelled(true);
                 if (event instanceof InteractEntityEvent.Secondary.MainHand) {
                     OpenManager open_manager = manager.getOpenManager();
@@ -75,7 +74,7 @@ public class EntityCaseListener {
         Entity entity = event.getTargetEntity();
         for (Manager manager : GWMCrates.getInstance().getCreatedManagers()) {
             Case caze = manager.getCase();
-            if (caze instanceof EntityCase && ((EntityCase) caze).getEntities().contains(entity)) {
+            if (caze instanceof EntityCase && ((EntityCase) caze).getEntity().equals(entity)) {
                 event.setCancelled(true);
             }
         }
@@ -86,7 +85,7 @@ public class EntityCaseListener {
         Entity entity = event.getTargetEntity();
         for (Manager manager : GWMCrates.getInstance().getCreatedManagers()) {
             Case caze = manager.getCase();
-            if (caze instanceof EntityCase && ((EntityCase) caze).getEntities().contains(entity)) {
+            if (caze instanceof EntityCase && ((EntityCase) caze).getEntity().equals(entity)) {
                 event.setCancelled(true);
             }
         }

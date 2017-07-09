@@ -29,29 +29,33 @@ public class FirstGuiPreview extends Preview {
 
     public static final HashMap<Container, Pair<FirstGuiPreview, Manager>> FIRST_GUI_CONTAINERS = new HashMap<Container, Pair<FirstGuiPreview, Manager>>();
 
-    protected Optional<Text> display_name = Optional.empty();
-    protected List<ItemStack> decorative_items;
-    protected int scroll_delay;
+    private Optional<Text> display_name = Optional.empty();
+    private List<ItemStack> decorative_items;
+    private int scroll_delay;
 
     public FirstGuiPreview(ConfigurationNode node) {
         super(node);
-        ConfigurationNode display_name_node = node.getNode("DISPLAY_NAME");
-        ConfigurationNode decorative_items_node = node.getNode("DECORATIVE_ITEMS");
-        ConfigurationNode scroll_delay_node = node.getNode("SCROLL_DELAY");
-        if (!display_name_node.isVirtual()) {
-            display_name = Optional.of(TextSerializers.FORMATTING_CODE.deserialize(display_name_node.getString()));
+        try {
+            ConfigurationNode display_name_node = node.getNode("DISPLAY_NAME");
+            ConfigurationNode decorative_items_node = node.getNode("DECORATIVE_ITEMS");
+            ConfigurationNode scroll_delay_node = node.getNode("SCROLL_DELAY");
+            if (!display_name_node.isVirtual()) {
+                display_name = Optional.of(TextSerializers.FORMATTING_CODE.deserialize(display_name_node.getString()));
+            }
+            if (decorative_items_node.isVirtual()) {
+                throw new RuntimeException("DECORATIVE_ITEMS node does not exist!");
+            }
+            decorative_items = new ArrayList<ItemStack>();
+            for (ConfigurationNode decorative_item_node : decorative_items_node.getChildrenList()) {
+                decorative_items.add(GWMCratesUtils.parseItem(decorative_item_node));
+            }
+            if (decorative_items.size() != 20) {
+                throw new RuntimeException("DECORATIVE_ITEMS size must be 20 instead of " + decorative_items.size() + "!");
+            }
+            scroll_delay = scroll_delay_node.getInt(10);
+        } catch (Exception e) {
+            throw new RuntimeException("Exception creating First Gui Preview!", e);
         }
-        if (decorative_items_node.isVirtual()) {
-            throw new RuntimeException("DECORATIVE_ITEMS node does not exist!");
-        }
-        decorative_items = new ArrayList<ItemStack>();
-        for (ConfigurationNode decorative_item_node : decorative_items_node.getChildrenList()) {
-            decorative_items.add(GWMCratesUtils.parseItem(decorative_item_node));
-        }
-        if (decorative_items.size() != 20) {
-            throw new RuntimeException("DECORATIVE_ITEMS size must be 20 instead of " + decorative_items.size() + "!");
-        }
-        scroll_delay = scroll_delay_node.getInt(10);
     }
 
     public FirstGuiPreview(Optional<Text> display_name, List<ItemStack> decorative_items, int scroll_delay) {
@@ -76,7 +80,7 @@ public class FirstGuiPreview extends Preview {
             if (index > drops.size() - 1) {
                 index = 0;
             }
-            ordered.getSlot(new SlotIndex(i)).get().set(drops.get(index).getDropItem());
+            ordered.getSlot(new SlotIndex(i)).get().set(drops.get(index).getDropItem().orElse(ItemStack.of(ItemTypes.NONE, 1)));
             index++;
         }
         for (int i = 17; i < 27; i++) {
@@ -113,7 +117,7 @@ public class FirstGuiPreview extends Preview {
             if (index == drops.size()) {
                 index = 0;
             }
-            inventory.query(new SlotIndex(16)).set(drops.get(index).getDropItem());
+            inventory.query(new SlotIndex(16)).set(drops.get(index).getDropItem().orElse(ItemStack.of(ItemTypes.NONE, 1)));
             index++;
             Sponge.getScheduler().createTaskBuilder().delayTicks(scroll_delay).execute(this).submit(GWMCrates.getInstance());
         }

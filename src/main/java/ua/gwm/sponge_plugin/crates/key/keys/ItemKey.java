@@ -15,15 +15,19 @@ import java.util.Optional;
 
 public class ItemKey extends Key {
 
-    protected ItemStack item;
+    private ItemStack item;
 
     public ItemKey(ConfigurationNode node) {
         super(node);
-        ConfigurationNode item_node = node.getNode("ITEM");
-        if (item_node.isVirtual()) {
-            throw new RuntimeException("ITEM node does not exist!");
+        try {
+            ConfigurationNode item_node = node.getNode("ITEM");
+            if (item_node.isVirtual()) {
+                throw new RuntimeException("ITEM node does not exist!");
+            }
+            item = GWMCratesUtils.parseItem(item_node);
+        } catch (Exception e) {
+            throw new RuntimeException("Exception creating Item Key!", e);
         }
-        item = GWMCratesUtils.parseItem(item_node);
     }
 
     public ItemKey(Optional<BigDecimal> price, ItemStack item) {
@@ -64,20 +68,18 @@ public class ItemKey extends Key {
 
     @Override
     public int get(Player player) {
-        int amout = 0;
+        int amount = 0;
         Inventory inventory = player.getInventory();
-        Iterator<Slot> slot_iterator = inventory.<Slot>slots().iterator();
-        while (slot_iterator.hasNext()) {
-            Slot slot = slot_iterator.next();
+        for (Slot slot : inventory.<Slot>slots()) {
             Optional<ItemStack> optional_item = slot.peek();
             if (optional_item.isPresent()) {
                 ItemStack item = optional_item.get();
                 if (GWMCratesUtils.itemStacksEquals(this.item, item)) {
-                    amout += item.getQuantity();
+                    amount += item.getQuantity();
                 }
             }
         }
-        return amout;
+        return amount;
     }
 
     public ItemStack getItem() {

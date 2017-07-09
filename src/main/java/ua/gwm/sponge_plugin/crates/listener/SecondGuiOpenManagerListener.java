@@ -5,6 +5,7 @@ import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.event.Listener;
 import org.spongepowered.api.event.item.inventory.ClickInventoryEvent;
 import org.spongepowered.api.event.item.inventory.InteractInventoryEvent;
+import org.spongepowered.api.item.ItemTypes;
 import org.spongepowered.api.item.inventory.Container;
 import org.spongepowered.api.item.inventory.ItemStack;
 import org.spongepowered.api.item.inventory.Slot;
@@ -35,11 +36,11 @@ public class SecondGuiOpenManagerListener {
             event.setCancelled(true);
             return;
         }
-        Optional<Player> optional_player = event.getCause().first(Player.class);
-        if (!optional_player.isPresent()) return;
-        Player player = optional_player.get();
         if (SecondGuiOpenManager.SECOND_GUI_INVENTORIES.containsKey(container)) {
             event.setCancelled(true);
+            Optional<Player> optional_player = event.getCause().first(Player.class);
+            if (!optional_player.isPresent()) return;
+            Player player = optional_player.get();
             OrderedInventory ordered = (OrderedInventory) container.iterator().next();
             Pair<SecondGuiOpenManager, Manager> pair = SecondGuiOpenManager.SECOND_GUI_INVENTORIES.get(container);
             SecondGuiOpenManager open_manager = pair.getKey();
@@ -49,7 +50,7 @@ public class SecondGuiOpenManagerListener {
                 if (GWMCratesUtils.isFirstInventory(container, slot)) {
                     SHOWN_GUI.add(container);
                     Drop drop = manager.getRandomDrop();
-                    ItemStack drop_item = drop.getDropItem().copy();
+                    ItemStack drop_item = drop.getDropItem().orElse(ItemStack.of(ItemTypes.NONE, 1));
                     Sponge.getScheduler().createTaskBuilder().delayTicks(1).execute(() -> slot.set(drop_item)).
                             submit(GWMCrates.getInstance());
                     if (open_manager.isShowOtherDrops()) {
@@ -57,7 +58,7 @@ public class SecondGuiOpenManagerListener {
                             for (Slot next : ordered.<Slot>slots()) {
                                 if (!Objects.equals(next.getProperty(SlotIndex.class, "slotindex").get().getValue(),
                                         slot.getProperty(SlotIndex.class, "slotindex").get().getValue())) {
-                                    next.set(manager.getRandomDrop().getDropItem());
+                                    next.set(manager.getRandomDrop().getDropItem().orElse(ItemStack.of(ItemTypes.NONE, 1)));
                                 }
                             }
                         }).submit(GWMCrates.getInstance());
@@ -75,6 +76,7 @@ public class SecondGuiOpenManagerListener {
                             player.closeInventory(GWMCrates.getInstance().getDefaultCause());
                         }
                         SHOWN_GUI.remove(container);
+                        SecondGuiOpenManager.SECOND_GUI_INVENTORIES.remove(container);
                     }).submit(GWMCrates.getInstance());
                     return;
                 }
@@ -102,6 +104,7 @@ public class SecondGuiOpenManagerListener {
                                 new Pair<String, String>("%MANAGER%", manager.getName())));
                 Sponge.getEventManager().post(opened_event);
                 player.sendMessage(opened_event.getMessage());
+                SecondGuiOpenManager.SECOND_GUI_INVENTORIES.remove(container);
             }
         }
     }

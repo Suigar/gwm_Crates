@@ -6,10 +6,10 @@ import ua.gwm.sponge_plugin.crates.manager.Manager;
 
 public abstract class Preview {
 
-    protected Preview() {
+    public Preview(ConfigurationNode node) {
     }
 
-    public Preview(ConfigurationNode node) {
+    public Preview() {
     }
 
     public abstract void preview(Player player, Manager manager);

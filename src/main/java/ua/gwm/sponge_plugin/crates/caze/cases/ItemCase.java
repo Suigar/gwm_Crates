@@ -15,18 +15,22 @@ import java.util.Optional;
 
 public class ItemCase extends Case {
 
-    protected ItemStack item;
-    protected boolean start_preview_on_left_click = false;
+    private ItemStack item;
+    private boolean start_preview_on_left_click = false;
 
     public ItemCase(ConfigurationNode node) {
         super(node);
-        ConfigurationNode item_node = node.getNode("ITEM");
-        ConfigurationNode start_preview_on_left_click_node = node.getNode("START_PREVIEW_ON_LEFT_CLICK");
-        if (item_node.isVirtual()) {
-            throw new RuntimeException("ITEM node does not exist!");
+        try {
+            ConfigurationNode item_node = node.getNode("ITEM");
+            ConfigurationNode start_preview_on_left_click_node = node.getNode("START_PREVIEW_ON_LEFT_CLICK");
+            if (item_node.isVirtual()) {
+                throw new RuntimeException("ITEM node does not exist!");
+            }
+            item = GWMCratesUtils.parseItem(item_node);
+            start_preview_on_left_click = start_preview_on_left_click_node.getBoolean(false);
+        } catch (Exception e) {
+            throw new RuntimeException("Exception creating Item Case!", e);
         }
-        item = GWMCratesUtils.parseItem(item_node);
-        start_preview_on_left_click = start_preview_on_left_click_node.getBoolean(false);
     }
 
     public ItemCase(Optional<BigDecimal> price, ItemStack item, boolean start_preview_on_left_click) {
@@ -68,20 +72,18 @@ public class ItemCase extends Case {
 
     @Override
     public int get(Player player) {
-        int amout = 0;
+        int amount = 0;
         Inventory inventory = player.getInventory();
-        Iterator<Slot> slot_iterator = inventory.<Slot>slots().iterator();
-        while (slot_iterator.hasNext()) {
-            Slot slot = slot_iterator.next();
+        for (Slot slot : inventory.<Slot>slots()) {
             Optional<ItemStack> optional_item = slot.peek();
             if (optional_item.isPresent()) {
                 ItemStack item = optional_item.get();
                 if (GWMCratesUtils.itemStacksEquals(this.item, item)) {
-                    amout += item.getQuantity();
+                    amount += item.getQuantity();
                 }
             }
         }
-        return amout;
+        return amount;
     }
 
     public ItemStack getItem() {

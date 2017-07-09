@@ -1,9 +1,7 @@
 package ua.gwm.sponge_plugin.crates.listener;
 
-import com.flowpowered.math.vector.Vector3d;
 import com.flowpowered.math.vector.Vector3i;
 import org.spongepowered.api.Sponge;
-import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.command.CommandSource;
 import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.entity.EntityTypes;
@@ -19,7 +17,6 @@ import org.spongepowered.api.world.World;
 import ua.gwm.sponge_plugin.crates.GWMCrates;
 import ua.gwm.sponge_plugin.crates.open_manager.open_managers.Animation1OpenManager;
 import ua.gwm.sponge_plugin.crates.util.GWMCratesUtils;
-import ua.gwm.sponge_plugin.crates.util.Pair;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -59,7 +56,7 @@ public class Animation1Listener {
         Player player = optional_player.get();
         if (!Animation1OpenManager.PLAYERS_OPENING_ANIMATION1.containsKey(player) || OPENED_PLAYERS.containsKey(player)) {
             for (Animation1OpenManager.Information info : Animation1OpenManager.PLAYERS_OPENING_ANIMATION1.values()) {
-                for (Location<World> location : info.getLocations().keySet()) {
+                for (Location<World> location : info.getOriginalBlockStates().keySet()) {
                     if (target_block.equals(location.getBlockPosition())) {
                         event.setCancelled(true);
                         return;
@@ -77,6 +74,7 @@ public class Animation1Listener {
             if (target_block.equals(crate_block) && !opened) {
                 information.getOpenManager().getOpenManager().open(player, information.getManager());
                 entry.setValue(true);
+                break;
             }
         }
         for (boolean bool : information.getLocations().values()) {

@@ -2,6 +2,8 @@ package ua.gwm.sponge_plugin.crates.caze.cases;
 
 import com.google.common.reflect.TypeToken;
 import ninja.leaping.configurate.ConfigurationNode;
+import org.spongepowered.api.data.DataContainer;
+import org.spongepowered.api.data.DataQuery;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.entity.EntityType;
@@ -15,68 +17,80 @@ import ua.gwm.sponge_plugin.crates.caze.Case;
 import ua.gwm.sponge_plugin.crates.util.GWMCratesUtils;
 
 import java.math.BigDecimal;
-import java.util.Collection;
-import java.util.HashSet;
+import java.util.LinkedHashMap;
+import java.util.Map;
 import java.util.Optional;
 
 public class EntityCase extends Case {
 
-    protected Collection<Location<World>> locations;
-    protected EntityType entity_type;
-    protected Optional<Text> name = Optional.empty();
-    protected boolean start_preview_on_left_click = false;
-    private Collection<Entity> entities;
+    private Location<World> location;
+    private EntityType entity_type;
+    private LinkedHashMap nbt = new LinkedHashMap();
+    private Optional<Text> name = Optional.empty();
+    private boolean start_preview_on_left_click = false;
+    private Entity entity;
 
     public EntityCase(ConfigurationNode node) {
         super(node);
-        ConfigurationNode locations_node = node.getNode("LOCATIONS");
-        ConfigurationNode entity_type_node = node.getNode("ENTITY_TYPE");
-        ConfigurationNode name_node = node.getNode("NAME");
-        ConfigurationNode start_preview_on_left_click_node = node.getNode("START_PREVIEW_ON_LEFT_CLICK");
         try {
-            if (locations_node.isVirtual()) {
-                throw new RuntimeException("LOCATIONS node does not exist!");
+            ConfigurationNode location_node = node.getNode("LOCATION");
+            ConfigurationNode entity_type_node = node.getNode("ENTITY_TYPE");
+            ConfigurationNode nbt_node = node.getNode("NBT");
+            ConfigurationNode name_node = node.getNode("NAME");
+            ConfigurationNode start_preview_on_left_click_node = node.getNode("START_PREVIEW_ON_LEFT_CLICK");
+            if (location_node.isVirtual()) {
+                throw new RuntimeException("LOCATION node does not exist!");
             }
             if (entity_type_node.isVirtual()) {
                 throw new RuntimeException("ENTITY_TYPE node does not exist!");
             }
-            locations = new HashSet<Location<World>>();
-            for (ConfigurationNode location_node : locations_node.getChildrenList()) {
-                locations.add(GWMCratesUtils.parseLocation(location_node));
+            if(!nbt_node.isVirtual()) {
+                nbt = (LinkedHashMap) nbt_node.getValue();
             }
+            location = GWMCratesUtils.parseLocation(location_node);
             entity_type = entity_type_node.getValue(TypeToken.of(EntityType.class));
             if (!name_node.isVirtual()) {
                 name = Optional.of(TextSerializers.FORMATTING_CODE.deserialize(name_node.getString()));
             }
             start_preview_on_left_click = start_preview_on_left_click_node.getBoolean(false);
-            createEntities();
+            createEntity();
         } catch (Exception e) {
             throw new RuntimeException("Exception creating Entity Case!", e);
         }
     }
 
-    public EntityCase(Optional<BigDecimal> price, Collection<Location<World>> locations, EntityType entity_type, Optional<Text> name,
-                      boolean start_preview_on_left_click) {
+    public EntityCase(Optional<BigDecimal> price, Location<World> location, EntityType entity_type, LinkedHashMap nbt,
+                      Optional<Text> name, boolean start_preview_on_left_click) {
         super(price);
-        this.locations = locations;
+        this.location = location;
         this.entity_type = entity_type;
+        this.nbt = nbt;
         this.name = name;
         this.start_preview_on_left_click = start_preview_on_left_click;
-        createEntities();
+        createEntity();
     }
 
-    private void createEntities() {
-        entities = new HashSet<Entity>();
-        locations.forEach(location -> {
-            World world = location.getExtent();
-            Entity entity = world.createEntity(entity_type, location.getPosition());
-            entity.setCreator(GWMCrates.PLUGIN_UUID);
-            name.ifPresent(text -> entity.offer(Keys.DISPLAY_NAME, text));
-            entity.offer(Keys.AI_ENABLED, false);
-            entity.offer(Keys.HAS_GRAVITY, false);
-            world.spawnEntity(entity, GWMCrates.getInstance().getDefaultCause());
-            entities.add(entity);
-        });
+    private void createEntity() {
+        World world = location.getExtent();
+        location.getExtent().loadChunk(location.getChunkPosition(), true);
+        Entity entity = world.createEntity(entity_type, location.getPosition());
+        entity.setCreator(GWMCrates.PLUGIN_UUID);
+        if (name.isPresent()) {
+            entity.offer(Keys.DISPLAY_NAME, name.get());
+            entity.offer(Keys.CUSTOM_NAME_VISIBLE, true);
+        }
+        entity.offer(Keys.AI_ENABLED, false);
+        entity.offer(Keys.HAS_GRAVITY, false);
+        DataContainer container = entity.toContainer();
+        LinkedHashMap nbt_map = new LinkedHashMap(nbt);
+        if (container.get(DataQuery.of("UnsafeData")).isPresent()) {
+            Map unsafe_data_map = container.getMap(DataQuery.of("UnsafeData")).get();
+            nbt_map.putAll(unsafe_data_map);
+        }
+        entity.setRawData(container.set(DataQuery.of("UnsafeData"), nbt_map));
+        entity = world.createEntity(container, location.getPosition()).get();
+        world.spawnEntity(entity, GWMCrates.getInstance().getDefaultCause());
+        this.entity = entity;
     }
 
     @Override
@@ -88,19 +102,19 @@ public class EntityCase extends Case {
         return Integer.MAX_VALUE;
     }
 
-    public Collection<Location<World>> getLocations() {
-        return locations;
+    public Location<World> getLocation() {
+        return location;
     }
 
-    public void setLocations(Collection<Location<World>> locations) {
-        this.locations = locations;
+    public void setLocation(Location<World> location) {
+        this.location = location;
     }
 
-    public EntityType getEntity_type() {
+    public EntityType getEntityType() {
         return entity_type;
     }
 
-    public void setEntity_type(EntityType entity_type) {
+    public void setEntityType(EntityType entity_type) {
         this.entity_type = entity_type;
     }
 
@@ -120,7 +134,7 @@ public class EntityCase extends Case {
         this.start_preview_on_left_click = start_preview_on_left_click;
     }
 
-    public Collection<Entity> getEntities() {
-        return entities;
+    public Entity getEntity() {
+        return entity;
     }
 }

@@ -8,13 +8,9 @@ import org.spongepowered.api.world.Location;
 import org.spongepowered.api.world.World;
 import ua.gwm.sponge_plugin.crates.GWMCrates;
 
-import java.io.BufferedWriter;
-import java.io.File;
-import java.io.FileWriter;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Set;
-import java.util.UUID;
 
 public class Hologram {
 
@@ -27,8 +23,12 @@ public class Hologram {
     }
 
     public static void deleteHolograms() {
-        HOLOGRAMS.forEach(hologram -> hologram.entity.remove());
-        HOLOGRAMS.clear();
+        Iterator<Hologram> hologram_iterator = HOLOGRAMS.iterator();
+        while (hologram_iterator.hasNext()) {
+            Hologram next_hologram = hologram_iterator.next();
+            next_hologram.getEntity().remove();
+            hologram_iterator.remove();
+        }
     }
 
     public synchronized static Hologram createHologram(Location<World> location, Text name) {

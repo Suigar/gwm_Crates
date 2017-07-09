@@ -8,17 +8,21 @@ import java.util.Optional;
 
 public abstract class Key {
 
-    protected Optional<BigDecimal> price = Optional.empty();
-
-    protected Key(Optional<BigDecimal> price) {
-        this.price = price;
-    }
+    private Optional<BigDecimal> price = Optional.empty();
 
     public Key(ConfigurationNode node) {
-        ConfigurationNode price_node = node.getNode("PRICE");
-        if (!price_node.isVirtual()) {
-            price = Optional.of(new BigDecimal(price_node.getString("0")));
+        try {
+            ConfigurationNode price_node = node.getNode("PRICE");
+            if (!price_node.isVirtual()) {
+                price = Optional.of(new BigDecimal(price_node.getString("0")));
+            }
+        } catch (Exception e) {
+            throw new RuntimeException("Exception creating Key!", e);
         }
+    }
+
+    public Key(Optional<BigDecimal> price) {
+        this.price = price;
     }
 
     public abstract void add(Player player, int amount);
