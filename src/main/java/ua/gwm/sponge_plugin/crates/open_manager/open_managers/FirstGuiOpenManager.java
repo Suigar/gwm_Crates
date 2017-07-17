@@ -136,11 +136,12 @@ public class FirstGuiOpenManager extends OpenManager {
         int wait_time = 0;
         for (int i = 0; i < scroll_delays.size() - 1; i++) {
             wait_time += scroll_delays.get(i);
+            int finalI = i;
             Sponge.getScheduler().createTaskBuilder().delayTicks(wait_time).execute(() -> {
                 for (int j = 10; j < 16; j++) {
                     ordered.getSlot(new SlotIndex(j)).get().set(inventory.query(new SlotIndex(j + 1)).peek().orElse(ItemStack.of(ItemTypes.NONE, 1)));
                 }
-                Drop new_drop = manager.getRandomDrop();
+                Drop new_drop = finalI == scroll_delays.size() - 5 ? manager.getRandomDrop() : manager.getFakeRandomDrop();
                 drop_list.add(new_drop);
                 ordered.getSlot(new SlotIndex(16)).get().set(new_drop.getDropItem().orElse(ItemStack.of(ItemTypes.NONE, 1)));
                 scroll_sound.ifPresent(sound -> player.playSound(sound, player.getLocation().getPosition(), 1.));

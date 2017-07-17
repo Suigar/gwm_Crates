@@ -13,6 +13,7 @@ public abstract class Drop {
     private Optional<String> id = Optional.empty();
     private Optional<BigDecimal> price = Optional.empty();
     private Optional<ItemStack> drop_item = Optional.empty();
+    private Optional<Integer> fake_level = Optional.empty();
     private int level;
 
     public Drop(ConfigurationNode node) {
@@ -20,6 +21,7 @@ public abstract class Drop {
             ConfigurationNode id_node = node.getNode("ID");
             ConfigurationNode price_node = node.getNode("PRICE");
             ConfigurationNode drop_item_node = node.getNode("DROP_ITEM");
+            ConfigurationNode fake_level_node = node.getNode("FAKE_LEVEL");
             ConfigurationNode level_node = node.getNode("LEVEL");
             if (!id_node.isVirtual()) {
                 id = Optional.of(id_node.getString());
@@ -29,6 +31,9 @@ public abstract class Drop {
             }
             if (!drop_item_node.isVirtual()) {
                 drop_item = Optional.of(GWMCratesUtils.parseItem(drop_item_node));
+            }
+            if (!fake_level.isPresent()) {
+                fake_level = Optional.of(fake_level_node.getInt(1));
             }
             level = level_node.getInt(1);
             if (level < 1) {
@@ -69,6 +74,14 @@ public abstract class Drop {
 
     public void setDropItem(Optional<ItemStack> drop_item) {
         this.drop_item = drop_item;
+    }
+
+    public Optional<Integer> getFakeLevel() {
+        return fake_level;
+    }
+
+    public void setFakeLevel(Optional<Integer> fake_level) {
+        this.fake_level = fake_level;
     }
 
     public int getLevel() {

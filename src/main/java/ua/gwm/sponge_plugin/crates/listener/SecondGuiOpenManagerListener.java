@@ -58,7 +58,7 @@ public class SecondGuiOpenManagerListener {
                             for (Slot next : ordered.<Slot>slots()) {
                                 if (!Objects.equals(next.getProperty(SlotIndex.class, "slotindex").get().getValue(),
                                         slot.getProperty(SlotIndex.class, "slotindex").get().getValue())) {
-                                    next.set(manager.getRandomDrop().getDropItem().orElse(ItemStack.of(ItemTypes.NONE, 1)));
+                                    next.set(manager.getFakeRandomDrop().getDropItem().orElse(ItemStack.of(ItemTypes.NONE, 1)));
                                 }
                             }
                         }).submit(GWMCrates.getInstance());

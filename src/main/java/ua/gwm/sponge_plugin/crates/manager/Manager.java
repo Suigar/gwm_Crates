@@ -182,6 +182,41 @@ public class Manager {
         return max;
     }
 
+    public Drop getFakeRandomDrop() {
+        int max_level = getMaxFakeLevel();
+        Drop drop;
+        while ((drop = getFakeDropByLevel(GWMCratesUtils.getRandomIntLevel(1, max_level))) == null) {
+        }
+        return drop;
+    }
+
+    private Drop getFakeDropByLevel(int level) {
+        List<Drop> drop_with_level = new ArrayList<Drop>();
+        for (Drop drop : drops) {
+            if (drop.getFakeLevel().orElse(drop.getLevel()) == level) {
+                drop_with_level.add(drop);
+            }
+        }
+        if (drop_with_level.size() == 0) {
+            return null;
+        } else if (drop_with_level.size() == 1) {
+            return drop_with_level.get(0);
+        } else {
+            return drop_with_level.get(new Random().nextInt(drop_with_level.size()));
+        }
+    }
+
+    private int getMaxFakeLevel() {
+        int max = 1;
+        for (Drop drop : drops) {
+            int level = drop.getFakeLevel().orElse(drop.getLevel());
+            if (level > max) {
+                max = level;
+            }
+        }
+        return max;
+    }
+
     public Optional<Drop> getDropById(String id) {
         for (Drop drop : drops) {
             if (drop.getId().isPresent() && drop.getId().get().equals(id)) {
