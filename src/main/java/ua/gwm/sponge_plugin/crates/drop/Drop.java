@@ -32,7 +32,7 @@ public abstract class Drop {
             if (!drop_item_node.isVirtual()) {
                 drop_item = Optional.of(GWMCratesUtils.parseItem(drop_item_node));
             }
-            if (!fake_level.isPresent()) {
+            if (!fake_level_node.isVirtual()) {
                 fake_level = Optional.of(fake_level_node.getInt(1));
             }
             level = level_node.getInt(1);
