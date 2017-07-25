@@ -155,7 +155,7 @@ public class FirstGuiOpenManager extends OpenManager {
                 for (int i = 0; i < 10; i++) {
                     ordered.getSlot(new SlotIndex(i)).get().set(ItemStack.of(ItemTypes.NONE, 1));
                 }
-                for (int i = 17; i < 17; i++) {
+                for (int i = 17; i < 27; i++) {
                     ordered.getSlot(new SlotIndex(i)).get().set(ItemStack.of(ItemTypes.NONE, 1));
                 }
             }
@@ -236,4 +236,88 @@ public class FirstGuiOpenManager extends OpenManager {
     public void setForbidClose(boolean forbid_close) {
         this.forbid_close = forbid_close;
     }
+
+    /*private static abstract class DecorativeDropChangeMode extends Thread {
+
+        private OrderedInventory inventory;
+        private List<ItemStack> decorative_items;
+
+        public DecorativeDropChangeMode(OrderedInventory inventory, List<ItemStack> decorative_items) {
+            this.inventory = inventory;
+            this.decorative_items = new ArrayList(decorative_items);
+        }
+
+        protected abstract void shuffle();
+
+        @Override
+        public void run() {
+            shuffle();
+            for (int i = 0; i < 10; i++) {
+                inventory.getSlot(new SlotIndex(i)).get().set(decorative_items.get(i));
+            }
+            for (int i = 17; i < 27; i++) {
+                inventory.getSlot(new SlotIndex(i)).get().set(decorative_items.get(i - 7));
+            }
+        }
+
+        public OrderedInventory getInventory() {
+            return inventory;
+        }
+
+        public List<ItemStack> getDecorativeItems() {
+            return decorative_items;
+        }
+    }
+
+    private static class RandomChangeRunnable extends DecorativeDropChangeMode {
+
+        public RandomChangeRunnable(OrderedInventory inventory, List<ItemStack> decorative_items) {
+            super(inventory, decorative_items);
+        }
+
+        @Override
+        protected void shuffle() {
+            Collections.shuffle(getDecorativeItems());
+        }
+    }
+
+    private static class NextChangeRunnable extends DecorativeDropChangeMode {
+
+        public NextChangeRunnable(OrderedInventory inventory, List<ItemStack> decorative_items) {
+            super(inventory, decorative_items);
+        }
+
+        @Override
+        protected void shuffle() {
+            List<ItemStack> list = getDecorativeItems();
+            ItemStack previous = list.get(0);
+            ItemStack temp;
+            list.set(0, list.get(list.size() - 1));
+            for (int i = 1 ; i < list.size(); i++) {
+                temp = previous;
+                previous = list.get(i);
+                list.set(i, temp);
+            }
+        }
+    }
+
+    private static class PreviousChangeRunnable extends DecorativeDropChangeMode {
+
+        public PreviousChangeRunnable(OrderedInventory inventory, List<ItemStack> decorative_items) {
+            super(inventory, decorative_items);
+        }
+
+        @Override
+        protected void shuffle() {
+            List<ItemStack> list = getDecorativeItems();
+            ItemStack previous = list.get(list.size() - 1);
+            ItemStack temp;
+            list.set(list.size() - 1, list.get(0));
+            for (int i = list.size() - 2 ; i > -1; i--) {
+                temp = previous;
+                previous = list.get(i);
+                list.set(i, temp);
+            }
+        }
+    }*/
 }
