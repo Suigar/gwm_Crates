@@ -63,7 +63,7 @@ public class SecondGuiOpenManagerListener {
                             }
                         }).submit(GWMCrates.getInstance());
                     }
-                    drop.apply(player);
+                    Sponge.getScheduler().createTaskBuilder().delayTicks(1).execute(() -> drop.apply(player)).submit(GWMCrates.getInstance());
                     open_manager.getClickSound().ifPresent(click_sound -> player.playSound(click_sound, player.getLocation().getPosition(), 1.));
                     PlayerOpenedCrateEvent opened_event = new PlayerOpenedCrateEvent(player, manager,
                             LanguageUtils.getText("SUCCESSFULLY_OPENED_MANAGER",
