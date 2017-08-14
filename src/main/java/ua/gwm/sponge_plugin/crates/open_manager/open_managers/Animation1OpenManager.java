@@ -71,7 +71,7 @@ public class Animation1OpenManager extends OpenManager {
                 }
                 String open_manager_type = open_manager_type_node.getString();
                 if (!GWMCrates.getInstance().getOpenManagers().containsKey(open_manager_type)) {
-                    throw new RuntimeException("Open Manager entity_type \"" + open_manager_type + "\" not found!");
+                    throw new RuntimeException("Open Manager type \"" + open_manager_type + "\" not found!");
                 }
                 try {
                     Class<? extends OpenManager> open_manager_class = GWMCrates.getInstance().getOpenManagers().get(open_manager_type);

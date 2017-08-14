@@ -23,15 +23,16 @@ public class Config {
     public Config(String name, boolean auto_save) {
         this.name = name;
         try {
-            file = new File(GWMCrates.getInstance().getConfigDirectory(), getName());
-            loader = HoconConfigurationLoader.builder().setFile(getFile()).build();
-            node = getLoader().load();
+            file = new File(GWMCrates.getInstance().getConfigDirectory(), name);
+            loader = HoconConfigurationLoader.builder().setFile(file).build();
+            node = loader.load();
             if (!file.exists()) {
                 file.createNewFile();
                 URL defaultsURL = GWMCrates.class.getResource("/" + name);
-                ConfigurationLoader<CommentedConfigurationNode> defaultsLoader = HoconConfigurationLoader.builder().setURL(defaultsURL).build();
+                ConfigurationLoader<CommentedConfigurationNode> defaultsLoader =
+                        HoconConfigurationLoader.builder().setURL(defaultsURL).build();
                 ConfigurationNode defaultsNode = defaultsLoader.load();
-                getNode().mergeValuesFrom(defaultsNode);
+                node.mergeValuesFrom(defaultsNode);
                 Sponge.getScheduler().createTaskBuilder().delayTicks(1).execute(this::save).
                         submit(GWMCrates.getInstance());
             }
@@ -66,7 +67,7 @@ public class Config {
 
     public void save() {
         try {
-            getLoader().save(getNode());
+            loader.save(node);
             if (GWMCrates.getInstance().isDebugEnabled()) {
                 GWMCrates.getInstance().getLogger().info("Config \"" + name + "\" successfully saved!");
             }
@@ -77,7 +78,7 @@ public class Config {
 
     public void reload() {
         try {
-            node = getLoader().load();
+            node = loader.load();
             if (GWMCrates.getInstance().isDebugEnabled()) {
                 GWMCrates.getInstance().getLogger().info("Config \"" + name + "\" successfully reloaded!");
             }

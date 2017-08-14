@@ -24,6 +24,7 @@ import ua.gwm.sponge_plugin.crates.util.Pair;
 import java.util.HashSet;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.concurrent.TimeUnit;
 
 public class SecondGuiOpenManagerListener {
 
@@ -63,7 +64,7 @@ public class SecondGuiOpenManagerListener {
                             }
                         }).submit(GWMCrates.getInstance());
                     }
-                    Sponge.getScheduler().createTaskBuilder().delayTicks(1).execute(() -> drop.apply(player)).submit(GWMCrates.getInstance());
+                    Sponge.getScheduler().createTaskBuilder().delay(1, TimeUnit.SECONDS).execute(() -> drop.apply(player)).submit(GWMCrates.getInstance());
                     open_manager.getClickSound().ifPresent(click_sound -> player.playSound(click_sound, player.getLocation().getPosition(), 1.));
                     PlayerOpenedCrateEvent opened_event = new PlayerOpenedCrateEvent(player, manager,
                             LanguageUtils.getText("SUCCESSFULLY_OPENED_MANAGER",

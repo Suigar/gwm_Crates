@@ -6,7 +6,7 @@
 
     <groupId>ua.gwm.sponge_plugin</groupId>
     <artifactId>crates</artifactId>
-    <version>1.43</version>
+    <version>1.5</version>
 
     <repositories>
         <repository>
@@ -19,6 +19,11 @@
         <dependency>
             <groupId>org.spongepowered</groupId>
             <artifactId>spongeapi</artifactId>
+            <version>LATEST</version>
+        </dependency>
+        <dependency>
+            <groupId>com.google.code.gson</groupId>
+            <artifactId>gson</artifactId>
             <version>LATEST</version>
         </dependency>
     </dependencies>

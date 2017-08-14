@@ -34,10 +34,10 @@ public class GWMCratesUtils {
 
     public static int getRandomIntLevel(int min, int max) {
         Random random = new Random();
-        while (random.nextBoolean()) {
+        while (random.nextBoolean() && min < max) {
             min++;
         }
-        return min > max ? max : min;
+        return min;
     }
 
     public static Location<World> parseLocation(ConfigurationNode node) {

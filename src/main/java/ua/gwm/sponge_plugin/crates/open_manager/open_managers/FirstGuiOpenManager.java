@@ -21,10 +21,12 @@ import ua.gwm.sponge_plugin.crates.event.PlayerOpenCrateEvent;
 import ua.gwm.sponge_plugin.crates.event.PlayerOpenedCrateEvent;
 import ua.gwm.sponge_plugin.crates.manager.Manager;
 import ua.gwm.sponge_plugin.crates.open_manager.OpenManager;
+import ua.gwm.sponge_plugin.crates.open_manager.open_managers.first_gui_decorative_items_change_mode.FirstGuiDecorativeItemsChangeMode;
 import ua.gwm.sponge_plugin.crates.util.GWMCratesUtils;
 import ua.gwm.sponge_plugin.crates.util.LanguageUtils;
 import ua.gwm.sponge_plugin.crates.util.Pair;
 
+import java.lang.reflect.Constructor;
 import java.util.*;
 
 public class FirstGuiOpenManager extends OpenManager {
@@ -41,6 +43,7 @@ public class FirstGuiOpenManager extends OpenManager {
     private boolean forbid_close;
     private Optional<SoundType> scroll_sound = Optional.empty();
     private Optional<SoundType> win_sound = Optional.empty();
+    private Optional<FirstGuiDecorativeItemsChangeMode> decorative_items_change_mode = Optional.empty();
 
     public FirstGuiOpenManager(ConfigurationNode node) {
         super(node);
@@ -54,6 +57,7 @@ public class FirstGuiOpenManager extends OpenManager {
             ConfigurationNode forbid_close_node = node.getNode("FORBID_CLOSE");
             ConfigurationNode scroll_sound_node = node.getNode("SCROLL_SOUND");
             ConfigurationNode win_sound_node = node.getNode("WIN_SOUND");
+            ConfigurationNode decorative_items_change_mode_node = node.getNode("DECORATIVE_ITEMS_CHANGE_MODE");
             if (!display_name_node.isVirtual()) {
                 display_name = Optional.of(TextSerializers.FORMATTING_CODE.deserialize(display_name_node.getString()));
             }
@@ -84,6 +88,23 @@ public class FirstGuiOpenManager extends OpenManager {
             if (!win_sound_node.isVirtual()) {
                 win_sound = Optional.of(win_sound_node.getValue(TypeToken.of(SoundType.class)));
             }
+            if (!decorative_items_change_mode_node.isVirtual()) {
+                ConfigurationNode decorative_items_change_mode_type_node = decorative_items_change_mode_node.getNode("TYPE");
+                if (decorative_items_change_mode_type_node.isVirtual()) {
+                    throw new RuntimeException("TYPE node for First Gui Decorative Items Change Mode does not exist!");
+                }
+                String first_gui_decorative_items_change_mode_type = decorative_items_change_mode_type_node.getString();
+                if (!GWMCrates.getInstance().getFirstGuiDecorativeItemsChangeModes().containsKey(first_gui_decorative_items_change_mode_type)) {
+                    throw new RuntimeException("First Gui Decorative Items Change Mode type \"" + first_gui_decorative_items_change_mode_type + "\" not found!");
+                }
+                try {
+                    Class<? extends FirstGuiDecorativeItemsChangeMode> first_gui_decorative_items_change_mode_class = GWMCrates.getInstance().getFirstGuiDecorativeItemsChangeModes().get(first_gui_decorative_items_change_mode_type);
+                    Constructor<? extends FirstGuiDecorativeItemsChangeMode> first_gui_decorative_items_change_mode_constructor = first_gui_decorative_items_change_mode_class.getConstructor(ConfigurationNode.class);
+                    decorative_items_change_mode = Optional.of(first_gui_decorative_items_change_mode_constructor.newInstance(decorative_items_change_mode_node));
+                } catch (Exception e) {
+                    throw new RuntimeException("Exception creating First Gui Decorative Items Change Mode!", e);
+                }
+            }
         } catch (Exception e) {
             throw new RuntimeException("Exception creating First Gui Open Manager!", e);
         }
@@ -93,7 +114,7 @@ public class FirstGuiOpenManager extends OpenManager {
                                List<ItemStack> decorative_items, List<Integer> scroll_delays,
                                boolean clear_decorative_items, boolean clear_other_drops,
                                int close_delay, Optional<SoundType> scroll_sound,
-                               Optional<SoundType> win_sound) {
+                               Optional<SoundType> win_sound, Optional<FirstGuiDecorativeItemsChangeMode> decorative_items_change_mode) {
         super(open_sound);
         this.display_name = display_name;
         if (decorative_items.size() != 20) {
@@ -106,6 +127,7 @@ public class FirstGuiOpenManager extends OpenManager {
         this.close_delay = close_delay;
         this.scroll_sound = scroll_sound;
         this.win_sound = win_sound;
+        this.decorative_items_change_mode = decorative_items_change_mode;
     }
 
     @Override
@@ -133,6 +155,10 @@ public class FirstGuiOpenManager extends OpenManager {
         Container container = player.openInventory(inventory, GWMCrates.getInstance().getDefaultCause()).get();
         getOpenSound().ifPresent(open_sound -> player.playSound(open_sound, player.getLocation().getPosition(), 1.));
         FIRST_GUI_CONTAINERS.put(container, new Pair<FirstGuiOpenManager, Manager>(this, manager));
+        decorative_items_change_mode.ifPresent(mode -> Sponge.getScheduler().
+                    createTaskBuilder().delayTicks(mode.getChangeDelay()).
+                    execute(new DropChangeRunnable(player, container, ordered, new ArrayList<ItemStack>(decorative_items), mode)).
+                    submit(GWMCrates.getInstance()));
         int wait_time = 0;
         for (int i = 0; i < scroll_delays.size() - 1; i++) {
             wait_time += scroll_delays.get(i);
@@ -237,87 +263,39 @@ public class FirstGuiOpenManager extends OpenManager {
         this.forbid_close = forbid_close;
     }
 
-    /*private static abstract class DecorativeDropChangeMode extends Thread {
+    public static class DropChangeRunnable implements Runnable {
 
-        private OrderedInventory inventory;
+        private Player player;
+        private Container container;
+        private OrderedInventory ordered;
         private List<ItemStack> decorative_items;
+        private FirstGuiDecorativeItemsChangeMode decorative_items_change_mode;
 
-        public DecorativeDropChangeMode(OrderedInventory inventory, List<ItemStack> decorative_items) {
-            this.inventory = inventory;
-            this.decorative_items = new ArrayList(decorative_items);
+        public DropChangeRunnable(Player player, Container container, OrderedInventory ordered,
+                                  List<ItemStack> decorative_items,
+                                  FirstGuiDecorativeItemsChangeMode decorative_items_change_mode) {
+            this.player = player;
+            this.container = container;
+            this.ordered = ordered;
+            this.decorative_items = decorative_items;
+            this.decorative_items_change_mode = decorative_items_change_mode;
         }
-
-        protected abstract void shuffle();
 
         @Override
         public void run() {
-            shuffle();
-            for (int i = 0; i < 10; i++) {
-                inventory.getSlot(new SlotIndex(i)).get().set(decorative_items.get(i));
-            }
-            for (int i = 17; i < 27; i++) {
-                inventory.getSlot(new SlotIndex(i)).get().set(decorative_items.get(i - 7));
-            }
-        }
-
-        public OrderedInventory getInventory() {
-            return inventory;
-        }
-
-        public List<ItemStack> getDecorativeItems() {
-            return decorative_items;
-        }
-    }
-
-    private static class RandomChangeRunnable extends DecorativeDropChangeMode {
-
-        public RandomChangeRunnable(OrderedInventory inventory, List<ItemStack> decorative_items) {
-            super(inventory, decorative_items);
-        }
-
-        @Override
-        protected void shuffle() {
-            Collections.shuffle(getDecorativeItems());
-        }
-    }
-
-    private static class NextChangeRunnable extends DecorativeDropChangeMode {
-
-        public NextChangeRunnable(OrderedInventory inventory, List<ItemStack> decorative_items) {
-            super(inventory, decorative_items);
-        }
-
-        @Override
-        protected void shuffle() {
-            List<ItemStack> list = getDecorativeItems();
-            ItemStack previous = list.get(0);
-            ItemStack temp;
-            list.set(0, list.get(list.size() - 1));
-            for (int i = 1 ; i < list.size(); i++) {
-                temp = previous;
-                previous = list.get(i);
-                list.set(i, temp);
+            Optional<Container> open_inventory = player.getOpenInventory();
+            if (open_inventory.isPresent() && open_inventory.get().equals(container)) {
+                decorative_items = decorative_items_change_mode.shuffle(decorative_items);
+                for (int i = 0; i < 10; i++) {
+                    ordered.getSlot(new SlotIndex(i)).get().set(decorative_items.get(i));
+                }
+                for (int i = 17; i < 27; i++) {
+                    ordered.getSlot(new SlotIndex(i)).get().set(decorative_items.get(i - 7));
+                }
+                Sponge.getScheduler().createTaskBuilder().
+                        delayTicks(decorative_items_change_mode.getChangeDelay()).
+                        execute(this).submit(GWMCrates.getInstance());
             }
         }
     }
-
-    private static class PreviousChangeRunnable extends DecorativeDropChangeMode {
-
-        public PreviousChangeRunnable(OrderedInventory inventory, List<ItemStack> decorative_items) {
-            super(inventory, decorative_items);
-        }
-
-        @Override
-        protected void shuffle() {
-            List<ItemStack> list = getDecorativeItems();
-            ItemStack previous = list.get(list.size() - 1);
-            ItemStack temp;
-            list.set(list.size() - 1, list.get(0));
-            for (int i = list.size() - 2 ; i > -1; i--) {
-                temp = previous;
-                previous = list.get(i);
-                list.set(i, temp);
-            }
-        }
-    }*/
 }

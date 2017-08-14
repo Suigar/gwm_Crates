@@ -37,7 +37,7 @@ public class MultiDrop extends Drop {
                     Drop drop = drop_constructor.newInstance(drop_node);
                     drops.add(drop);
                 } catch (Exception e) {
-                    throw new RuntimeException("Exception creating drop (part of Multi Drop)!", e);
+                    throw new RuntimeException("Exception creating Drop (part of Multi Drop)!", e);
                 }
             }
         } catch (Exception e) {

@@ -1,5 +1,7 @@
 package ua.gwm.sponge_plugin.crates;
 
+import com.google.gson.Gson;
+import com.google.gson.JsonObject;
 import com.google.inject.Inject;
 import ninja.leaping.configurate.ConfigurationNode;
 import ninja.leaping.configurate.commented.CommentedConfigurationNode;
@@ -27,10 +29,7 @@ import ua.gwm.sponge_plugin.crates.drop.drops.MultiDrop;
 import ua.gwm.sponge_plugin.crates.event.GWMCratesRegistrationEvent;
 import ua.gwm.sponge_plugin.crates.hologram.Hologram;
 import ua.gwm.sponge_plugin.crates.key.Key;
-import ua.gwm.sponge_plugin.crates.key.keys.EmptyKey;
-import ua.gwm.sponge_plugin.crates.key.keys.ItemKey;
-import ua.gwm.sponge_plugin.crates.key.keys.TimedKey;
-import ua.gwm.sponge_plugin.crates.key.keys.VirtualKey;
+import ua.gwm.sponge_plugin.crates.key.keys.*;
 import ua.gwm.sponge_plugin.crates.listener.*;
 import ua.gwm.sponge_plugin.crates.manager.Manager;
 import ua.gwm.sponge_plugin.crates.open_manager.OpenManager;
@@ -38,18 +37,23 @@ import ua.gwm.sponge_plugin.crates.open_manager.open_managers.Animation1OpenMana
 import ua.gwm.sponge_plugin.crates.open_manager.open_managers.FirstGuiOpenManager;
 import ua.gwm.sponge_plugin.crates.open_manager.open_managers.NoGuiOpenManager;
 import ua.gwm.sponge_plugin.crates.open_manager.open_managers.SecondGuiOpenManager;
+import ua.gwm.sponge_plugin.crates.open_manager.open_managers.first_gui_decorative_items_change_mode.FirstGuiDecorativeItemsChangeMode;
+import ua.gwm.sponge_plugin.crates.open_manager.open_managers.first_gui_decorative_items_change_mode.first_gui_decorative_items_change_modes.OrderedChangeMode;
+import ua.gwm.sponge_plugin.crates.open_manager.open_managers.first_gui_decorative_items_change_mode.first_gui_decorative_items_change_modes.RandomChangeMode;
 import ua.gwm.sponge_plugin.crates.preview.Preview;
 import ua.gwm.sponge_plugin.crates.preview.previews.FirstGuiPreview;
 import ua.gwm.sponge_plugin.crates.preview.previews.SecondGuiPreview;
 import ua.gwm.sponge_plugin.crates.util.Config;
 
 import java.io.File;
+import java.io.InputStreamReader;
+import java.net.URL;
 import java.util.*;
 
 @Plugin(
         id = "gwm_crates",
         name = "GWMCrates",
-        version = "1.43",
+        version = "1.5",
         description = "Universal crates plugin for your server!",
         authors = {"GWM"/*
                 Nazar Kalinovskiy
@@ -63,6 +67,8 @@ public class GWMCrates {
 
     public static final UUID PLUGIN_UUID = UUID.nameUUIDFromBytes(new byte[]
             {'G', 'W', 'M', 'C', 'r', 'a', 't', 'e', 's'});
+
+    public static final double CURRENT_VERSION = 1.5;
 
     private static GWMCrates instance;
 
@@ -91,6 +97,7 @@ public class GWMCrates {
     private HashMap<String, Class<? extends Drop>> drops = new HashMap<String, Class<? extends Drop>>();
     private HashMap<String, Class<? extends OpenManager>> open_managers = new HashMap<String, Class<? extends OpenManager>>();
     private HashMap<String, Class<? extends Preview>> previews = new HashMap<String, Class<? extends Preview>>();
+    private HashMap<String, Class<? extends FirstGuiDecorativeItemsChangeMode>> first_gui_decorative_items_change_modes = new HashMap<String, Class<? extends FirstGuiDecorativeItemsChangeMode>>();
 
     private HashSet<Manager> created_managers = new HashSet<Manager>();
 
@@ -128,6 +135,7 @@ public class GWMCrates {
             }
         }
         default_cause = Cause.of(NamedCause.of("root", plugin_container));
+        checkForUpdates();
         config = new Config("config.conf", false);
         language_config = new Config("language.conf", false);
         virtual_cases_config = new Config("virtual_cases.conf", true);
@@ -209,10 +217,12 @@ public class GWMCrates {
         open_managers.clear();
         drops.clear();
         previews.clear();
+        first_gui_decorative_items_change_modes.clear();
         register();
         optional_economy_service = Optional.empty();
         loadEconomy();
         createManagers();
+        checkForUpdates();
         logger.info("Plugin has been reloaded.");
     }
 
@@ -225,6 +235,8 @@ public class GWMCrates {
         registration_event.getCases().put("TIMED", TimedCase.class);
         registration_event.getCases().put("EMPTY", EmptyCase.class);
         registration_event.getKeys().put("ITEM", ItemKey.class);
+        registration_event.getKeys().put("MULTI", MultiKey.class);
+        registration_event.getKeys().put("MULTIPLE-AMOUNT", MultipleAmountKey.class);
         registration_event.getKeys().put("VIRTUAL", VirtualKey.class);
         registration_event.getKeys().put("TIMED", TimedKey.class);
         registration_event.getKeys().put("EMPTY", EmptyKey.class);
@@ -237,6 +249,8 @@ public class GWMCrates {
         registration_event.getOpenManagers().put("ANIMATION1", Animation1OpenManager.class);
         registration_event.getPreviews().put("FIRST", FirstGuiPreview.class);
         registration_event.getPreviews().put("SECOND", SecondGuiPreview.class);
+        registration_event.getFirstGuiDecorativeItemsChangeModes().put("RANDOM", RandomChangeMode.class);
+        registration_event.getFirstGuiDecorativeItemsChangeModes().put("ORDERED", OrderedChangeMode.class);
         Sponge.getEventManager().post(registration_event);
         for (Map.Entry<String, Class<? extends Case>> entry : registration_event.getCases().entrySet()) {
             String name = entry.getKey();
@@ -293,6 +307,17 @@ public class GWMCrates {
                 logger.info("Successfully added Preview type " + name + " (" + class_name + ".class)!");
             }
         }
+        for (Map.Entry<String, Class<? extends FirstGuiDecorativeItemsChangeMode>> entry : registration_event.getFirstGuiDecorativeItemsChangeModes().entrySet()) {
+            String name = entry.getKey();
+            Class<? extends FirstGuiDecorativeItemsChangeMode> first_gui_decorative_items_chande_mode_class = entry.getValue();
+            String class_name = first_gui_decorative_items_chande_mode_class.getSimpleName();
+            if (first_gui_decorative_items_change_modes.containsKey(name)) {
+                logger.warn("Trying to add First Gui Decorative Items Change Mode type " + name + " (" + class_name + ".class) which already exist!");
+            } else {
+                first_gui_decorative_items_change_modes.put(name, first_gui_decorative_items_chande_mode_class);
+                logger.info("Successfully added First Gui Decorative Items Change Mode type " + name + " (" + class_name + ".class)!");
+            }
+        }
         logger.info("Registration complete!");
     }
 
@@ -324,6 +349,21 @@ public class GWMCrates {
         } else {
             logger.info("Economy Service does not found!");
         }
+    }
+
+    private void checkForUpdates() {
+        Sponge.getScheduler().createTaskBuilder().async().execute(() -> {
+            try {
+                InputStreamReader reader = new InputStreamReader(new URL("https://ore.spongepowered.org/api/projects/gwm_crates").openStream());
+                JsonObject object = new Gson().fromJson(reader, JsonObject.class);
+                double version = object.get("recommended").getAsJsonObject().get("name").getAsJsonPrimitive().getAsDouble();
+                if (version > CURRENT_VERSION) {
+                    logger.warn("New version (" + version + ") available on Ore!");
+                }
+            } catch (Exception e) {
+                logger.warn("Exception checking plugin updates on Ore!", e);
+            }
+        }).submit(this);
     }
 
     public Optional<Manager> getManagerById(String manager_id) {
@@ -375,6 +415,10 @@ public class GWMCrates {
         return previews;
     }
 
+    public HashMap<String, Class<? extends FirstGuiDecorativeItemsChangeMode>> getFirstGuiDecorativeItemsChangeModes() {
+        return first_gui_decorative_items_change_modes;
+    }
+
     public HashSet<Manager> getCreatedManagers() {
         return created_managers;
     }
@@ -404,6 +448,6 @@ public class GWMCrates {
     }
 
     public boolean isDebugEnabled() {
-        return config.getNode("DEBUG").getBoolean(true);
+        return config.getNode("DEBUG").getBoolean(false);
     }
 }
