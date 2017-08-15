@@ -7,7 +7,7 @@ import ua.gwm.sponge_plugin.crates.caze.Case;
 import ua.gwm.sponge_plugin.crates.drop.Drop;
 import ua.gwm.sponge_plugin.crates.key.Key;
 import ua.gwm.sponge_plugin.crates.open_manager.OpenManager;
-import ua.gwm.sponge_plugin.crates.open_manager.open_managers.first_gui_decorative_items_change_mode.FirstGuiDecorativeItemsChangeMode;
+import ua.gwm.sponge_plugin.crates.decorative_items_change_mode.DecorativeItemsChangeMode;
 import ua.gwm.sponge_plugin.crates.preview.Preview;
 
 import java.util.HashMap;
@@ -19,7 +19,7 @@ public class GWMCratesRegistrationEvent implements Event {
     private HashMap<String, Class<? extends Drop>> drops = new HashMap<String, Class<? extends Drop>>();
     private HashMap<String, Class<? extends OpenManager>> open_managers = new HashMap<String, Class<? extends OpenManager>>();
     private HashMap<String, Class<? extends Preview>> previews = new HashMap<String, Class<? extends Preview>>();
-    private HashMap<String, Class<? extends FirstGuiDecorativeItemsChangeMode>> first_gui_decorative_items_change_modes = new HashMap<String, Class<? extends FirstGuiDecorativeItemsChangeMode>>();
+    private HashMap<String, Class<? extends DecorativeItemsChangeMode>> decorative_items_change_modes = new HashMap<String, Class<? extends DecorativeItemsChangeMode>>();
 
     @Override
     public Cause getCause() {
@@ -46,7 +46,7 @@ public class GWMCratesRegistrationEvent implements Event {
         return previews;
     }
 
-    public HashMap<String, Class<? extends FirstGuiDecorativeItemsChangeMode>> getFirstGuiDecorativeItemsChangeModes() {
-        return first_gui_decorative_items_change_modes;
+    public HashMap<String, Class<? extends DecorativeItemsChangeMode>> getDecorativeItemsChangeModes() {
+        return decorative_items_change_modes;
     }
 }

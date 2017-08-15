@@ -37,9 +37,9 @@ import ua.gwm.sponge_plugin.crates.open_manager.open_managers.Animation1OpenMana
 import ua.gwm.sponge_plugin.crates.open_manager.open_managers.FirstGuiOpenManager;
 import ua.gwm.sponge_plugin.crates.open_manager.open_managers.NoGuiOpenManager;
 import ua.gwm.sponge_plugin.crates.open_manager.open_managers.SecondGuiOpenManager;
-import ua.gwm.sponge_plugin.crates.open_manager.open_managers.first_gui_decorative_items_change_mode.FirstGuiDecorativeItemsChangeMode;
-import ua.gwm.sponge_plugin.crates.open_manager.open_managers.first_gui_decorative_items_change_mode.first_gui_decorative_items_change_modes.OrderedChangeMode;
-import ua.gwm.sponge_plugin.crates.open_manager.open_managers.first_gui_decorative_items_change_mode.first_gui_decorative_items_change_modes.RandomChangeMode;
+import ua.gwm.sponge_plugin.crates.decorative_items_change_mode.DecorativeItemsChangeMode;
+import ua.gwm.sponge_plugin.crates.decorative_items_change_mode.decorative_items_change_modes.OrderedChangeMode;
+import ua.gwm.sponge_plugin.crates.decorative_items_change_mode.decorative_items_change_modes.RandomChangeMode;
 import ua.gwm.sponge_plugin.crates.preview.Preview;
 import ua.gwm.sponge_plugin.crates.preview.previews.FirstGuiPreview;
 import ua.gwm.sponge_plugin.crates.preview.previews.SecondGuiPreview;
@@ -53,7 +53,7 @@ import java.util.*;
 @Plugin(
         id = "gwm_crates",
         name = "GWMCrates",
-        version = "1.5",
+        version = "1.51",
         description = "Universal crates plugin for your server!",
         authors = {"GWM"/*
                 Nazar Kalinovskiy
@@ -68,7 +68,7 @@ public class GWMCrates {
     public static final UUID PLUGIN_UUID = UUID.nameUUIDFromBytes(new byte[]
             {'G', 'W', 'M', 'C', 'r', 'a', 't', 'e', 's'});
 
-    public static final double CURRENT_VERSION = 1.5;
+    public static final double CURRENT_VERSION = 1.51;
 
     private static GWMCrates instance;
 
@@ -97,7 +97,7 @@ public class GWMCrates {
     private HashMap<String, Class<? extends Drop>> drops = new HashMap<String, Class<? extends Drop>>();
     private HashMap<String, Class<? extends OpenManager>> open_managers = new HashMap<String, Class<? extends OpenManager>>();
     private HashMap<String, Class<? extends Preview>> previews = new HashMap<String, Class<? extends Preview>>();
-    private HashMap<String, Class<? extends FirstGuiDecorativeItemsChangeMode>> first_gui_decorative_items_change_modes = new HashMap<String, Class<? extends FirstGuiDecorativeItemsChangeMode>>();
+    private HashMap<String, Class<? extends DecorativeItemsChangeMode>> decorative_items_change_modes = new HashMap<String, Class<? extends DecorativeItemsChangeMode>>();
 
     private HashSet<Manager> created_managers = new HashSet<Manager>();
 
@@ -217,7 +217,7 @@ public class GWMCrates {
         open_managers.clear();
         drops.clear();
         previews.clear();
-        first_gui_decorative_items_change_modes.clear();
+        decorative_items_change_modes.clear();
         register();
         optional_economy_service = Optional.empty();
         loadEconomy();
@@ -249,8 +249,8 @@ public class GWMCrates {
         registration_event.getOpenManagers().put("ANIMATION1", Animation1OpenManager.class);
         registration_event.getPreviews().put("FIRST", FirstGuiPreview.class);
         registration_event.getPreviews().put("SECOND", SecondGuiPreview.class);
-        registration_event.getFirstGuiDecorativeItemsChangeModes().put("RANDOM", RandomChangeMode.class);
-        registration_event.getFirstGuiDecorativeItemsChangeModes().put("ORDERED", OrderedChangeMode.class);
+        registration_event.getDecorativeItemsChangeModes().put("RANDOM", RandomChangeMode.class);
+        registration_event.getDecorativeItemsChangeModes().put("ORDERED", OrderedChangeMode.class);
         Sponge.getEventManager().post(registration_event);
         for (Map.Entry<String, Class<? extends Case>> entry : registration_event.getCases().entrySet()) {
             String name = entry.getKey();
@@ -307,15 +307,15 @@ public class GWMCrates {
                 logger.info("Successfully added Preview type " + name + " (" + class_name + ".class)!");
             }
         }
-        for (Map.Entry<String, Class<? extends FirstGuiDecorativeItemsChangeMode>> entry : registration_event.getFirstGuiDecorativeItemsChangeModes().entrySet()) {
+        for (Map.Entry<String, Class<? extends DecorativeItemsChangeMode>> entry : registration_event.getDecorativeItemsChangeModes().entrySet()) {
             String name = entry.getKey();
-            Class<? extends FirstGuiDecorativeItemsChangeMode> first_gui_decorative_items_chande_mode_class = entry.getValue();
-            String class_name = first_gui_decorative_items_chande_mode_class.getSimpleName();
-            if (first_gui_decorative_items_change_modes.containsKey(name)) {
-                logger.warn("Trying to add First Gui Decorative Items Change Mode type " + name + " (" + class_name + ".class) which already exist!");
+            Class<? extends DecorativeItemsChangeMode> decorative_items_change_mode_class = entry.getValue();
+            String class_name = decorative_items_change_mode_class.getSimpleName();
+            if (decorative_items_change_modes.containsKey(name)) {
+                logger.warn("Trying to add Decorative Items Change Mode type " + name + " (" + class_name + ".class) which already exist!");
             } else {
-                first_gui_decorative_items_change_modes.put(name, first_gui_decorative_items_chande_mode_class);
-                logger.info("Successfully added First Gui Decorative Items Change Mode type " + name + " (" + class_name + ".class)!");
+                decorative_items_change_modes.put(name, decorative_items_change_mode_class);
+                logger.info("Successfully added Decorative Items Change Mode type " + name + " (" + class_name + ".class)!");
             }
         }
         logger.info("Registration complete!");
@@ -415,8 +415,8 @@ public class GWMCrates {
         return previews;
     }
 
-    public HashMap<String, Class<? extends FirstGuiDecorativeItemsChangeMode>> getFirstGuiDecorativeItemsChangeModes() {
-        return first_gui_decorative_items_change_modes;
+    public HashMap<String, Class<? extends DecorativeItemsChangeMode>> getDecorativeItemsChangeModes() {
+        return decorative_items_change_modes;
     }
 
     public HashSet<Manager> getCreatedManagers() {

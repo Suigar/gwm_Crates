@@ -1,13 +1,13 @@
-package ua.gwm.sponge_plugin.crates.open_manager.open_managers.first_gui_decorative_items_change_mode.first_gui_decorative_items_change_modes;
+package ua.gwm.sponge_plugin.crates.decorative_items_change_mode.decorative_items_change_modes;
 
 import ninja.leaping.configurate.ConfigurationNode;
 import org.spongepowered.api.item.inventory.ItemStack;
-import ua.gwm.sponge_plugin.crates.open_manager.open_managers.first_gui_decorative_items_change_mode.FirstGuiDecorativeItemsChangeMode;
+import ua.gwm.sponge_plugin.crates.decorative_items_change_mode.DecorativeItemsChangeMode;
 
 import java.util.ArrayList;
 import java.util.List;
 
-public class OrderedChangeMode extends FirstGuiDecorativeItemsChangeMode {
+public class OrderedChangeMode extends DecorativeItemsChangeMode {
 
     private boolean right;
 
