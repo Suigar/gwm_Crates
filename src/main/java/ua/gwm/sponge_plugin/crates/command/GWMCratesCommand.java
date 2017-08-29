@@ -217,7 +217,7 @@ public class GWMCratesCommand implements CommandCallable {
                 }
                 EconomyService economy_service = optional_economy_service.get();
                 Optional<UniqueAccount> optional_player_account = economy_service.getOrCreateAccount(uuid);
-                if (!optional_economy_service.isPresent()) {
+                if (!optional_player_account.isPresent()) {
                     source.sendMessage(LanguageUtils.getText("ECONOMY_ACCOUNT_NOT_FOUND"));
                     return CommandResult.success();
                 }

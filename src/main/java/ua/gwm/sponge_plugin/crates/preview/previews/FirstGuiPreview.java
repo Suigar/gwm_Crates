@@ -98,7 +98,7 @@ public class FirstGuiPreview extends Preview {
         for (int i = 0; i < 10; i++) {
             ordered.getSlot(new SlotIndex(i)).get().set(decorative_items.get(i));
         }
-        List<Drop> drops = manager.getDrop();
+        List<Drop> drops = manager.getDrops();
         int index = 0;
         for (int i = 10; i < 17; i++) {
             if (index > drops.size() - 1) {

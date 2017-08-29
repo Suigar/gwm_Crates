@@ -29,7 +29,7 @@ public class NoGuiOpenManager extends OpenManager {
         PlayerOpenCrateEvent open_event = new PlayerOpenCrateEvent(player, manager);
         Sponge.getEventManager().post(open_event);
         if (open_event.isCancelled()) return;
-        Drop drop = manager.getRandomDrop();
+        Drop drop = manager.getDrop(player, false);
         drop.apply(player);
         getOpenSound().ifPresent(open_sound -> player.playSound(open_sound, player.getLocation().getPosition(), 1.));
         PlayerOpenedCrateEvent opened_event = new PlayerOpenedCrateEvent(player, manager,

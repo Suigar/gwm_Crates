@@ -1,6 +1,7 @@
 package ua.gwm.sponge_plugin.crates.manager;
 
 import ninja.leaping.configurate.ConfigurationNode;
+import org.spongepowered.api.entity.living.player.Player;
 import ua.gwm.sponge_plugin.crates.GWMCrates;
 import ua.gwm.sponge_plugin.crates.caze.Case;
 import ua.gwm.sponge_plugin.crates.drop.Drop;
@@ -147,74 +148,52 @@ public class Manager {
         this.preview = preview;
     }
 
-    public Drop getRandomDrop() {
-        int max_level = getMaxLevel();
-        Drop drop;
-        while ((drop = getDropByLevel(GWMCratesUtils.getRandomIntLevel(1, max_level))) == null) {
-        }
-        return drop;
-    }
-
-    private Drop getDropByLevel(int level) {
-        List<Drop> drop_with_level = new ArrayList<Drop>();
+    public Drop getDrop(Player player, boolean fake) {
+        Map<Integer, List<Drop>> sorted_drops = new HashMap<Integer, List<Drop>>();
         for (Drop drop : drops) {
-            if (drop.getLevel() == level) {
-                drop_with_level.add(drop);
+            boolean found_by_permission = false;
+            for (Map.Entry<String, Integer> entry : fake ?
+                    drop.getPermissionFakeLevels().entrySet() : drop.getPermissionLevels().entrySet()) {
+                String permission = entry.getKey();
+                int permission_level = entry.getValue();
+                if (player.hasPermission(permission)) {
+                    if (sorted_drops.containsKey(permission_level)) {
+                        sorted_drops.get(permission_level).add(drop);
+                        found_by_permission = true;
+                        break;
+                    } else {
+                        List<Drop> list = new ArrayList<Drop>();
+                        list.add(drop);
+                        sorted_drops.put(permission_level, list);
+                        found_by_permission = true;
+                        break;
+                    }
+                }
+            }
+            if (!found_by_permission) {
+                int level = fake ? drop.getFakeLevel().orElse(drop.getLevel()) : drop.getLevel();
+                if (sorted_drops.containsKey(level)) {
+                    sorted_drops.get(level).add(drop);
+                } else {
+                    List<Drop> list = new ArrayList<Drop>();
+                    list.add(drop);
+                    sorted_drops.put(level, list);
+                }
             }
         }
-        if (drop_with_level.size() == 0) {
-            return null;
-        } else if (drop_with_level.size() == 1) {
-            return drop_with_level.get(0);
-        } else {
-            return drop_with_level.get(new Random().nextInt(drop_with_level.size()));
-        }
-    }
-
-    private int getMaxLevel() {
-        int max = 1;
-        for (Drop drop : drops) {
-            int level = drop.getLevel();
-            if (level > max) {
-                max = level;
+        int max_level = 1;
+        for (int level : sorted_drops.keySet()) {
+            if (level > max_level) {
+                max_level = level;
             }
         }
-        return max;
-    }
-
-    public Drop getFakeRandomDrop() {
-        int max_level = getMaxFakeLevel();
-        Drop drop;
-        while ((drop = getFakeDropByLevel(GWMCratesUtils.getRandomIntLevel(1, max_level))) == null) {
-        }
-        return drop;
-    }
-
-    private Drop getFakeDropByLevel(int level) {
-        List<Drop> drop_with_level = new ArrayList<Drop>();
-        for (Drop drop : drops) {
-            if (drop.getFakeLevel().orElse(drop.getLevel()) == level) {
-                drop_with_level.add(drop);
+        while (true) {
+            int level = GWMCratesUtils.getRandomIntLevel(1, max_level);
+            if (sorted_drops.containsKey(level)) {
+                List<Drop> actual_drops = sorted_drops.get(level);
+                return actual_drops.get(new Random().nextInt(actual_drops.size()));
             }
         }
-        if (drop_with_level.size() == 0) {
-            return null;
-        } else if (drop_with_level.size() == 1) {
-            return drop_with_level.get(0);
-        } else {
-            return drop_with_level.get(new Random().nextInt(drop_with_level.size()));
-        }
-    }
-
-    private int getMaxFakeLevel() {
-        int max = 1;
-        for (Drop drop : drops) {
-            int level = drop.getFakeLevel().orElse(drop.getLevel());
-            if (level > max) {
-                max = level;
-            }
-        }
-        return max;
     }
 
     public Optional<Drop> getDropById(String id) {
@@ -250,11 +229,11 @@ public class Manager {
         this.key = key;
     }
 
-    public List<Drop> getDrop() {
+    public List<Drop> getDrops() {
         return drops;
     }
 
-    public void setDrop(List<Drop> drops) {
+    public void setDrops(List<Drop> drops) {
         this.drops = drops;
     }
 

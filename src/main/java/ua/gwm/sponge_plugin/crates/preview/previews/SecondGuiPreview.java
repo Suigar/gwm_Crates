@@ -50,7 +50,7 @@ public class SecondGuiPreview extends Preview {
 
     @Override
     public void preview(Player player, Manager manager) {
-        InventoryDimension dimension = new InventoryDimension(9, GWMCratesUtils.getInventoryHeight(manager.getDrop().size()));
+        InventoryDimension dimension = new InventoryDimension(9, GWMCratesUtils.getInventoryHeight(manager.getDrops().size()));
         Inventory inventory = display_name.map(text -> Inventory.builder().of(InventoryArchetypes.CHEST).
                 property(InventoryDimension.PROPERTY_NAME, dimension).
                 property(InventoryTitle.PROPERTY_NAME, new InventoryTitle(text)).
@@ -58,7 +58,7 @@ public class SecondGuiPreview extends Preview {
                 property(InventoryDimension.PROPERTY_NAME, dimension).
                 build(GWMCrates.getInstance()));
         OrderedInventory ordered = inventory.query(OrderedInventory.class);
-        Iterator<Drop> drop_iterator = manager.getDrop().iterator();
+        Iterator<Drop> drop_iterator = manager.getDrops().iterator();
         int size = 9 * dimension.getRows();
         for (int i = 0; i < size && drop_iterator.hasNext();) {
             Drop next = drop_iterator.next();
