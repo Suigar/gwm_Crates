@@ -148,54 +148,6 @@ public class Manager {
         this.preview = preview;
     }
 
-    public Drop getDrop(Player player, boolean fake) {
-        Map<Integer, List<Drop>> sorted_drops = new HashMap<Integer, List<Drop>>();
-        for (Drop drop : drops) {
-            boolean found_by_permission = false;
-            for (Map.Entry<String, Integer> entry : fake ?
-                    drop.getPermissionFakeLevels().entrySet() : drop.getPermissionLevels().entrySet()) {
-                String permission = entry.getKey();
-                int permission_level = entry.getValue();
-                if (player.hasPermission(permission)) {
-                    if (sorted_drops.containsKey(permission_level)) {
-                        sorted_drops.get(permission_level).add(drop);
-                        found_by_permission = true;
-                        break;
-                    } else {
-                        List<Drop> list = new ArrayList<Drop>();
-                        list.add(drop);
-                        sorted_drops.put(permission_level, list);
-                        found_by_permission = true;
-                        break;
-                    }
-                }
-            }
-            if (!found_by_permission) {
-                int level = fake ? drop.getFakeLevel().orElse(drop.getLevel()) : drop.getLevel();
-                if (sorted_drops.containsKey(level)) {
-                    sorted_drops.get(level).add(drop);
-                } else {
-                    List<Drop> list = new ArrayList<Drop>();
-                    list.add(drop);
-                    sorted_drops.put(level, list);
-                }
-            }
-        }
-        int max_level = 1;
-        for (int level : sorted_drops.keySet()) {
-            if (level > max_level) {
-                max_level = level;
-            }
-        }
-        while (true) {
-            int level = GWMCratesUtils.getRandomIntLevel(1, max_level);
-            if (sorted_drops.containsKey(level)) {
-                List<Drop> actual_drops = sorted_drops.get(level);
-                return actual_drops.get(new Random().nextInt(actual_drops.size()));
-            }
-        }
-    }
-
     public Optional<Drop> getDropById(String id) {
         for (Drop drop : drops) {
             if (drop.getId().isPresent() && drop.getId().get().equals(id)) {

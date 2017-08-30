@@ -50,7 +50,7 @@ public class SecondGuiOpenManagerListener {
                 Slot slot = transaction.getSlot();
                 if (GWMCratesUtils.isFirstInventory(container, slot)) {
                     SHOWN_GUI.add(container);
-                    Drop drop = manager.getDrop(player, false);
+                    Drop drop = GWMCratesUtils.chooseDropByLevel(manager.getDrops(), player, false);
                     ItemStack drop_item = drop.getDropItem().orElse(ItemStack.of(ItemTypes.NONE, 1));
                     Sponge.getScheduler().createTaskBuilder().delayTicks(1).execute(() -> slot.set(drop_item)).
                             submit(GWMCrates.getInstance());
@@ -59,7 +59,7 @@ public class SecondGuiOpenManagerListener {
                             for (Slot next : ordered.<Slot>slots()) {
                                 if (!Objects.equals(next.getProperty(SlotIndex.class, "slotindex").get().getValue(),
                                         slot.getProperty(SlotIndex.class, "slotindex").get().getValue())) {
-                                    next.set(manager.getDrop(player, true).getDropItem().orElse(ItemStack.of(ItemTypes.NONE, 1)));
+                                    next.set(GWMCratesUtils.chooseDropByLevel(manager.getDrops(), player, true).getDropItem().orElse(ItemStack.of(ItemTypes.NONE, 1)));
                                 }
                             }
                         }).submit(GWMCrates.getInstance());
@@ -99,7 +99,7 @@ public class SecondGuiOpenManagerListener {
             if (open_manager.isForbidClose()) {
                 event.setCancelled(true);
             } else if (open_manager.isGiveRandomOnClose()) {
-                manager.getDrop(player, false).apply(player);
+                GWMCratesUtils.chooseDropByLevel(manager.getDrops(), player, false).apply(player);
                 PlayerOpenedCrateEvent opened_event = new PlayerOpenedCrateEvent(player, manager,
                         LanguageUtils.getText("SUCCESSFULLY_OPENED_MANAGER",
                                 new Pair<String, String>("%MANAGER%", manager.getName())));

@@ -5,6 +5,7 @@ import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.item.inventory.ItemStack;
 import ua.gwm.sponge_plugin.crates.GWMCrates;
 import ua.gwm.sponge_plugin.crates.drop.Drop;
+import ua.gwm.sponge_plugin.crates.util.GWMCratesUtils;
 
 import java.lang.reflect.Constructor;
 import java.math.BigDecimal;
@@ -13,11 +14,13 @@ import java.util.*;
 public class MultiDrop extends Drop {
 
     private List<Drop> drops;
+    private boolean give_all = true;
 
     public MultiDrop(ConfigurationNode node) {
         super(node);
         try {
             ConfigurationNode drops_node = node.getNode("DROPS");
+            ConfigurationNode give_all_node = node.getNode("GIVE_ALL");
             if (drops_node.isVirtual()) {
                 throw new RuntimeException("DROPS node does not exist");
             }
@@ -40,20 +43,26 @@ public class MultiDrop extends Drop {
                     throw new RuntimeException("Exception creating Drop (part of Multi Drop)!", e);
                 }
             }
+            give_all = give_all_node.getBoolean(true);
         } catch (Exception e) {
             throw new RuntimeException("Exception creating Multi Drop!", e);
         }
     }
 
     public MultiDrop(Optional<String> id, Optional<BigDecimal> price, Optional<ItemStack> drop_item, int level,
-                     List<Drop> drops) {
+                     List<Drop> drops, boolean give_all) {
         super(id, price, drop_item, level);
         this.drops = drops;
+        this.give_all = give_all;
     }
 
     @Override
     public void apply(Player player) {
-        drops.forEach(drop -> drop.apply(player));
+        if (give_all) {
+            drops.forEach(drop -> drop.apply(player));
+        } else {
+            GWMCratesUtils.chooseDropByLevel(drops, player, false).apply(player);
+        }
     }
 
     public List<Drop> getDrops() {

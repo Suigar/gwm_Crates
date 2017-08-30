@@ -53,7 +53,7 @@ import java.util.*;
 @Plugin(
         id = "gwm_crates",
         name = "GWMCrates",
-        version = "1.6",
+        version = "1.61",
         description = "Universal crates plugin for your server!",
         authors = {"GWM"/*
                 Nazar Kalinovskiy
@@ -68,7 +68,7 @@ public class GWMCrates {
     public static final UUID PLUGIN_UUID = UUID.nameUUIDFromBytes(new byte[]
             {'G', 'W', 'M', 'C', 'r', 'a', 't', 'e', 's'});
 
-    public static final double CURRENT_VERSION = 1.6;
+    public static final double CURRENT_VERSION = 1.61;
 
     private static GWMCrates instance;
 

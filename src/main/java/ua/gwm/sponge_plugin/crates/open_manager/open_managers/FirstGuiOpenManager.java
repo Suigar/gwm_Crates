@@ -145,7 +145,7 @@ public class FirstGuiOpenManager extends OpenManager {
             ordered.getSlot(new SlotIndex(i)).get().set(decorative_items.get(i));
         }
         for (int i = 10; i < 17; i++) {
-            Drop new_drop = manager.getDrop(player, false);
+            Drop new_drop = GWMCratesUtils.chooseDropByLevel(manager.getDrops(), player, true);
             drop_list.add(new_drop);
             ordered.getSlot(new SlotIndex(i)).get().set(new_drop.getDropItem().orElse(ItemStack.of(ItemTypes.NONE, 1)));
         }
@@ -167,7 +167,7 @@ public class FirstGuiOpenManager extends OpenManager {
                 for (int j = 10; j < 16; j++) {
                     ordered.getSlot(new SlotIndex(j)).get().set(inventory.query(new SlotIndex(j + 1)).peek().orElse(ItemStack.of(ItemTypes.NONE, 1)));
                 }
-                Drop new_drop = manager.getDrop(player, !(finalI == scroll_delays.size() - 5));
+                Drop new_drop = GWMCratesUtils.chooseDropByLevel(manager.getDrops(), player, !(finalI == scroll_delays.size() - 5));
                 drop_list.add(new_drop);
                 ordered.getSlot(new SlotIndex(16)).get().set(new_drop.getDropItem().orElse(ItemStack.of(ItemTypes.NONE, 1)));
                 scroll_sound.ifPresent(sound -> player.playSound(sound, player.getLocation().getPosition(), 1.));
