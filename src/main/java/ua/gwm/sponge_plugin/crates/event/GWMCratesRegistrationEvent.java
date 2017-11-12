@@ -1,52 +1,32 @@
 package ua.gwm.sponge_plugin.crates.event;
 
-import org.spongepowered.api.event.Event;
 import org.spongepowered.api.event.cause.Cause;
+import org.spongepowered.api.event.impl.AbstractEvent;
 import ua.gwm.sponge_plugin.crates.GWMCrates;
-import ua.gwm.sponge_plugin.crates.caze.Case;
-import ua.gwm.sponge_plugin.crates.drop.Drop;
-import ua.gwm.sponge_plugin.crates.key.Key;
-import ua.gwm.sponge_plugin.crates.open_manager.OpenManager;
-import ua.gwm.sponge_plugin.crates.decorative_items_change_mode.DecorativeItemsChangeMode;
-import ua.gwm.sponge_plugin.crates.preview.Preview;
+import ua.gwm.sponge_plugin.crates.gui.configuration_dialog.ConfigurationDialog;
+import ua.gwm.sponge_plugin.crates.util.SuperObject;
+import ua.gwm.sponge_plugin.crates.util.SuperObjectStorage;
+import ua.gwm.sponge_plugin.crates.util.SuperObjectType;
 
-import java.util.HashMap;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.Optional;
+import java.util.Set;
 
-public class GWMCratesRegistrationEvent implements Event {
+public class GWMCratesRegistrationEvent extends AbstractEvent {
 
-    private HashMap<String, Class<? extends Case>> cases = new HashMap<String, Class<? extends Case>>();
-    private HashMap<String, Class<? extends Key>> keys = new HashMap<String, Class<? extends Key>>();
-    private HashMap<String, Class<? extends Drop>> drops = new HashMap<String, Class<? extends Drop>>();
-    private HashMap<String, Class<? extends OpenManager>> open_managers = new HashMap<String, Class<? extends OpenManager>>();
-    private HashMap<String, Class<? extends Preview>> previews = new HashMap<String, Class<? extends Preview>>();
-    private HashMap<String, Class<? extends DecorativeItemsChangeMode>> decorative_items_change_modes = new HashMap<String, Class<? extends DecorativeItemsChangeMode>>();
+    private final HashSet<SuperObjectStorage> super_object_storage =
+            new HashSet<SuperObjectStorage>();
 
+    public void register(SuperObjectType super_object_type, String type, Class<? extends SuperObject> super_object_class, Optional<Class<? extends ConfigurationDialog>> configuration_dialog) {
+        super_object_storage.add(new SuperObjectStorage(super_object_type, type, super_object_class, configuration_dialog));
+    }
     @Override
     public Cause getCause() {
         return GWMCrates.getInstance().getDefaultCause();
     }
 
-    public HashMap<String, Class<? extends Case>> getCases() {
-        return cases;
-    }
-
-    public HashMap<String, Class<? extends Key>> getKeys() {
-        return keys;
-    }
-
-    public HashMap<String, Class<? extends Drop>> getDrops() {
-        return drops;
-    }
-
-    public HashMap<String, Class<? extends OpenManager>> getOpenManagers() {
-        return open_managers;
-    }
-
-    public HashMap<String, Class<? extends Preview>> getPreviews() {
-        return previews;
-    }
-
-    public HashMap<String, Class<? extends DecorativeItemsChangeMode>> getDecorativeItemsChangeModes() {
-        return decorative_items_change_modes;
+    public Set<SuperObjectStorage> getSuperObjectStorage() {
+        return Collections.unmodifiableSet(super_object_storage);
     }
 }

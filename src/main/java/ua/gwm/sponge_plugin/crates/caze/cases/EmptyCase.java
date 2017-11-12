@@ -12,8 +12,8 @@ public class EmptyCase extends Case {
         super(node);
     }
 
-    public EmptyCase() {
-        super(Optional.empty());
+    public EmptyCase(Optional<String> id) {
+        super("EMPTY", id, Optional.empty());
     }
 
     @Override

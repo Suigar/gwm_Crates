@@ -31,8 +31,8 @@ public class TimedCase extends Case {
         }
     }
 
-    public TimedCase(Optional<BigDecimal> price, String virtual_name, long delay) {
-        super(price);
+    public TimedCase(Optional<BigDecimal> price, Optional<String> id, String virtual_name, long delay) {
+        super("TIMED", id, price);
         this.virtual_name = virtual_name;
         this.delay = delay;
     }

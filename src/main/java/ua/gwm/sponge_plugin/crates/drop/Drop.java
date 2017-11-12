@@ -4,40 +4,37 @@ import com.google.common.reflect.TypeToken;
 import ninja.leaping.configurate.ConfigurationNode;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.item.inventory.ItemStack;
-import ua.gwm.sponge_plugin.crates.util.GWMCratesUtils;
+import ua.gwm.sponge_plugin.crates.util.SuperObject;
+import ua.gwm.sponge_plugin.crates.util.Utils;
 
 import java.math.BigDecimal;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 
-public abstract class Drop {
+public abstract class Drop extends SuperObject {
 
-    private Optional<String> id = Optional.empty();
     private Optional<BigDecimal> price = Optional.empty();
+    private int level;
     private Optional<ItemStack> drop_item = Optional.empty();
     private Optional<Integer> fake_level = Optional.empty();
     private Map<String, Integer> permission_levels = new HashMap<String, Integer>();
     private Map<String, Integer> permission_fake_levels = new HashMap<String, Integer>();
-    private int level;
 
     public Drop(ConfigurationNode node) {
+        super(node);
         try {
-            ConfigurationNode id_node = node.getNode("ID");
             ConfigurationNode price_node = node.getNode("PRICE");
             ConfigurationNode drop_item_node = node.getNode("DROP_ITEM");
             ConfigurationNode fake_level_node = node.getNode("FAKE_LEVEL");
             ConfigurationNode level_node = node.getNode("LEVEL");
             ConfigurationNode permission_levels_node = node.getNode("PERMISSION_LEVELS");
             ConfigurationNode permission_fake_levels_node = node.getNode("PERMISSION_FAKE_LEVELS");
-            if (!id_node.isVirtual()) {
-                id = Optional.of(id_node.getString());
-            }
             if (!price_node.isVirtual()) {
                 price = Optional.of(new BigDecimal(price_node.getString("0")));
             }
             if (!drop_item_node.isVirtual()) {
-                drop_item = Optional.of(GWMCratesUtils.parseItem(drop_item_node));
+                drop_item = Optional.of(Utils.parseItem(drop_item_node));
             }
             if (!fake_level_node.isVirtual()) {
                 fake_level = Optional.of(fake_level_node.getInt(1));
@@ -57,8 +54,8 @@ public abstract class Drop {
         }
     }
 
-    public Drop(Optional<String> id, Optional<BigDecimal> price, Optional<ItemStack> drop_item, int level) {
-        this.id = id;
+    public Drop(String type, Optional<String> id, Optional<BigDecimal> price, Optional<ItemStack> drop_item, int level) {
+        super(type, id);
         this.price = price;
         this.drop_item = drop_item;
         if (level < 1) {
@@ -68,10 +65,6 @@ public abstract class Drop {
     }
 
     public abstract void apply(Player player);
-
-    public Optional<String> getId() {
-        return id;
-    }
 
     public Optional<BigDecimal> getPrice() {
         return price;

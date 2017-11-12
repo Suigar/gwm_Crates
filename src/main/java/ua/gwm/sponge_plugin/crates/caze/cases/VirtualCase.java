@@ -25,8 +25,8 @@ public class VirtualCase extends Case {
         }
     }
 
-    public VirtualCase(Optional<BigDecimal> price, String virtual_name) {
-        super(price);
+    public VirtualCase(Optional<BigDecimal> price, Optional<String> id, String virtual_name) {
+        super("VIRTUAL", id, price);
         this.virtual_name = virtual_name;
     }
 

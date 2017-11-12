@@ -32,7 +32,7 @@ public class EntityCaseListener {
             if (!(caze instanceof EntityCase)) {
                 continue;
             }
-            if (((EntityCase) caze).getEntity().equals(entity)) {
+            if (((EntityCase) caze).getEntityUuid().equals(entity.getUniqueId())) {
                 event.setCancelled(true);
                 if (event instanceof InteractEntityEvent.Secondary.MainHand) {
                     OpenManager open_manager = manager.getOpenManager();
@@ -65,28 +65,6 @@ public class EntityCaseListener {
                             new Pair<String, String>("%MANAGER%", manager.getName())));
                     return;
                 }
-            }
-        }
-    }
-
-    @Listener
-    public void cancelMoveEvent(MoveEntityEvent event) {
-        Entity entity = event.getTargetEntity();
-        for (Manager manager : GWMCrates.getInstance().getCreatedManagers()) {
-            Case caze = manager.getCase();
-            if (caze instanceof EntityCase && ((EntityCase) caze).getEntity().equals(entity)) {
-                event.setCancelled(true);
-            }
-        }
-    }
-
-    @Listener
-    public void cancelDamageEvent(DamageEntityEvent event) {
-        Entity entity = event.getTargetEntity();
-        for (Manager manager : GWMCrates.getInstance().getCreatedManagers()) {
-            Case caze = manager.getCase();
-            if (caze instanceof EntityCase && ((EntityCase) caze).getEntity().equals(entity)) {
-                event.setCancelled(true);
             }
         }
     }

@@ -14,15 +14,16 @@ import org.spongepowered.api.item.inventory.type.OrderedInventory;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.serializer.TextSerializers;
 import ua.gwm.sponge_plugin.crates.GWMCrates;
-import ua.gwm.sponge_plugin.crates.decorative_items_change_mode.DecorativeItemsChangeMode;
+import ua.gwm.sponge_plugin.crates.change_mode.DecorativeItemsChangeMode;
 import ua.gwm.sponge_plugin.crates.drop.Drop;
 import ua.gwm.sponge_plugin.crates.manager.Manager;
-import ua.gwm.sponge_plugin.crates.open_manager.open_managers.FirstGuiOpenManager;
+import ua.gwm.sponge_plugin.crates.open_manager.open_managers.FirstOpenManager;
 import ua.gwm.sponge_plugin.crates.preview.Preview;
-import ua.gwm.sponge_plugin.crates.util.GWMCratesUtils;
 import ua.gwm.sponge_plugin.crates.util.Pair;
+import ua.gwm.sponge_plugin.crates.util.SuperObjectType;
+import ua.gwm.sponge_plugin.crates.util.UnsafeUtils;
+import ua.gwm.sponge_plugin.crates.util.Utils;
 
-import java.lang.reflect.Constructor;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -52,42 +53,29 @@ public class FirstGuiPreview extends Preview {
             }
             decorative_items = new ArrayList<ItemStack>();
             for (ConfigurationNode decorative_item_node : decorative_items_node.getChildrenList()) {
-                decorative_items.add(GWMCratesUtils.parseItem(decorative_item_node));
+                decorative_items.add(Utils.parseItem(decorative_item_node));
             }
             if (decorative_items.size() != 20) {
                 throw new RuntimeException("DECORATIVE_ITEMS size must be 20 instead of " + decorative_items.size() + "!");
             }
             scroll_delay = scroll_delay_node.getInt(10);
             if (!decorative_items_change_mode_node.isVirtual()) {
-                ConfigurationNode decorative_items_change_mode_type_node = decorative_items_change_mode_node.getNode("TYPE");
-                if (decorative_items_change_mode_type_node.isVirtual()) {
-                    throw new RuntimeException("TYPE node for Decorative Items Change Mode does not exist!");
-                }
-                String first_gui_decorative_items_change_mode_type = decorative_items_change_mode_type_node.getString();
-                if (!GWMCrates.getInstance().getDecorativeItemsChangeModes().containsKey(first_gui_decorative_items_change_mode_type)) {
-                    throw new RuntimeException("Decorative Items Change Mode type \"" + first_gui_decorative_items_change_mode_type + "\" not found!");
-                }
-                try {
-                    Class<? extends DecorativeItemsChangeMode> first_gui_decorative_items_change_mode_class = GWMCrates.getInstance().getDecorativeItemsChangeModes().get(first_gui_decorative_items_change_mode_type);
-                    Constructor<? extends DecorativeItemsChangeMode> first_gui_decorative_items_change_mode_constructor = first_gui_decorative_items_change_mode_class.getConstructor(ConfigurationNode.class);
-                    decorative_items_change_mode = Optional.of(first_gui_decorative_items_change_mode_constructor.newInstance(decorative_items_change_mode_node));
-                } catch (Exception e) {
-                    throw new RuntimeException("Exception creating Decorative Items Change Mode!", e);
-                }
+                decorative_items_change_mode = Optional.of((DecorativeItemsChangeMode) Utils.createSuperObject(decorative_items_change_mode_node, SuperObjectType.DECORATIVE_ITEMS_CHANGE_MODE));
             }
         } catch (Exception e) {
             throw new RuntimeException("Exception creating First Gui Preview!", e);
         }
     }
 
-    public FirstGuiPreview(Optional<Text> display_name, List<ItemStack> decorative_items,
+    public FirstGuiPreview(Optional<String> id, Optional<Text> display_name, List<ItemStack> decorative_items,
                            int scroll_delay, Optional<DecorativeItemsChangeMode> decorative_items_change_mode) {
-        super();
+        super("FIRST", id);
         this.display_name = display_name;
         this.decorative_items = decorative_items;
         this.scroll_delay = scroll_delay;
         this.decorative_items_change_mode = decorative_items_change_mode;
     }
+
     @Override
     public void preview(Player player, Manager manager) {
         Inventory inventory = display_name.map(text -> Inventory.builder().of(InventoryArchetypes.CHEST).
@@ -110,11 +98,11 @@ public class FirstGuiPreview extends Preview {
         for (int i = 17; i < 27; i++) {
             ordered.getSlot(new SlotIndex(i)).get().set(decorative_items.get(i - 7));
         }
-        Container container = player.openInventory(inventory, GWMCrates.getInstance().getDefaultCause()).get();
+        Container container = UnsafeUtils.openInventory(player, inventory).get();
         FIRST_GUI_CONTAINERS.put(container, new Pair<FirstGuiPreview, Manager>(this, manager));
         decorative_items_change_mode.ifPresent(mode -> Sponge.getScheduler().
                 createTaskBuilder().delayTicks(mode.getChangeDelay()).
-                execute(new FirstGuiOpenManager.DropChangeRunnable(player, container, ordered, new ArrayList<ItemStack>(decorative_items), mode)).
+                execute(new FirstOpenManager.DropChangeRunnable(player, container, ordered, new ArrayList<ItemStack>(decorative_items), mode)).
                 submit(GWMCrates.getInstance()));
         Sponge.getScheduler().createTaskBuilder().delayTicks(scroll_delay).
                 execute(new DropChangeRunnable(container, drops, index)).

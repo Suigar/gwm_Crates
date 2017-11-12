@@ -2,6 +2,7 @@ package ua.gwm.sponge_plugin.crates.open_manager.open_managers;
 
 import com.flowpowered.math.vector.Vector3i;
 import com.google.common.reflect.TypeToken;
+import de.randombyte.holograms.api.HologramsService;
 import ninja.leaping.configurate.ConfigurationNode;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.block.BlockState;
@@ -18,12 +19,13 @@ import org.spongepowered.api.world.Location;
 import org.spongepowered.api.world.World;
 import ua.gwm.sponge_plugin.crates.GWMCrates;
 import ua.gwm.sponge_plugin.crates.event.PlayerOpenCrateEvent;
-import ua.gwm.sponge_plugin.crates.hologram.Hologram;
 import ua.gwm.sponge_plugin.crates.listener.Animation1Listener;
 import ua.gwm.sponge_plugin.crates.manager.Manager;
 import ua.gwm.sponge_plugin.crates.open_manager.OpenManager;
+import ua.gwm.sponge_plugin.crates.util.SuperObjectType;
+import ua.gwm.sponge_plugin.crates.util.UnsafeUtils;
+import ua.gwm.sponge_plugin.crates.util.Utils;
 
-import java.lang.reflect.Constructor;
 import java.util.*;
 
 public class Animation1OpenManager extends OpenManager {
@@ -33,7 +35,7 @@ public class Animation1OpenManager extends OpenManager {
     private BlockType floor_block_type;
     private BlockType fence_block_type;
     private BlockType crate_block_type;
-    private OpenManager open_manager = new NoGuiOpenManager(Optional.empty());
+    private OpenManager open_manager = new NoGuiOpenManager(Optional.empty(), Optional.empty());
     private Optional<Text> hologram = Optional.empty();
     private long close_delay = 0;
 
@@ -65,31 +67,17 @@ public class Animation1OpenManager extends OpenManager {
                 close_delay = close_delay_node.getLong();
             }
             if (!open_manager_node.isVirtual()) {
-                ConfigurationNode open_manager_type_node = open_manager_node.getNode("TYPE");
-                if (open_manager_type_node.isVirtual()) {
-                    throw new RuntimeException("TYPE node for Open Manager does not exist!");
-                }
-                String open_manager_type = open_manager_type_node.getString();
-                if (!GWMCrates.getInstance().getOpenManagers().containsKey(open_manager_type)) {
-                    throw new RuntimeException("Open Manager type \"" + open_manager_type + "\" not found!");
-                }
-                try {
-                    Class<? extends OpenManager> open_manager_class = GWMCrates.getInstance().getOpenManagers().get(open_manager_type);
-                    Constructor<? extends OpenManager> open_manager_constructor = open_manager_class.getConstructor(ConfigurationNode.class);
-                    open_manager = open_manager_constructor.newInstance(open_manager_node);
-                } catch (Exception e) {
-                    throw new RuntimeException("Exception creating Open Manager!", e);
-                }
+                open_manager = (OpenManager) Utils.createSuperObject(node, SuperObjectType.OPEN_MANAGER);
             }
         } catch (Exception e) {
             GWMCrates.getInstance().getLogger().info("Exception creating Animation1 Open Manager!");
         }
     }
 
-    public Animation1OpenManager(Optional<SoundType> open_sound, BlockType floor_block_type,
+    public Animation1OpenManager(Optional<String> id, Optional<SoundType> open_sound, BlockType floor_block_type,
                                  BlockType fence_block_type, BlockType crate_block_type, OpenManager open_manager,
                                  Optional<Text> hologram, int close_delay) {
-        super(open_sound);
+        super("ANIMATION1", id, open_sound);
         this.floor_block_type = floor_block_type;
         this.fence_block_type = fence_block_type;
         this.crate_block_type = crate_block_type;
@@ -117,54 +105,47 @@ public class Animation1OpenManager extends OpenManager {
                             world, loc_x + x, loc_y + y, loc_z + z);
                     BlockState loc_state = loc.getBlock();
                     original_block_states.put(loc, loc_state);
-                    loc.setBlockType(BlockTypes.AIR, BlockChangeFlag.NONE, GWMCrates.getInstance().getDefaultCause());
+                    UnsafeUtils.setBlockType(location, BlockTypes.AIR, BlockChangeFlag.NONE);
                 }
             }
         }
         for (int x = -2; x <= 2; x++) {
             for (int z = -2; z <= 2; z++) {
-                new Location<World>(world, loc_x + x, loc_y - 1, loc_z + z).
-                        setBlockType(floor_block_type, BlockChangeFlag.NONE, GWMCrates.getInstance().getDefaultCause());
+                UnsafeUtils.setBlockType(new Location<World>(world, loc_x + x, loc_y - 1, loc_z + z), floor_block_type, BlockChangeFlag.NONE);
                 if (z == 2 || z == -2 || x == 2 || x == -2) {
-                    new Location<World>(world, loc_x + x, loc_y , loc_z + z).
-                            setBlockType(fence_block_type, BlockChangeFlag.NONE, GWMCrates.getInstance().getDefaultCause());
+                    UnsafeUtils.setBlockType(new Location<World>(world, loc_x + x, loc_y , loc_z + z), fence_block_type, BlockChangeFlag.NONE);
                 }
             }
         }
-        HashSet<Hologram> holograms = new HashSet<Hologram>();
+        HashSet<HologramsService.Hologram> holograms = new HashSet<HologramsService.Hologram>();
         Location<World> loc1 = new Location<World>(world, loc_x + 2, loc_y, loc_z);
-        loc1.setBlock(BlockState.builder().
+        UnsafeUtils.setBlock(loc1, BlockState.builder().
                         blockType(crate_block_type).
                         add(Keys.DIRECTION, Direction.WEST).
                         build(),
-                BlockChangeFlag.NONE,
-                GWMCrates.getInstance().getDefaultCause());
-        hologram.ifPresent(name -> holograms.add(Hologram.createHologram(loc1.add(0.5, -1.2, 0.5), name)));
+                BlockChangeFlag.NONE);
         Location<World> loc2 = new Location<World>(world, loc_x - 2, loc_y, loc_z);
-        loc2.setBlock(BlockState.builder().
+        UnsafeUtils.setBlock(loc2, BlockState.builder().
                         blockType(crate_block_type).
                         add(Keys.DIRECTION, Direction.EAST).
-                        add(Keys.OPEN, true).
                         build(),
-                BlockChangeFlag.NONE,
-                GWMCrates.getInstance().getDefaultCause());
-        hologram.ifPresent(name -> holograms.add(Hologram.createHologram(loc2.add(0.5, -1.2, 0.5), name)));
+                BlockChangeFlag.NONE);
         Location<World> loc3 = new Location<World>(world, loc_x, loc_y, loc_z + 2);
-        loc3.setBlock(BlockState.builder().
+        UnsafeUtils.setBlock(loc3, BlockState.builder().
                         blockType(crate_block_type).
                         add(Keys.DIRECTION, Direction.NORTH).
                         build(),
-                GWMCrates.getInstance().getDefaultCause());
-        hologram.ifPresent(name -> holograms.add(Hologram.createHologram(loc3.add(0.5, -1.2, 0.5), name)));
+                BlockChangeFlag.NONE);
         Location<World> loc4 = new Location<World>(world, loc_x, loc_y, loc_z - 2);
-        loc4.setBlock(BlockState.builder().
+        UnsafeUtils.setBlock(loc4, BlockState.builder().
                         blockType(crate_block_type).
                         add(Keys.DIRECTION, Direction.SOUTH).
-                        add(Keys.OPEN, true).
                         build(),
-                BlockChangeFlag.NONE,
-                GWMCrates.getInstance().getDefaultCause());
-        hologram.ifPresent(name -> holograms.add(Hologram.createHologram(loc4.add(0.5, -1.2, 0.5), name)));
+                BlockChangeFlag.NONE);
+        Utils.tryCreateHologram(loc1, hologram).ifPresent(holograms::add);
+        Utils.tryCreateHologram(loc2, hologram).ifPresent(holograms::add);
+        Utils.tryCreateHologram(loc3, hologram).ifPresent(holograms::add);
+        Utils.tryCreateHologram(loc4, hologram).ifPresent(holograms::add);
         getOpenSound().ifPresent(sound -> player.playSound(sound, player.getLocation().getPosition(), 1.));
         PLAYERS_OPENING_ANIMATION1.put(player, new Information(this, manager,
                 new HashMap<Location<World>, Boolean>(){{
@@ -251,11 +232,11 @@ public class Animation1OpenManager extends OpenManager {
         private Manager manager;
         private Map<Location<World>, Boolean> locations;
         private Map<Location<World>, BlockState> original_block_states;
-        private Set<Hologram> holograms;
+        private Set<HologramsService.Hologram> holograms;
 
         public Information(Animation1OpenManager open_manager, Manager manager,
                            Map<Location<World>, Boolean> locations, Map<Location<World>, BlockState> original_block_states,
-                           Set<Hologram> holograms) {
+                           Set<HologramsService.Hologram> holograms) {
             this.open_manager = open_manager;
             this.manager = manager;
             this.locations = locations;
@@ -295,11 +276,11 @@ public class Animation1OpenManager extends OpenManager {
             this.original_block_states = original_block_states;
         }
 
-        public Set<Hologram> getHolograms() {
+        public Set<HologramsService.Hologram> getHolograms() {
             return holograms;
         }
 
-        public void setHolograms(Set<Hologram> holograms) {
+        public void setHolograms(Set<HologramsService.Hologram> holograms) {
             this.holograms = holograms;
         }
     }

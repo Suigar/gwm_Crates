@@ -19,15 +19,16 @@ import ua.gwm.sponge_plugin.crates.GWMCrates;
 import ua.gwm.sponge_plugin.crates.event.PlayerOpenCrateEvent;
 import ua.gwm.sponge_plugin.crates.manager.Manager;
 import ua.gwm.sponge_plugin.crates.open_manager.OpenManager;
-import ua.gwm.sponge_plugin.crates.util.GWMCratesUtils;
 import ua.gwm.sponge_plugin.crates.util.Pair;
+import ua.gwm.sponge_plugin.crates.util.UnsafeUtils;
+import ua.gwm.sponge_plugin.crates.util.Utils;
 
 import java.util.HashMap;
 import java.util.Optional;
 
-public class SecondGuiOpenManager extends OpenManager {
+public class SecondOpenManager extends OpenManager {
 
-    public static final HashMap<Container, Pair<SecondGuiOpenManager, Manager>> SECOND_GUI_INVENTORIES = new HashMap<Container, Pair<SecondGuiOpenManager, Manager>>();
+    public static final HashMap<Container, Pair<SecondOpenManager, Manager>> SECOND_GUI_INVENTORIES = new HashMap<Container, Pair<SecondOpenManager, Manager>>();
 
     private Optional<Text> display_name = Optional.empty();
     private ItemStack hidden_item;
@@ -40,7 +41,7 @@ public class SecondGuiOpenManager extends OpenManager {
     private boolean give_random_on_close;
     private Optional<SoundType> click_sound = Optional.empty();
 
-    public SecondGuiOpenManager(ConfigurationNode node) {
+    public SecondOpenManager(ConfigurationNode node) {
         super(node);
         try {
             ConfigurationNode display_name_node = node.getNode("DISPLAY_NAME");
@@ -59,7 +60,7 @@ public class SecondGuiOpenManager extends OpenManager {
             if (hidden_item_node.isVirtual()) {
                 throw new RuntimeException("HIDDEN_ITEM node does not exist!");
             }
-            hidden_item = GWMCratesUtils.parseItem(hidden_item_node);
+            hidden_item = Utils.parseItem(hidden_item_node);
             increase_hidden_item_quantity = increase_hidden_item_quantity_node.getBoolean(true);
             rows = rows_node.getInt(3);
             if (rows < 1 || rows > 6) {
@@ -83,12 +84,12 @@ public class SecondGuiOpenManager extends OpenManager {
         }
     }
 
-    public SecondGuiOpenManager(Optional<SoundType> open_sound, Optional<Text> display_name,
-                                ItemStack hidden_item, boolean increase_hidden_item_quantity,
-                                int rows, boolean show_other_drops, int close_delay,
-                                boolean forbid_close, boolean give_random_on_close,
-                                Optional<SoundType> click_sound) {
-        super(open_sound);
+    public SecondOpenManager(Optional<String> id, Optional<SoundType> open_sound, Optional<Text> display_name,
+                             ItemStack hidden_item, boolean increase_hidden_item_quantity,
+                             int rows, boolean show_other_drops, int close_delay,
+                             boolean forbid_close, boolean give_random_on_close,
+                             Optional<SoundType> click_sound) {
+        super("SECOND", id, open_sound);
         this.display_name = display_name;
         this.hidden_item = hidden_item;
         this.increase_hidden_item_quantity = increase_hidden_item_quantity;
@@ -127,14 +128,9 @@ public class SecondGuiOpenManager extends OpenManager {
             copy.setQuantity(quantity);
             ordered.getSlot(new SlotIndex(i)).get().set(copy);
         }
-        Container container = player.openInventory(inventory, GWMCrates.getInstance().getDefaultCause()).get();
+        Container container = UnsafeUtils.openInventory(player, inventory).get();
         getOpenSound().ifPresent(open_sound -> player.playSound(open_sound, player.getLocation().getPosition(), 1.));
-        SECOND_GUI_INVENTORIES.put(container, new Pair<SecondGuiOpenManager, Manager>(this, manager));
-    }
-
-    @Override
-    public boolean canOpen(Player player, Manager manager) {
-        return true;
+        SECOND_GUI_INVENTORIES.put(container, new Pair<SecondOpenManager, Manager>(this, manager));
     }
 
     public ItemStack getHiddenItem() {

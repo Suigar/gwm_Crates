@@ -1,16 +1,14 @@
 package ua.gwm.sponge_plugin.crates.manager;
 
 import ninja.leaping.configurate.ConfigurationNode;
-import org.spongepowered.api.entity.living.player.Player;
-import ua.gwm.sponge_plugin.crates.GWMCrates;
 import ua.gwm.sponge_plugin.crates.caze.Case;
 import ua.gwm.sponge_plugin.crates.drop.Drop;
 import ua.gwm.sponge_plugin.crates.key.Key;
 import ua.gwm.sponge_plugin.crates.open_manager.OpenManager;
 import ua.gwm.sponge_plugin.crates.preview.Preview;
-import ua.gwm.sponge_plugin.crates.util.GWMCratesUtils;
+import ua.gwm.sponge_plugin.crates.util.SuperObjectType;
+import ua.gwm.sponge_plugin.crates.util.Utils;
 
-import java.lang.reflect.Constructor;
 import java.util.*;
 
 public class Manager {
@@ -22,6 +20,8 @@ public class Manager {
     private OpenManager open_manager;
     private List<Drop> drops;
     private Optional<Preview> preview = Optional.empty();
+    private boolean send_open_message = true;
+    private Optional<String> custom_open_message = Optional.empty();
 
     public Manager(ConfigurationNode node) {
         ConfigurationNode id_node = node.getNode("ID");
@@ -31,6 +31,8 @@ public class Manager {
         ConfigurationNode open_manager_node = node.getNode("OPEN_MANAGER");
         ConfigurationNode drops_node = node.getNode("DROPS");
         ConfigurationNode preview_node = node.getNode("PREVIEW");
+        ConfigurationNode send_open_message_node = node.getNode("SEND_OPEN_MESSAGE");
+        ConfigurationNode custom_open_message_node = node.getNode("CUSTOM_OPEN_MESSAGE");
         if (id_node.isVirtual()) {
             throw new RuntimeException("ID node does not exist!");
         }
@@ -51,90 +53,19 @@ public class Manager {
         }
         id = id_node.getString();
         name = name_node.getString();
-        //Loading case
-        ConfigurationNode case_type_node = case_node.getNode("TYPE");
-        if (case_type_node.isVirtual()) {
-            throw new RuntimeException("TYPE node for Case does not exist!");
-        }
-        String case_type = case_type_node.getString();
-        if (!GWMCrates.getInstance().getCases().containsKey(case_type)) {
-            throw new RuntimeException("Case type \"" + case_type + "\" not found!");
-        }
-        try {
-            Class<? extends Case> case_class = GWMCrates.getInstance().getCases().get(case_type);
-            Constructor<? extends Case> case_constructor = case_class.getConstructor(ConfigurationNode.class);
-            caze = case_constructor.newInstance(case_node);
-        } catch (Exception e) {
-            throw new RuntimeException("Exception creating Case!", e);
-        }
-        //Loading key
-        ConfigurationNode key_type_node = key_node.getNode("TYPE");
-        if (key_type_node.isVirtual()) {
-            throw new RuntimeException("TYPE node for Key does not exist!");
-        }
-        String key_type = key_type_node.getString();
-        if (!GWMCrates.getInstance().getKeys().containsKey(key_type)) {
-            throw new RuntimeException("Key type \"" + key_type + "\" not found!");
-        }
-        try {
-            Class<? extends Key> key_class = GWMCrates.getInstance().getKeys().get(key_type);
-            Constructor<? extends Key> key_constructor = key_class.getConstructor(ConfigurationNode.class);
-            key = key_constructor.newInstance(key_node);
-        } catch (Exception e) {
-            throw new RuntimeException("Exception creating Key!", e);
-        }
-        //Loading open manager
-        ConfigurationNode open_manager_type_node = open_manager_node.getNode("TYPE");
-        if (open_manager_type_node.isVirtual()) {
-            throw new RuntimeException("TYPE node for Open Manager does not exist!");
-        }
-        String open_manager_type = open_manager_type_node.getString();
-        if (!GWMCrates.getInstance().getOpenManagers().containsKey(open_manager_type)) {
-            throw new RuntimeException("Open Manager type \"" + open_manager_type + "\" not found!");
-        }
-        try {
-            Class<? extends OpenManager> open_manager_class = GWMCrates.getInstance().getOpenManagers().get(open_manager_type);
-            Constructor<? extends OpenManager> open_manager_constructor = open_manager_class.getConstructor(ConfigurationNode.class);
-            open_manager = open_manager_constructor.newInstance(open_manager_node);
-        } catch (Exception e) {
-            throw new RuntimeException("Exception creating Open Manager!", e);
-        }
-        //Loading drops
+        caze = (Case) Utils.createSuperObject(case_node, SuperObjectType.CASE);
+        key = (Key) Utils.createSuperObject(key_node, SuperObjectType.KEY);
         drops = new ArrayList<Drop>();
         for (ConfigurationNode drop_node : drops_node.getChildrenList()) {
-            ConfigurationNode drop_type_node = drop_node.getNode("TYPE");
-            if (drop_type_node.isVirtual()) {
-                throw new RuntimeException("TYPE node for Drop does not exist!");
-            }
-            String drop_type = drop_type_node.getString();
-            if (!GWMCrates.getInstance().getDrops().containsKey(drop_type)) {
-                throw new RuntimeException("Drop type \"" + drop_type + "\" not found!");
-            }
-            try {
-                Class<? extends Drop> drop_class = GWMCrates.getInstance().getDrops().get(drop_type);
-                Constructor<? extends Drop> drop_constructor = drop_class.getConstructor(ConfigurationNode.class);
-                drops.add(drop_constructor.newInstance(drop_node));
-            } catch (Exception e) {
-                throw new RuntimeException("Exception creating Drop!", e);
-            }
+            drops.add((Drop) Utils.createSuperObject(drop_node, SuperObjectType.DROP));
         }
-        //Loading preview
+        open_manager = (OpenManager) Utils.createSuperObject(open_manager_node, SuperObjectType.OPEN_MANAGER);
         if (!preview_node.isVirtual()) {
-            ConfigurationNode preview_type_node = preview_node.getNode("TYPE");
-            if (preview_type_node.isVirtual()) {
-                throw new RuntimeException("TYPE node for Preview does not exist!");
-            }
-            String preview_type = preview_type_node.getString();
-            if (!GWMCrates.getInstance().getPreviews().containsKey(preview_type)) {
-                throw new RuntimeException("Preview type \"" + preview_type + "\" not found!");
-            }
-            try {
-                Class<? extends Preview> preview_class = GWMCrates.getInstance().getPreviews().get(preview_type);
-                Constructor<? extends Preview> preview_constructor = preview_class.getConstructor(ConfigurationNode.class);
-                preview = Optional.of(preview_constructor.newInstance(preview_node));
-            } catch (Exception e) {
-                throw new RuntimeException("Exception creating Preview!", e);
-            }
+            preview = Optional.of((Preview) Utils.createSuperObject(preview_node, SuperObjectType.PREVIEW));
+        }
+        send_open_message = send_open_message_node.getBoolean(true);
+        if (!custom_open_message_node.isVirtual()) {
+            custom_open_message = Optional.of(custom_open_message_node.getString());
         }
     }
 
@@ -203,5 +134,21 @@ public class Manager {
 
     public void setPreview(Optional<Preview> preview) {
         this.preview = preview;
+    }
+
+    public boolean isSendOpenMessage() {
+        return send_open_message;
+    }
+
+    public void setSendOpenMessage(boolean send_open_message) {
+        this.send_open_message = send_open_message;
+    }
+
+    public Optional<String> getCustomOpenMessage() {
+        return custom_open_message;
+    }
+
+    public void setCustomOpenMessage(Optional<String> custom_open_message) {
+        this.custom_open_message = custom_open_message;
     }
 }

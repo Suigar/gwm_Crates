@@ -12,7 +12,7 @@ import ua.gwm.sponge_plugin.crates.key.Key;
 import ua.gwm.sponge_plugin.crates.manager.Manager;
 import ua.gwm.sponge_plugin.crates.open_manager.OpenManager;
 import ua.gwm.sponge_plugin.crates.preview.Preview;
-import ua.gwm.sponge_plugin.crates.util.GWMCratesUtils;
+import ua.gwm.sponge_plugin.crates.util.Utils;
 import ua.gwm.sponge_plugin.crates.util.LanguageUtils;
 import ua.gwm.sponge_plugin.crates.util.Pair;
 
@@ -30,7 +30,7 @@ public class ItemCaseListener {
             Case caze = manager.getCase();
             if (!(caze instanceof ItemCase)) continue;
             ItemStack case_item = ((ItemCase) caze).getItem();
-            if (!GWMCratesUtils.itemStacksEquals(item, case_item)) continue;
+            if (!Utils.itemStacksEquals(item, case_item)) continue;
             event.setCancelled(true);
             OpenManager open_manager = manager.getOpenManager();
             if (!open_manager.canOpen(player, manager)) {
@@ -61,7 +61,7 @@ public class ItemCaseListener {
             Case caze = manager.getCase();
             if (!(caze instanceof ItemCase)) continue;
             ItemStack case_item = ((ItemCase) caze).getItem();
-            if (!GWMCratesUtils.itemStacksEquals(item, case_item)) continue;
+            if (!Utils.itemStacksEquals(item, case_item)) continue;
             event.setCancelled(true);
             if (!((ItemCase) caze).isStartPreviewOnLeftClick()) return;
             Optional<Preview> optional_preview = manager.getPreview();

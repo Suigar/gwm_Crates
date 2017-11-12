@@ -4,7 +4,7 @@ import ninja.leaping.configurate.ConfigurationNode;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.item.inventory.ItemStack;
 import ua.gwm.sponge_plugin.crates.drop.Drop;
-import ua.gwm.sponge_plugin.crates.util.GWMCratesUtils;
+import ua.gwm.sponge_plugin.crates.util.Utils;
 
 import java.math.BigDecimal;
 import java.util.Optional;
@@ -20,7 +20,7 @@ public class ItemDrop extends Drop {
             if (item_node.isVirtual()) {
                 throw new RuntimeException("ITEM node does not exist!");
             }
-            item = GWMCratesUtils.parseItem(item_node);
+            item = Utils.parseItem(item_node);
         } catch (Exception e) {
             throw new RuntimeException("Exception creating Item Drop!", e);
         }
@@ -28,7 +28,7 @@ public class ItemDrop extends Drop {
 
     public ItemDrop(Optional<String> id, Optional<BigDecimal> price, Optional<ItemStack> drop_item, int level,
                     ItemStack item) {
-        super(id, price, drop_item, level);
+        super("ITEM", id, price, drop_item, level);
         this.item = item;
     }
 

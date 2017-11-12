@@ -2,15 +2,17 @@ package ua.gwm.sponge_plugin.crates.key;
 
 import ninja.leaping.configurate.ConfigurationNode;
 import org.spongepowered.api.entity.living.player.Player;
+import ua.gwm.sponge_plugin.crates.util.SuperObject;
 
 import java.math.BigDecimal;
 import java.util.Optional;
 
-public abstract class Key {
+public abstract class Key extends SuperObject {
 
     private Optional<BigDecimal> price = Optional.empty();
 
     public Key(ConfigurationNode node) {
+        super(node);
         try {
             ConfigurationNode price_node = node.getNode("PRICE");
             if (!price_node.isVirtual()) {
@@ -21,7 +23,8 @@ public abstract class Key {
         }
     }
 
-    public Key(Optional<BigDecimal> price) {
+    public Key(String type, Optional<String> id, Optional<BigDecimal> price) {
+        super(type, id);
         this.price = price;
     }
 

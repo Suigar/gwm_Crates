@@ -1,19 +1,21 @@
 package ua.gwm.sponge_plugin.crates;
 
+import com.flowpowered.math.vector.Vector3d;
+import com.google.common.reflect.TypeToken;
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 import com.google.inject.Inject;
+import de.randombyte.holograms.api.HologramsService;
 import ninja.leaping.configurate.ConfigurationNode;
 import ninja.leaping.configurate.commented.CommentedConfigurationNode;
 import ninja.leaping.configurate.hocon.HoconConfigurationLoader;
 import ninja.leaping.configurate.loader.ConfigurationLoader;
+import ninja.leaping.configurate.objectmapping.ObjectMappingException;
 import org.slf4j.Logger;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.config.ConfigDir;
-import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.event.Listener;
 import org.spongepowered.api.event.cause.Cause;
-import org.spongepowered.api.event.cause.NamedCause;
 import org.spongepowered.api.event.game.GameReloadEvent;
 import org.spongepowered.api.event.game.state.*;
 import org.spongepowered.api.plugin.Plugin;
@@ -21,54 +23,56 @@ import org.spongepowered.api.plugin.PluginContainer;
 import org.spongepowered.api.service.economy.EconomyService;
 import ua.gwm.sponge_plugin.crates.caze.Case;
 import ua.gwm.sponge_plugin.crates.caze.cases.*;
+import ua.gwm.sponge_plugin.crates.change_mode.change_modes.OrderedChangeMode;
+import ua.gwm.sponge_plugin.crates.change_mode.change_modes.RandomChangeMode;
 import ua.gwm.sponge_plugin.crates.command.GWMCratesCommand;
-import ua.gwm.sponge_plugin.crates.drop.Drop;
-import ua.gwm.sponge_plugin.crates.drop.drops.CommandsDrop;
-import ua.gwm.sponge_plugin.crates.drop.drops.ItemDrop;
-import ua.gwm.sponge_plugin.crates.drop.drops.MultiDrop;
+import ua.gwm.sponge_plugin.crates.drop.drops.*;
 import ua.gwm.sponge_plugin.crates.event.GWMCratesRegistrationEvent;
-import ua.gwm.sponge_plugin.crates.hologram.Hologram;
-import ua.gwm.sponge_plugin.crates.key.Key;
+import ua.gwm.sponge_plugin.crates.gui.configuration_dialog.configuration_dialogues.caze.*;
+import ua.gwm.sponge_plugin.crates.gui.configuration_dialog.configuration_dialogues.change_mode.OrderedChangeModeConfigurationDialog;
+import ua.gwm.sponge_plugin.crates.gui.configuration_dialog.configuration_dialogues.change_mode.RandomChangeModeConfigurationDialog;
+import ua.gwm.sponge_plugin.crates.gui.configuration_dialog.configuration_dialogues.drop.*;
+import ua.gwm.sponge_plugin.crates.gui.configuration_dialog.configuration_dialogues.key.*;
+import ua.gwm.sponge_plugin.crates.gui.configuration_dialog.configuration_dialogues.open_manager.Animation1OpenManagerConfigurationDialog;
+import ua.gwm.sponge_plugin.crates.gui.configuration_dialog.configuration_dialogues.open_manager.FirstOpenManagerConfigurationDialog;
+import ua.gwm.sponge_plugin.crates.gui.configuration_dialog.configuration_dialogues.open_manager.NoGuiOpenManagerConfigurationDialog;
+import ua.gwm.sponge_plugin.crates.gui.configuration_dialog.configuration_dialogues.open_manager.SecondOpenManagerConfigurationDialog;
+import ua.gwm.sponge_plugin.crates.gui.configuration_dialog.configuration_dialogues.preview.FirstPreviewConfigurationDialog;
+import ua.gwm.sponge_plugin.crates.gui.configuration_dialog.configuration_dialogues.preview.SecondPreviewConfigurationDialog;
 import ua.gwm.sponge_plugin.crates.key.keys.*;
 import ua.gwm.sponge_plugin.crates.listener.*;
 import ua.gwm.sponge_plugin.crates.manager.Manager;
-import ua.gwm.sponge_plugin.crates.open_manager.OpenManager;
 import ua.gwm.sponge_plugin.crates.open_manager.open_managers.Animation1OpenManager;
-import ua.gwm.sponge_plugin.crates.open_manager.open_managers.FirstGuiOpenManager;
+import ua.gwm.sponge_plugin.crates.open_manager.open_managers.FirstOpenManager;
 import ua.gwm.sponge_plugin.crates.open_manager.open_managers.NoGuiOpenManager;
-import ua.gwm.sponge_plugin.crates.open_manager.open_managers.SecondGuiOpenManager;
-import ua.gwm.sponge_plugin.crates.decorative_items_change_mode.DecorativeItemsChangeMode;
-import ua.gwm.sponge_plugin.crates.decorative_items_change_mode.decorative_items_change_modes.OrderedChangeMode;
-import ua.gwm.sponge_plugin.crates.decorative_items_change_mode.decorative_items_change_modes.RandomChangeMode;
-import ua.gwm.sponge_plugin.crates.preview.Preview;
+import ua.gwm.sponge_plugin.crates.open_manager.open_managers.SecondOpenManager;
 import ua.gwm.sponge_plugin.crates.preview.previews.FirstGuiPreview;
 import ua.gwm.sponge_plugin.crates.preview.previews.SecondGuiPreview;
-import ua.gwm.sponge_plugin.crates.util.Config;
+import ua.gwm.sponge_plugin.crates.util.*;
 
 import java.io.File;
 import java.io.InputStreamReader;
 import java.net.URL;
-import java.util.*;
+import java.nio.file.Files;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Optional;
 
 @Plugin(
         id = "gwm_crates",
         name = "GWMCrates",
-        version = "1.61",
+        version = "2.0",
         description = "Universal crates plugin for your server!",
         authors = {"GWM"/*
                 Nazar Kalinovskiy
                 My contacts:
-                email(nkGreWeMa@gmail.com),
-                Skype(nk_gwm),
+                email(gwm@tutanota.com),
                 Discord(GWM#2192),
                 Telegram(@grewema),
                 Wire(@grewema)*/})
 public class GWMCrates {
 
-    public static final UUID PLUGIN_UUID = UUID.nameUUIDFromBytes(new byte[]
-            {'G', 'W', 'M', 'C', 'r', 'a', 't', 'e', 's'});
-
-    public static final double CURRENT_VERSION = 1.61;
+    public static final double CURRENT_VERSION = 2.0;
 
     private static GWMCrates instance;
 
@@ -92,16 +96,16 @@ public class GWMCrates {
     @Inject
     private PluginContainer plugin_container;
 
-    private HashMap<String, Class<? extends Case>> cases = new HashMap<String, Class<? extends Case>>();
-    private HashMap<String, Class<? extends Key>> keys = new HashMap<String, Class<? extends Key>>();
-    private HashMap<String, Class<? extends Drop>> drops = new HashMap<String, Class<? extends Drop>>();
-    private HashMap<String, Class<? extends OpenManager>> open_managers = new HashMap<String, Class<? extends OpenManager>>();
-    private HashMap<String, Class<? extends Preview>> previews = new HashMap<String, Class<? extends Preview>>();
-    private HashMap<String, Class<? extends DecorativeItemsChangeMode>> decorative_items_change_modes = new HashMap<String, Class<? extends DecorativeItemsChangeMode>>();
+    private HashSet<SuperObjectStorage> super_objects =
+            new HashSet<SuperObjectStorage>();
+
+    private HashMap<Pair<SuperObjectType, String>, SuperObject> saved_super_objects =
+            new HashMap<Pair<SuperObjectType, String>, SuperObject>();
 
     private HashSet<Manager> created_managers = new HashSet<Manager>();
 
     private Optional<EconomyService> optional_economy_service = Optional.empty();
+    private Optional<HologramsService> optional_holograms_service = Optional.empty();
 
     private Config config;
     private Config language_config;
@@ -109,6 +113,12 @@ public class GWMCrates {
     private Config virtual_keys_config;
     private Config timed_cases_delays_config;
     private Config timed_keys_delays_config;
+    private Config saved_super_objects_config;
+
+    private boolean debug = false;
+    private boolean check_updates = true;
+    private double api_version = 6;
+    private Vector3d hologram_offset = new Vector3d(0.5, -1.2, 0.5);
 
     @Listener
     public void onConstruct(GameConstructionEvent event) {
@@ -119,6 +129,7 @@ public class GWMCrates {
     public void onPreInitialization(GamePreInitializationEvent event) {
         managers_directory = new File(config_directory, "managers");
         if (!config_directory.exists()) {
+            logger.info("Config directory does not exist! Trying to create it...");
             try {
                 config_directory.mkdirs();
                 logger.info("Config directory successfully created!");
@@ -127,6 +138,7 @@ public class GWMCrates {
             }
         }
         if (!managers_directory.exists()) {
+            logger.info("Managers directory does not exist! Trying to create it...");
             try {
                 managers_directory.mkdirs();
                 logger.info("Managers directory successfully created!");
@@ -134,14 +146,18 @@ public class GWMCrates {
                 logger.warn("Failed creating managers config directory!", e);
             }
         }
-        default_cause = Cause.of(NamedCause.of("root", plugin_container));
-        checkForUpdates();
         config = new Config("config.conf", false);
         language_config = new Config("language.conf", false);
+        saved_super_objects_config = new Config("saved_super_objects.conf", false);
         virtual_cases_config = new Config("virtual_cases.conf", true);
         virtual_keys_config = new Config("virtual_keys.conf", true);
         timed_cases_delays_config = new Config("timed_cases_delays.conf", true);
         timed_keys_delays_config = new Config("timed_keys_delays.conf", true);
+        loadConfigValues();
+        default_cause = UnsafeUtils.createDefaultCause();
+        if (check_updates) {
+            checkUpdates();
+        }
         logger.info("PreInitialization complete!");
     }
 
@@ -153,8 +169,8 @@ public class GWMCrates {
         Sponge.getEventManager().registerListeners(this, new SecondGuiOpenManagerListener());
         Sponge.getEventManager().registerListeners(this, new PreviewListener());
         Sponge.getEventManager().registerListeners(this, new Animation1Listener());
-        Sponge.getEventManager().registerListeners(this, new ExtraEntityRemover());
         Sponge.getEventManager().registerListeners(this, new EntityCaseListener());
+        Sponge.getEventManager().registerListeners(this, new DebugCrateListener());
         Sponge.getCommandManager().register(this, new GWMCratesCommand(),
                 "gwmcrates", "gwmcrate", "crates", "crate");
         register();
@@ -162,24 +178,21 @@ public class GWMCrates {
     }
 
     @Listener
-    public void onStarted(GameStartedServerEvent event) {
+    public void onPostInitialization(GamePostInitializationEvent event) {
         loadEconomy();
-        Sponge.getScheduler().createTaskBuilder().delayTicks(config.getNode("MANAGERS_LOAD_DELAY").getLong(20))
-                .execute(this::createManagers).submit(this);
+        loadHologramsService();
+        loadSavedSuperObjects();
+        Sponge.getScheduler().createTaskBuilder().
+                delayTicks(config.getNode("MANAGERS_LOAD_DELAY").getLong(20)).
+                execute(this::createManagers).submit(this);
+        logger.info("PostInitialization complete!");
     }
 
     @Listener
     public void onStopping(GameStoppingServerEvent event) {
-        Hologram.deleteHolograms();
-        created_managers.stream().
-                filter(manager -> manager.getCase() instanceof EntityCase).
-                forEach(manager -> ((EntityCase) manager.getCase()).getEntity().remove());
-        virtual_cases_config.save();
-        virtual_keys_config.save();
-        timed_cases_delays_config.save();
-        timed_keys_delays_config.save();
+        deleteHolograms();
         save();
-        logger.info("Successfully stopped!");
+        logger.info("Stopping complete!");
     }
 
     @Listener
@@ -194,17 +207,12 @@ public class GWMCrates {
         virtual_keys_config.save();
         timed_cases_delays_config.save();
         timed_keys_delays_config.save();
+        saved_super_objects_config.save();
         logger.info("All plugin configs has been saved!");
     }
 
     public void reload() {
-        Hologram.deleteHolograms();
-        created_managers.stream().
-                filter(manager -> manager.getCase() instanceof EntityCase).
-                forEach(manager -> {
-                    Entity entity = ((EntityCase)manager.getCase()).getEntity();
-                    entity.remove();
-                });
+        deleteHolograms();
         created_managers.clear();
         config.reload();
         language_config.reload();
@@ -212,146 +220,162 @@ public class GWMCrates {
         virtual_keys_config.reload();
         timed_cases_delays_config.reload();
         timed_keys_delays_config.reload();
-        cases.clear();
-        keys.clear();
-        open_managers.clear();
-        drops.clear();
-        previews.clear();
-        decorative_items_change_modes.clear();
+        saved_super_objects_config.reload();
+        super_objects.clear();
+        saved_super_objects.clear();
+        loadConfigValues();
+        default_cause = UnsafeUtils.createDefaultCause();
         register();
         optional_economy_service = Optional.empty();
+        optional_holograms_service = Optional.empty();
         loadEconomy();
+        loadHologramsService();
+        loadSavedSuperObjects();
         createManagers();
-        checkForUpdates();
+        if (check_updates) {
+            checkUpdates();
+        }
         logger.info("Plugin has been reloaded.");
+    }
+
+    private void deleteHolograms() {
+        for (Manager manager : created_managers) {
+            Case caze = manager.getCase();
+            if (caze instanceof BlockCase) {
+                BlockCase block_case = (BlockCase) caze;
+                block_case.getCreatedHologram().ifPresent(HologramsService.Hologram::remove);
+            }
+        }
+        Animation1OpenManager.PLAYERS_OPENING_ANIMATION1.values().
+                forEach(information -> information.getHolograms().
+                        forEach(HologramsService.Hologram::remove));
     }
 
     private void register() {
         GWMCratesRegistrationEvent registration_event = new GWMCratesRegistrationEvent();
-        registration_event.getCases().put("ITEM", ItemCase.class);
-        registration_event.getCases().put("BLOCK", BlockCase.class);
-        registration_event.getCases().put("ENTITY", EntityCase.class);
-        registration_event.getCases().put("VIRTUAL", VirtualCase.class);
-        registration_event.getCases().put("TIMED", TimedCase.class);
-        registration_event.getCases().put("EMPTY", EmptyCase.class);
-        registration_event.getKeys().put("ITEM", ItemKey.class);
-        registration_event.getKeys().put("MULTI", MultiKey.class);
-        registration_event.getKeys().put("MULTIPLE-AMOUNT", MultipleAmountKey.class);
-        registration_event.getKeys().put("VIRTUAL", VirtualKey.class);
-        registration_event.getKeys().put("TIMED", TimedKey.class);
-        registration_event.getKeys().put("EMPTY", EmptyKey.class);
-        registration_event.getDrops().put("ITEM", ItemDrop.class);
-        registration_event.getDrops().put("COMMANDS", CommandsDrop.class);
-        registration_event.getDrops().put("MULTI", MultiDrop.class);
-        registration_event.getOpenManagers().put("NO-GUI", NoGuiOpenManager.class);
-        registration_event.getOpenManagers().put("FIRST", FirstGuiOpenManager.class);
-        registration_event.getOpenManagers().put("SECOND", SecondGuiOpenManager.class);
-        registration_event.getOpenManagers().put("ANIMATION1", Animation1OpenManager.class);
-        registration_event.getPreviews().put("FIRST", FirstGuiPreview.class);
-        registration_event.getPreviews().put("SECOND", SecondGuiPreview.class);
-        registration_event.getDecorativeItemsChangeModes().put("RANDOM", RandomChangeMode.class);
-        registration_event.getDecorativeItemsChangeModes().put("ORDERED", OrderedChangeMode.class);
+        registration_event.register(SuperObjectType.CASE, "ITEM", ItemCase.class, Optional.of(ItemCaseConfigurationDialog.class));
+        registration_event.register(SuperObjectType.CASE, "BLOCK", BlockCase.class, Optional.of(BlockCaseConfigurationDialog.class));
+        registration_event.register(SuperObjectType.CASE, "ENTITY", EntityCase.class, Optional.of(EntityCaseConfigurationDialog.class));
+        registration_event.register(SuperObjectType.CASE, "TIMED", TimedCase.class, Optional.of(TimedCaseConfigurationDialog.class));
+        registration_event.register(SuperObjectType.CASE, "VIRTUAL", VirtualCase.class, Optional.of(VirtualCaseConfigurationDialog.class));
+        registration_event.register(SuperObjectType.CASE, "EMPTY", EmptyCase.class, Optional.of(EmptyCaseConfigurationDialog.class));
+        registration_event.register(SuperObjectType.KEY, "ITEM", ItemKey.class, Optional.of(ItemKeyConfigurationDialog.class));
+        registration_event.register(SuperObjectType.KEY, "MULTI", MultiKey.class, Optional.of(MultiKeyConfigurationDialog.class));
+        registration_event.register(SuperObjectType.KEY, "MULTIPLE-AMOUNT", MultipleAmountKey.class, Optional.of(MultipleAmountKeyConfigurationDialog.class));
+        registration_event.register(SuperObjectType.KEY, "TIMED", TimedKey.class, Optional.of(TimedKeyConfigurationDialog.class));
+        registration_event.register(SuperObjectType.KEY, "VIRTUAL", VirtualKey.class, Optional.of(VirtualKeyConfigurationDialog.class));
+        registration_event.register(SuperObjectType.KEY, "EMPTY", EmptyKey.class, Optional.of(EmptyKeyConfigurationDialog.class));
+        registration_event.register(SuperObjectType.OPEN_MANAGER, "NO-GUI", NoGuiOpenManager.class, Optional.of(NoGuiOpenManagerConfigurationDialog.class));
+        registration_event.register(SuperObjectType.OPEN_MANAGER, "FIRST", FirstOpenManager.class, Optional.of(FirstOpenManagerConfigurationDialog.class));
+        registration_event.register(SuperObjectType.OPEN_MANAGER, "SECOND", SecondOpenManager.class, Optional.of(SecondOpenManagerConfigurationDialog.class));
+        registration_event.register(SuperObjectType.OPEN_MANAGER, "ANIMATION1", Animation1OpenManager.class, Optional.of(Animation1OpenManagerConfigurationDialog.class));
+        registration_event.register(SuperObjectType.PREVIEW, "FIRST", FirstGuiPreview.class, Optional.of(FirstPreviewConfigurationDialog.class));
+        registration_event.register(SuperObjectType.PREVIEW, "SECOND", SecondGuiPreview.class, Optional.of(SecondPreviewConfigurationDialog.class));
+        registration_event.register(SuperObjectType.DROP, "ITEM", ItemDrop.class, Optional.of(ItemDropConfigurationDialog.class));
+        registration_event.register(SuperObjectType.DROP, "COMMANDS", CommandsDrop.class, Optional.of(CommandsDropConfigurationDialog.class));
+        registration_event.register(SuperObjectType.DROP, "MULTI", MultiDrop.class, Optional.of(MultiDropConfigurationDialog.class));
+        registration_event.register(SuperObjectType.DROP, "DELAY", DelayDrop.class, Optional.of(DelayDropConfigurationDialog.class));
+        registration_event.register(SuperObjectType.DROP, "PERMISSION", PermissionDrop.class, Optional.of(PermissionDropConfigurationDialog.class));
+        registration_event.register(SuperObjectType.DECORATIVE_ITEMS_CHANGE_MODE, "RANDOM", RandomChangeMode.class, Optional.of(RandomChangeModeConfigurationDialog.class));
+        registration_event.register(SuperObjectType.DECORATIVE_ITEMS_CHANGE_MODE, "ORDERED", OrderedChangeMode.class, Optional.of(OrderedChangeModeConfigurationDialog.class));
         Sponge.getEventManager().post(registration_event);
-        for (Map.Entry<String, Class<? extends Case>> entry : registration_event.getCases().entrySet()) {
-            String name = entry.getKey();
-            Class<? extends Case> case_class = entry.getValue();
-            String class_name = case_class.getSimpleName();
-            if (cases.containsKey(name)) {
-                logger.warn("Trying to add Case type " + name + " (" + class_name + ".class) which already exist!");
+        for (SuperObjectStorage super_object_storage : registration_event.getSuperObjectStorage()) {
+            SuperObjectType super_object_type = super_object_storage.getSuperObjectType();
+            String type = super_object_storage.getType();
+            if (Utils.getSuperObjectStorage(super_object_type, type).isPresent()) {
+                logger.warn("Super Objects already contains Super Object \"" + super_object_type + "\" with type \"" + type + "\"!");
             } else {
-                cases.put(name, case_class);
-                logger.info("Successfully added Case type " + name + " (" + class_name + ".class)!");
-            }
-        }
-        for (Map.Entry<String, Class<? extends Key>> entry : registration_event.getKeys().entrySet()) {
-            String name = entry.getKey();
-            Class<? extends Key> key_class = entry.getValue();
-            String class_name = key_class.getSimpleName();
-            if (keys.containsKey(name)) {
-                logger.warn("Trying to add Key type " + name + " (" + class_name + ".class) which already exist!");
-            } else {
-                keys.put(name, key_class);
-                logger.info("Successfully added Key type " + name + " (" + class_name + ".class)!");
-            }
-        }
-        for (Map.Entry<String, Class<? extends Drop>> entry : registration_event.getDrops().entrySet()) {
-            String name = entry.getKey();
-            Class<? extends Drop> drop_class = entry.getValue();
-            String class_name = drop_class.getSimpleName();
-            if (drops.containsKey(name)) {
-                logger.warn("Trying to add Drop type " + name + " (" + class_name + ".class) which already exist!");
-            } else {
-                drops.put(name, drop_class);
-                logger.info("Successfully added Drop type " + name + " (" + class_name + ".class)!");
-            }
-        }
-        for (Map.Entry<String, Class<? extends OpenManager>> entry : registration_event.getOpenManagers().entrySet()) {
-            String name = entry.getKey();
-            Class<? extends OpenManager> open_manager_class = entry.getValue();
-            String class_name = open_manager_class.getSimpleName();
-            if (open_managers.containsKey(name)) {
-                logger.warn("Trying to add Open Manager type " + name + " (" + class_name + ".class) which already exist!");
-            } else {
-                open_managers.put(name, open_manager_class);
-                logger.info("Successfully added Open Manager type " + name + " (" + class_name + ".class)!");
-            }
-        }
-        for (Map.Entry<String, Class<? extends Preview>> entry : registration_event.getPreviews().entrySet()) {
-            String name = entry.getKey();
-            Class<? extends Preview> preview_class = entry.getValue();
-            String class_name = preview_class.getSimpleName();
-            if (previews.containsKey(name)) {
-                logger.warn("Trying to add Preview type " + name + " (" + class_name + ".class) which already exist!");
-            } else {
-                previews.put(name, preview_class);
-                logger.info("Successfully added Preview type " + name + " (" + class_name + ".class)!");
-            }
-        }
-        for (Map.Entry<String, Class<? extends DecorativeItemsChangeMode>> entry : registration_event.getDecorativeItemsChangeModes().entrySet()) {
-            String name = entry.getKey();
-            Class<? extends DecorativeItemsChangeMode> decorative_items_change_mode_class = entry.getValue();
-            String class_name = decorative_items_change_mode_class.getSimpleName();
-            if (decorative_items_change_modes.containsKey(name)) {
-                logger.warn("Trying to add Decorative Items Change Mode type " + name + " (" + class_name + ".class) which already exist!");
-            } else {
-                decorative_items_change_modes.put(name, decorative_items_change_mode_class);
-                logger.info("Successfully added Decorative Items Change Mode type " + name + " (" + class_name + ".class)!");
+                super_objects.add(super_object_storage);
+                logger.info("Successfully added Super Object \"" + super_object_type + "\" with type \"" + type + "\"!");
             }
         }
         logger.info("Registration complete!");
     }
 
-    private void createManagers() {
-        File[] managers_files = managers_directory.listFiles();
-        if (managers_files.length == 0) {
-            logger.warn("No one manager was found.");
-        } else {
-            for (File manager_file : managers_files) {
-                try {
-                    ConfigurationLoader<CommentedConfigurationNode> manager_configuration_loader =
-                            HoconConfigurationLoader.builder().setFile(manager_file).build();
-                    ConfigurationNode manager_node = manager_configuration_loader.load();
-                    Manager manager = new Manager(manager_node);
-                    created_managers.add(manager);
-                    logger.info("Manager \"" + manager.getName() + "\" successfully created!");
-                } catch (Exception e) {
-                    logger.info("Exception creating manager " + manager_file.getName() + "!", e);
-                }
-            }
-            logger.info("All managers created!");
+    private void loadConfigValues() {
+        try {
+            debug = config.getNode("DEBUG").getBoolean(false);
+            check_updates = config.getNode("CHECK_UPDATES").getBoolean(true);
+            api_version = config.getNode("API_VERSION").getDouble(6);
+            hologram_offset = config.getNode("HOLOGRAMS_OFFSET").getValue(TypeToken.of(Vector3d.class), new Vector3d(0.5, -1.2, 0.5));
+        } catch (ObjectMappingException e) {
+            logger.warn("Exception loading config values!", e);
         }
     }
 
-    private void loadEconomy() {
+    private void loadSavedSuperObjects() {
+        saved_super_objects_config.getNode("SAVED_SUPER_OBJECTS").getChildrenList().forEach(node -> {
+            ConfigurationNode super_object_type_node = node.getNode("SUPER_OBJECT_TYPE");
+            ConfigurationNode saved_id_node = node.getNode("SAVED_ID");
+            ConfigurationNode id_node = node.getNode("ID");
+            String id = id_node.isVirtual() ? "Unknown ID" : id_node.getString();
+            if (super_object_type_node.isVirtual()) {
+                throw new RuntimeException("SUPER_OBJECT_TYPE node does not exist for Saved Super Object with id \"" + id + "\"!");
+            }
+            String super_object_type_name = super_object_type_node.getString();
+            if (!SuperObjectType.SUPER_OBJECT_TYPES.containsKey(super_object_type_name)) {
+                throw new RuntimeException("Super Object Type \"" + super_object_type_name + "\" does not found!");
+            }
+            SuperObjectType super_object_type = SuperObjectType.SUPER_OBJECT_TYPES.get(super_object_type_name);
+            if (saved_id_node.isVirtual()) {
+                throw new RuntimeException("SAVED_ID node does not exist for Saved Super Object \"" + super_object_type + "\" with id \"" + id + "\"!");
+            }
+            String saved_id = saved_id_node.getString();
+            Pair<SuperObjectType, String> pair = new Pair<SuperObjectType, String>(super_object_type, saved_id);
+            if (saved_super_objects.containsKey(pair)) {
+                throw new RuntimeException("Saved Super Objects already contains Saved Super Object \"" + super_object_type + "\" with saved ID \"" + saved_id + "\"!");
+            }
+            saved_super_objects.put(pair, Utils.createSuperObject(node, super_object_type));
+        });
+    }
+
+    private void createManagers() {
+        try {
+            Files.walk(managers_directory.toPath()).forEach(path -> {
+                File manager_file = path.toFile();
+                if (!manager_file.isDirectory()) {
+                    try {
+                        ConfigurationLoader<CommentedConfigurationNode> manager_configuration_loader =
+                                HoconConfigurationLoader.builder().setFile(manager_file).build();
+                        ConfigurationNode manager_node = manager_configuration_loader.load();
+                        Manager manager = new Manager(manager_node);
+                        created_managers.add(manager);
+                        logger.info("Manager \"" + manager.getName() + "\" successfully created!");
+                    } catch (Exception e) {
+                        logger.info("Exception creating manager " + manager_file.getName() + "!", e);
+                    }
+                }
+            });
+        } catch (Exception e) {
+            logger.warn("Exception creating managers!", e);
+        }
+    }
+
+    private boolean loadEconomy() {
         optional_economy_service = Sponge.getServiceManager().provide(EconomyService.class);
         if (optional_economy_service.isPresent()) {
             logger.info("Economy Service found!");
-        } else {
-            logger.info("Economy Service does not found!");
+            return true;
         }
+        logger.warn("Economy Service does not found!");
+        logger.info("Please install plugin that provides Economy Service, if you want use economical features.");
+        return false;
     }
 
-    private void checkForUpdates() {
+    private boolean loadHologramsService() {
+        try {
+            optional_holograms_service = Sponge.getServiceManager().provide(HologramsService.class);
+            if (optional_holograms_service.isPresent()) {
+                logger.info("Holograms Service found!");
+                return true;
+            }
+        } catch (NoClassDefFoundError ignored) {}
+        logger.warn("Holograms Service does not found!");
+        logger.info("Please install \"Holograms\" plugin (https://ore.spongepowered.org/RandomByte/Holograms) if you want use holograms!");
+        return false;
+    }
+
+    private void checkUpdates() {
         Sponge.getScheduler().createTaskBuilder().async().execute(() -> {
             try {
                 InputStreamReader reader = new InputStreamReader(new URL("https://ore.spongepowered.org/api/projects/gwm_crates").openStream());
@@ -366,21 +390,16 @@ public class GWMCrates {
         }).submit(this);
     }
 
-    public Optional<Manager> getManagerById(String manager_id) {
-        for (Manager manager : created_managers) {
-            if (manager.getId().equalsIgnoreCase(manager_id)) {
-                return Optional.of(manager);
-            }
-        }
-        return Optional.empty();
-    }
-
     public Cause getDefaultCause() {
         return default_cause;
     }
 
     public File getConfigDirectory() {
         return config_directory;
+    }
+
+    public File getManagersDirectory() {
+        return managers_directory;
     }
 
     public Logger getLogger() {
@@ -391,32 +410,20 @@ public class GWMCrates {
         return optional_economy_service;
     }
 
+    public Optional<HologramsService> getHologramsService() {
+        return optional_holograms_service;
+    }
+
     public PluginContainer getPluginContainer() {
         return plugin_container;
     }
 
-    public HashMap<String, Class<? extends Case>> getCases() {
-        return cases;
+    public HashSet<SuperObjectStorage> getSuperObjectStorage() {
+        return super_objects;
     }
 
-    public HashMap<String, Class<? extends Key>> getKeys() {
-        return keys;
-    }
-
-    public HashMap<String, Class<? extends Drop>> getDrops() {
-        return drops;
-    }
-
-    public HashMap<String, Class<? extends OpenManager>> getOpenManagers() {
-        return open_managers;
-    }
-
-    public HashMap<String, Class<? extends Preview>> getPreviews() {
-        return previews;
-    }
-
-    public HashMap<String, Class<? extends DecorativeItemsChangeMode>> getDecorativeItemsChangeModes() {
-        return decorative_items_change_modes;
+    public HashMap<Pair<SuperObjectType, String>, SuperObject> getSavedSuperObjects() {
+        return saved_super_objects;
     }
 
     public HashSet<Manager> getCreatedManagers() {
@@ -448,6 +455,18 @@ public class GWMCrates {
     }
 
     public boolean isDebugEnabled() {
-        return config.getNode("DEBUG").getBoolean(false);
+        return debug;
+    }
+
+    public boolean isCheckUpdates() {
+        return check_updates;
+    }
+
+    public double getApiVersion() {
+        return api_version;
+    }
+
+    public Vector3d getHologramOffset() {
+        return hologram_offset;
     }
 }

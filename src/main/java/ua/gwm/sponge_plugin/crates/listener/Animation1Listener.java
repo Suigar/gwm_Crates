@@ -1,6 +1,7 @@
 package ua.gwm.sponge_plugin.crates.listener;
 
 import com.flowpowered.math.vector.Vector3i;
+import de.randombyte.holograms.api.HologramsService;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.command.CommandSource;
 import org.spongepowered.api.entity.Entity;
@@ -15,8 +16,10 @@ import org.spongepowered.api.world.BlockChangeFlag;
 import org.spongepowered.api.world.Location;
 import org.spongepowered.api.world.World;
 import ua.gwm.sponge_plugin.crates.GWMCrates;
+import ua.gwm.sponge_plugin.crates.event.PlayerOpenedCrateEvent;
 import ua.gwm.sponge_plugin.crates.open_manager.open_managers.Animation1OpenManager;
-import ua.gwm.sponge_plugin.crates.util.GWMCratesUtils;
+import ua.gwm.sponge_plugin.crates.util.UnsafeUtils;
+import ua.gwm.sponge_plugin.crates.util.Utils;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -32,7 +35,7 @@ public class Animation1Listener {
         if (!entity.getType().equals(EntityTypes.PLAYER)) return;
         Player player = (Player) entity;
         if (!Animation1OpenManager.PLAYERS_OPENING_ANIMATION1.containsKey(player) || OPENED_PLAYERS.containsKey(player)) return;
-        if (GWMCratesUtils.isLocationChanged(event.getFromTransform(), event.getToTransform(), true)) {
+        if (Utils.isLocationChanged(event.getFromTransform(), event.getToTransform(), true)) {
             event.setCancelled(true);
         }
     }
@@ -80,11 +83,13 @@ public class Animation1Listener {
         for (boolean bool : information.getLocations().values()) {
             if (!bool) return;
         }
+        PlayerOpenedCrateEvent opened_event = new PlayerOpenedCrateEvent(player, information.getManager(), null);
+        Sponge.getEventManager().post(opened_event);
         OPENED_PLAYERS.put(player, information.getOpenManager());
         Sponge.getScheduler().createTaskBuilder().delayTicks(information.getOpenManager().getCloseDelay()).execute(() -> {
             information.getOriginalBlockStates().forEach(((location, state) ->
-                    location.setBlock(state, BlockChangeFlag.NONE, GWMCrates.getInstance().getDefaultCause())));
-            information.getHolograms().forEach(hologram -> hologram.getEntity().remove());
+                UnsafeUtils.setBlock(location, state, BlockChangeFlag.NONE)));
+            information.getHolograms().forEach(HologramsService.Hologram::remove);
             Animation1OpenManager.PLAYERS_OPENING_ANIMATION1.remove(player);
             OPENED_PLAYERS.remove(player);
         }).submit(GWMCrates.getInstance());

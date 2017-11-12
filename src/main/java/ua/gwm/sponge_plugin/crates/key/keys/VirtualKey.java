@@ -25,8 +25,8 @@ public class VirtualKey extends Key {
         }
     }
 
-    public VirtualKey(Optional<BigDecimal> price, String virtual_name) {
-        super(price);
+    public VirtualKey(Optional<BigDecimal> price, Optional<String> id, String virtual_name) {
+        super("VIRTUAL", id, price);
         this.virtual_name = virtual_name;
     }
 

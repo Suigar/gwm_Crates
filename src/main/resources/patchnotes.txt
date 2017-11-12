@@ -1,0 +1,17 @@
+0. Added 'patchnotes.txt' file :D
+1. Reworked config.conf
+1.1. Added 'CHECK_UPDATES' parameter.
+1.2. Added 'API_VERSION' parameter.
+1.3. Added 'HOLOGRAM_OFFSET' parameter.
+2. Added API7 support (to enable it, set 'API_VERSION' parameter in 'config.conf' to '7')
+3. Added GUI crates configurator (/gwmcrates gui')
+4. Reworked plugin structure, now Cases, Keys, Open Managers, Drops, Previews and Decorative Items Change Modes are Super Objects.
+5. Added Saved Super Objects, and type 'SAVED' for all Super Objects.
+6. Added 'DELAY' Drop.
+7. Added 'PERMISSION' Drop.
+8. Reworked 'ENTITY' Case, now it dont spawn entity, it only listens for clicks on entity specified by parameter 'ENTITY_UUID'.
+9. Fixed bug which allow to open crate for players who havent permission to open this crate.
+10. Now, to use holograms you need install 'Holograms' plugin.
+11. Reworked 'open crate message', which now can be configured for each crate, or be disabled.
+12. If 'DEBUG' parameter is enabled, plugin will log any crate opening (player, manager, drop).
+13. Some more things, which I forget..

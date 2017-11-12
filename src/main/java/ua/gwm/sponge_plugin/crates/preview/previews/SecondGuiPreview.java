@@ -17,8 +17,9 @@ import ua.gwm.sponge_plugin.crates.GWMCrates;
 import ua.gwm.sponge_plugin.crates.drop.Drop;
 import ua.gwm.sponge_plugin.crates.manager.Manager;
 import ua.gwm.sponge_plugin.crates.preview.Preview;
-import ua.gwm.sponge_plugin.crates.util.GWMCratesUtils;
 import ua.gwm.sponge_plugin.crates.util.Pair;
+import ua.gwm.sponge_plugin.crates.util.UnsafeUtils;
+import ua.gwm.sponge_plugin.crates.util.Utils;
 
 import java.util.HashMap;
 import java.util.Iterator;
@@ -43,14 +44,14 @@ public class SecondGuiPreview extends Preview {
         }
     }
 
-    public SecondGuiPreview(Optional<Text> display_name, boolean show_only_drops_with_drop_item) {
-        super();
+    public SecondGuiPreview(Optional<String> id, Optional<Text> display_name) {
+        super("SECOND", id);
         this.display_name = display_name;
     }
 
     @Override
     public void preview(Player player, Manager manager) {
-        InventoryDimension dimension = new InventoryDimension(9, GWMCratesUtils.getInventoryHeight(manager.getDrops().size()));
+        InventoryDimension dimension = new InventoryDimension(9, Utils.getInventoryHeight(manager.getDrops().size()));
         Inventory inventory = display_name.map(text -> Inventory.builder().of(InventoryArchetypes.CHEST).
                 property(InventoryDimension.PROPERTY_NAME, dimension).
                 property(InventoryTitle.PROPERTY_NAME, new InventoryTitle(text)).
@@ -69,7 +70,7 @@ public class SecondGuiPreview extends Preview {
             ordered.getSlot(new SlotIndex(i)).get().set(drop_item);
             i++;
         }
-        Container container = player.openInventory(inventory, GWMCrates.getInstance().getDefaultCause()).get();
+        Container container = UnsafeUtils.openInventory(player, inventory).get();
         SECOND_GUI_CONTAINERS.put(container, new Pair<SecondGuiPreview, Manager>(this, manager));
     }
 }

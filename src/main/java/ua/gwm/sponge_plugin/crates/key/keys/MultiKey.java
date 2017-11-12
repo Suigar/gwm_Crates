@@ -2,10 +2,10 @@ package ua.gwm.sponge_plugin.crates.key.keys;
 
 import ninja.leaping.configurate.ConfigurationNode;
 import org.spongepowered.api.entity.living.player.Player;
-import ua.gwm.sponge_plugin.crates.GWMCrates;
 import ua.gwm.sponge_plugin.crates.key.Key;
+import ua.gwm.sponge_plugin.crates.util.SuperObjectType;
+import ua.gwm.sponge_plugin.crates.util.Utils;
 
-import java.lang.reflect.Constructor;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
@@ -26,22 +26,7 @@ public class MultiKey extends Key {
             }
             keys = new ArrayList<Key>();
             for (ConfigurationNode key_node : keys_node.getChildrenList()) {
-                ConfigurationNode key_type_node = key_node.getNode("TYPE");
-                if (key_type_node.isVirtual()) {
-                    throw new RuntimeException("TYPE node does not exist!");
-                }
-                String key_type = key_type_node.getString();
-                if (!GWMCrates.getInstance().getKeys().containsKey(key_type)) {
-                    throw new RuntimeException("Key type \"" + key_type + "\" not found!");
-                }
-                try {
-                    Class<? extends Key> key_class = GWMCrates.getInstance().getKeys().get(key_type);
-                    Constructor<? extends Key> key_constructor = key_class.getConstructor(ConfigurationNode.class);
-                    Key key = key_constructor.newInstance(key_node);
-                    keys.add(key);
-                } catch (Exception e) {
-                    throw new RuntimeException("Exception creating Key (part of Multi Key)!", e);
-                }
+                keys.add((Key) Utils.createSuperObject(key_node, SuperObjectType.KEY));
             }
             all_keys_needed = all_keys_needed_node.getBoolean(false);
         } catch (Exception e) {
@@ -49,8 +34,8 @@ public class MultiKey extends Key {
         }
     }
 
-    public MultiKey(Optional<BigDecimal> price, List<Key> keys, boolean all_keys_needed) {
-        super(price);
+    public MultiKey(Optional<BigDecimal> price, Optional<String> id, List<Key> keys, boolean all_keys_needed) {
+        super("MULTI", id, price);
         this.keys = keys;
         this.all_keys_needed = all_keys_needed;
     }

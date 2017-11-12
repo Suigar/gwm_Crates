@@ -1,11 +1,12 @@
-package ua.gwm.sponge_plugin.crates.decorative_items_change_mode.decorative_items_change_modes;
+package ua.gwm.sponge_plugin.crates.change_mode.change_modes;
 
 import ninja.leaping.configurate.ConfigurationNode;
 import org.spongepowered.api.item.inventory.ItemStack;
-import ua.gwm.sponge_plugin.crates.decorative_items_change_mode.DecorativeItemsChangeMode;
+import ua.gwm.sponge_plugin.crates.change_mode.DecorativeItemsChangeMode;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 public class OrderedChangeMode extends DecorativeItemsChangeMode {
 
@@ -21,8 +22,8 @@ public class OrderedChangeMode extends DecorativeItemsChangeMode {
         }
     }
 
-    public OrderedChangeMode(int change_delay, List<Integer> ignored_indices, boolean right) {
-        super(change_delay, ignored_indices);
+    public OrderedChangeMode(int change_delay, Optional<String> id, List<Integer> ignored_indices, boolean right) {
+        super("ORDERED", id, change_delay, ignored_indices);
         this.right = right;
     }
 

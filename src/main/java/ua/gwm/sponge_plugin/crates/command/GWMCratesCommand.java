@@ -5,20 +5,24 @@ import org.spongepowered.api.command.CommandCallable;
 import org.spongepowered.api.command.CommandException;
 import org.spongepowered.api.command.CommandResult;
 import org.spongepowered.api.command.CommandSource;
+import org.spongepowered.api.command.source.ConsoleSource;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.service.economy.Currency;
 import org.spongepowered.api.service.economy.EconomyService;
 import org.spongepowered.api.service.economy.account.UniqueAccount;
 import org.spongepowered.api.text.Text;
+import org.spongepowered.api.text.format.TextColors;
 import org.spongepowered.api.world.Location;
 import org.spongepowered.api.world.World;
 import ua.gwm.sponge_plugin.crates.GWMCrates;
 import ua.gwm.sponge_plugin.crates.caze.Case;
 import ua.gwm.sponge_plugin.crates.drop.Drop;
+import ua.gwm.sponge_plugin.crates.gui.GWMCratesGUI;
 import ua.gwm.sponge_plugin.crates.key.Key;
 import ua.gwm.sponge_plugin.crates.manager.Manager;
 import ua.gwm.sponge_plugin.crates.open_manager.OpenManager;
 import ua.gwm.sponge_plugin.crates.preview.Preview;
+import ua.gwm.sponge_plugin.crates.util.Utils;
 import ua.gwm.sponge_plugin.crates.util.LanguageUtils;
 import ua.gwm.sponge_plugin.crates.util.Pair;
 
@@ -41,6 +45,19 @@ public class GWMCratesCommand implements CommandCallable {
         switch (args[0].toLowerCase()) {
             case "help": {
                 sendHelp(source);
+                return CommandResult.success();
+            }
+            case "gui": {
+                if (!(source instanceof ConsoleSource)) {
+                    source.sendMessage(LanguageUtils.getText("HAVE_NOT_PERMISSION"));
+                    return CommandResult.success();
+                }
+                try {
+                    GWMCratesGUI.initialize();
+                } catch (Exception e) {
+                    source.sendMessage(Text.builder("GWMCratesGUI already initialized (or some exception happened)!").color(TextColors.RED).build());
+                    GWMCrates.getInstance().getLogger().warn("Exception when initializing GWMCratesGUI!", e);
+                }
                 return CommandResult.success();
             }
             case "save": {
@@ -72,7 +89,7 @@ public class GWMCratesCommand implements CommandCallable {
                     return CommandResult.success();
                 }
                 Player player = optional_player.get();
-                Optional<Manager> optional_manager = GWMCrates.getInstance().getManagerById(manager_id);
+                Optional<Manager> optional_manager = Utils.getManager(manager_id);
                 if (!optional_manager.isPresent()) {
                     source.sendMessage(LanguageUtils.getText("MANAGER_NOT_EXIST",
                             new Pair<String, String>("%MANAGER_ID%", manager_id)));
@@ -124,7 +141,7 @@ public class GWMCratesCommand implements CommandCallable {
                     source.sendMessage(LanguageUtils.getText("COMMAND_CAN_BE_EXECUTED_ONLY_BY_PLAYER"));
                     return CommandResult.success();
                 }
-                Optional<Manager> optional_manager = GWMCrates.getInstance().getManagerById(manager_id);
+                Optional<Manager> optional_manager = Utils.getManager(manager_id);
                 if (!optional_manager.isPresent()) {
                     source.sendMessage(LanguageUtils.getText("MANAGER_NOT_EXIST",
                             new Pair<String, String>("%MANAGER_ID%", manager_id)));
@@ -176,7 +193,7 @@ public class GWMCratesCommand implements CommandCallable {
                     return CommandResult.success();
                 }
                 Player player = optional_player.get();
-                Optional<Manager> optional_manager = GWMCrates.getInstance().getManagerById(manager_id);
+                Optional<Manager> optional_manager = Utils.getManager(manager_id);
                 if (!optional_manager.isPresent()) {
                     source.sendMessage(LanguageUtils.getText("MANAGER_NOT_EXIST",
                             new Pair<String, String>("%MANAGER_ID%", manager_id)));
@@ -225,7 +242,7 @@ public class GWMCratesCommand implements CommandCallable {
                 Currency currency = economy_service.getDefaultCurrency();
                 BigDecimal money = player_account.getBalance(currency);
                 String manager_id = args[2].toLowerCase();
-                Optional<Manager> optional_manager = GWMCrates.getInstance().getManagerById(manager_id);
+                Optional<Manager> optional_manager = Utils.getManager(manager_id);
                 if (!optional_manager.isPresent()) {
                     source.sendMessage(LanguageUtils.getText("MANAGER_NOT_EXIST",
                             new Pair<String, String>("%MANAGER_ID%", manager_id)));
@@ -360,7 +377,7 @@ public class GWMCratesCommand implements CommandCallable {
                     return CommandResult.empty();
                 }
                 String manager_id = args[3].toLowerCase();
-                Optional<Manager> optional_manager = GWMCrates.getInstance().getManagerById(manager_id);
+                Optional<Manager> optional_manager = Utils.getManager(manager_id);
                 if (!optional_manager.isPresent()) {
                     source.sendMessage(LanguageUtils.getText("MANAGER_NOT_EXIST",
                             new Pair<String, String>("%MANAGER_ID%", manager_id)));

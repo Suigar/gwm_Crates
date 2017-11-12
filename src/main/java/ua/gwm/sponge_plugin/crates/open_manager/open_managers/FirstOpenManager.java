@@ -16,22 +16,19 @@ import org.spongepowered.api.item.inventory.type.OrderedInventory;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.serializer.TextSerializers;
 import ua.gwm.sponge_plugin.crates.GWMCrates;
+import ua.gwm.sponge_plugin.crates.change_mode.DecorativeItemsChangeMode;
 import ua.gwm.sponge_plugin.crates.drop.Drop;
 import ua.gwm.sponge_plugin.crates.event.PlayerOpenCrateEvent;
 import ua.gwm.sponge_plugin.crates.event.PlayerOpenedCrateEvent;
 import ua.gwm.sponge_plugin.crates.manager.Manager;
 import ua.gwm.sponge_plugin.crates.open_manager.OpenManager;
-import ua.gwm.sponge_plugin.crates.decorative_items_change_mode.DecorativeItemsChangeMode;
-import ua.gwm.sponge_plugin.crates.util.GWMCratesUtils;
-import ua.gwm.sponge_plugin.crates.util.LanguageUtils;
-import ua.gwm.sponge_plugin.crates.util.Pair;
+import ua.gwm.sponge_plugin.crates.util.*;
 
-import java.lang.reflect.Constructor;
 import java.util.*;
 
-public class FirstGuiOpenManager extends OpenManager {
+public class FirstOpenManager extends OpenManager {
 
-    public static final HashMap<Container, Pair<FirstGuiOpenManager, Manager>> FIRST_GUI_CONTAINERS = new HashMap<Container, Pair<FirstGuiOpenManager, Manager>>();
+    public static final HashMap<Container, Pair<FirstOpenManager, Manager>> FIRST_GUI_CONTAINERS = new HashMap<Container, Pair<FirstOpenManager, Manager>>();
     public static final HashSet<Container> SHOWN_GUI = new HashSet<Container>();
 
     private Optional<Text> display_name = Optional.empty();
@@ -45,7 +42,7 @@ public class FirstGuiOpenManager extends OpenManager {
     private Optional<SoundType> win_sound = Optional.empty();
     private Optional<DecorativeItemsChangeMode> decorative_items_change_mode = Optional.empty();
 
-    public FirstGuiOpenManager(ConfigurationNode node) {
+    public FirstOpenManager(ConfigurationNode node) {
         super(node);
         try {
             ConfigurationNode display_name_node = node.getNode("DISPLAY_NAME");
@@ -66,7 +63,7 @@ public class FirstGuiOpenManager extends OpenManager {
             }
             decorative_items = new ArrayList<ItemStack>();
             for (ConfigurationNode decorative_item_node : decorative_items_node.getChildrenList()) {
-                decorative_items.add(GWMCratesUtils.parseItem(decorative_item_node));
+                decorative_items.add(Utils.parseItem(decorative_item_node));
             }
             if (decorative_items.size() != 20) {
                 throw new RuntimeException("DECORATIVE_ITEMS size must be 20 instead of " + decorative_items.size() + "!");
@@ -89,33 +86,19 @@ public class FirstGuiOpenManager extends OpenManager {
                 win_sound = Optional.of(win_sound_node.getValue(TypeToken.of(SoundType.class)));
             }
             if (!decorative_items_change_mode_node.isVirtual()) {
-                ConfigurationNode decorative_items_change_mode_type_node = decorative_items_change_mode_node.getNode("TYPE");
-                if (decorative_items_change_mode_type_node.isVirtual()) {
-                    throw new RuntimeException("TYPE node for Decorative Items Change Mode does not exist!");
-                }
-                String first_gui_decorative_items_change_mode_type = decorative_items_change_mode_type_node.getString();
-                if (!GWMCrates.getInstance().getDecorativeItemsChangeModes().containsKey(first_gui_decorative_items_change_mode_type)) {
-                    throw new RuntimeException("Decorative Items Change Mode type \"" + first_gui_decorative_items_change_mode_type + "\" not found!");
-                }
-                try {
-                    Class<? extends DecorativeItemsChangeMode> first_gui_decorative_items_change_mode_class = GWMCrates.getInstance().getDecorativeItemsChangeModes().get(first_gui_decorative_items_change_mode_type);
-                    Constructor<? extends DecorativeItemsChangeMode> first_gui_decorative_items_change_mode_constructor = first_gui_decorative_items_change_mode_class.getConstructor(ConfigurationNode.class);
-                    decorative_items_change_mode = Optional.of(first_gui_decorative_items_change_mode_constructor.newInstance(decorative_items_change_mode_node));
-                } catch (Exception e) {
-                    throw new RuntimeException("Exception creating Decorative Items Change Mode!", e);
-                }
+                decorative_items_change_mode = Optional.of((DecorativeItemsChangeMode) Utils.createSuperObject(decorative_items_change_mode_node, SuperObjectType.DECORATIVE_ITEMS_CHANGE_MODE));
             }
         } catch (Exception e) {
             throw new RuntimeException("Exception creating First Gui Open Manager!", e);
         }
     }
 
-    public FirstGuiOpenManager(Optional<SoundType> open_sound, Optional<Text> display_name,
-                               List<ItemStack> decorative_items, List<Integer> scroll_delays,
-                               boolean clear_decorative_items, boolean clear_other_drops,
-                               int close_delay, Optional<SoundType> scroll_sound,
-                               Optional<SoundType> win_sound, Optional<DecorativeItemsChangeMode> decorative_items_change_mode) {
-        super(open_sound);
+    public FirstOpenManager(Optional<String> id, Optional<SoundType> open_sound, Optional<Text> display_name,
+                            List<ItemStack> decorative_items, List<Integer> scroll_delays,
+                            boolean clear_decorative_items, boolean clear_other_drops,
+                            int close_delay, Optional<SoundType> scroll_sound,
+                            Optional<SoundType> win_sound, Optional<DecorativeItemsChangeMode> decorative_items_change_mode) {
+        super("FIRST", id, open_sound);
         this.display_name = display_name;
         if (decorative_items.size() != 20) {
             throw new RuntimeException("DECORATIVE_ITEMS size must be 20 instead of " + decorative_items.size() + "!");
@@ -145,16 +128,16 @@ public class FirstGuiOpenManager extends OpenManager {
             ordered.getSlot(new SlotIndex(i)).get().set(decorative_items.get(i));
         }
         for (int i = 10; i < 17; i++) {
-            Drop new_drop = GWMCratesUtils.chooseDropByLevel(manager.getDrops(), player, true);
+            Drop new_drop = Utils.chooseDropByLevel(manager.getDrops(), player, true);
             drop_list.add(new_drop);
             ordered.getSlot(new SlotIndex(i)).get().set(new_drop.getDropItem().orElse(ItemStack.of(ItemTypes.NONE, 1)));
         }
         for (int i = 17; i < 27; i++) {
             ordered.getSlot(new SlotIndex(i)).get().set(decorative_items.get(i - 7));
         }
-        Container container = player.openInventory(inventory, GWMCrates.getInstance().getDefaultCause()).get();
+        Container container = UnsafeUtils.openInventory(player, inventory).get();
         getOpenSound().ifPresent(open_sound -> player.playSound(open_sound, player.getLocation().getPosition(), 1.));
-        FIRST_GUI_CONTAINERS.put(container, new Pair<FirstGuiOpenManager, Manager>(this, manager));
+        FIRST_GUI_CONTAINERS.put(container, new Pair<FirstOpenManager, Manager>(this, manager));
         decorative_items_change_mode.ifPresent(mode -> Sponge.getScheduler().
                     createTaskBuilder().delayTicks(mode.getChangeDelay()).
                     execute(new DropChangeRunnable(player, container, ordered, new ArrayList<ItemStack>(decorative_items), mode)).
@@ -167,7 +150,7 @@ public class FirstGuiOpenManager extends OpenManager {
                 for (int j = 10; j < 16; j++) {
                     ordered.getSlot(new SlotIndex(j)).get().set(inventory.query(new SlotIndex(j + 1)).peek().orElse(ItemStack.of(ItemTypes.NONE, 1)));
                 }
-                Drop new_drop = GWMCratesUtils.chooseDropByLevel(manager.getDrops(), player, !(finalI == scroll_delays.size() - 5));
+                Drop new_drop = Utils.chooseDropByLevel(manager.getDrops(), player, !(finalI == scroll_delays.size() - 5));
                 drop_list.add(new_drop);
                 ordered.getSlot(new SlotIndex(16)).get().set(new_drop.getDropItem().orElse(ItemStack.of(ItemTypes.NONE, 1)));
                 scroll_sound.ifPresent(sound -> player.playSound(sound, player.getLocation().getPosition(), 1.));
@@ -194,25 +177,17 @@ public class FirstGuiOpenManager extends OpenManager {
                 }
             }
             SHOWN_GUI.add(container);
-            PlayerOpenedCrateEvent opened_event = new PlayerOpenedCrateEvent(player, manager,
-                    LanguageUtils.getText("SUCCESSFULLY_OPENED_MANAGER",
-                            new Pair<String, String>("%MANAGER%", manager.getName())));
+            PlayerOpenedCrateEvent opened_event = new PlayerOpenedCrateEvent(player, manager, drop);
             Sponge.getEventManager().post(opened_event);
-            player.sendMessage(opened_event.getMessage());
         }).submit(GWMCrates.getInstance());
         Sponge.getScheduler().createTaskBuilder().delayTicks(wait_time + scroll_delays.get(scroll_delays.size() - 1) + close_delay).execute(() -> {
             Optional<Container> optional_open_inventory = player.getOpenInventory();
             if (optional_open_inventory.isPresent() && container.equals(optional_open_inventory.get())) {
-                player.closeInventory(GWMCrates.getInstance().getDefaultCause());
+                UnsafeUtils.closeInventory(player);
             }
             SHOWN_GUI.remove(container);
             FIRST_GUI_CONTAINERS.remove(container);
         }).submit(GWMCrates.getInstance());
-    }
-
-    @Override
-    public boolean canOpen(Player player, Manager manager) {
-        return true;
     }
 
     public List<ItemStack> getDecorativeItems() {

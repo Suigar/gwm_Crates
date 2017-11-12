@@ -12,8 +12,8 @@ public class EmptyKey extends Key {
         super(node);
     }
 
-    public EmptyKey() {
-        super(Optional.empty());
+    public EmptyKey(Optional<String> id) {
+        super("EMPTY", id, Optional.empty());
     }
 
     @Override
