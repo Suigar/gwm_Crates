@@ -61,7 +61,7 @@ import java.util.Optional;
 @Plugin(
         id = "gwm_crates",
         name = "GWMCrates",
-        version = "2.0",
+        version = "2.01",
         description = "Universal crates plugin for your server!",
         authors = {"GWM"/*
                 Nazar Kalinovskiy
@@ -72,7 +72,7 @@ import java.util.Optional;
                 Wire(@grewema)*/})
 public class GWMCrates {
 
-    public static final double CURRENT_VERSION = 2.0;
+    public static final double CURRENT_VERSION = 2.01;
 
     private static GWMCrates instance;
 
@@ -239,16 +239,22 @@ public class GWMCrates {
     }
 
     private void deleteHolograms() {
-        for (Manager manager : created_managers) {
-            Case caze = manager.getCase();
-            if (caze instanceof BlockCase) {
-                BlockCase block_case = (BlockCase) caze;
-                block_case.getCreatedHologram().ifPresent(HologramsService.Hologram::remove);
+        try {
+            for (Manager manager : created_managers) {
+                Case caze = manager.getCase();
+                if (caze instanceof BlockCase) {
+                    BlockCase block_case = (BlockCase) caze;
+                    block_case.getCreatedHologram().ifPresent(HologramsService.Hologram::remove);
+                }
+            }
+            Animation1OpenManager.PLAYERS_OPENING_ANIMATION1.values().
+                    forEach(information -> information.getHolograms().
+                            forEach(HologramsService.Hologram::remove));
+        } catch (Exception e) {
+            if (debug) {
+                logger.warn("Exception deleting holograms (Ignore this if you have no holograms)!", e);
             }
         }
-        Animation1OpenManager.PLAYERS_OPENING_ANIMATION1.values().
-                forEach(information -> information.getHolograms().
-                        forEach(HologramsService.Hologram::remove));
     }
 
     private void register() {
@@ -297,7 +303,7 @@ public class GWMCrates {
             debug = config.getNode("DEBUG").getBoolean(false);
             check_updates = config.getNode("CHECK_UPDATES").getBoolean(true);
             api_version = config.getNode("API_VERSION").getDouble(6);
-            hologram_offset = config.getNode("HOLOGRAMS_OFFSET").getValue(TypeToken.of(Vector3d.class), new Vector3d(0.5, -1.2, 0.5));
+            hologram_offset = config.getNode("HOLOGRAM_OFFSET").getValue(TypeToken.of(Vector3d.class), new Vector3d(0.5, -1.2, 0.5));
         } catch (ObjectMappingException e) {
             logger.warn("Exception loading config values!", e);
         }

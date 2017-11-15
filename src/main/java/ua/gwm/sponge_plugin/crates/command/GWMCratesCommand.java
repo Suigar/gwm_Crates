@@ -177,7 +177,8 @@ public class GWMCratesCommand implements CommandCallable {
                             new Pair<String, String>("%PLAYER%", target.getName())));
                     if (GWMCrates.getInstance().getConfig().getNode("TELL_FORCE_CRATE_OPEN_INFO").getBoolean(true)) {
                         target.sendMessage(LanguageUtils.getText("CRATE_FORCE_OPENED_BY_PLAYER",
-                                new Pair<String, String>("%PLAUER%", optional_player.get().getName())));
+                                new Pair<String, String>("%PLAYER%", optional_player.get().getName()),
+                                new Pair<String, String>("%MANAGER%", manager.getName())));
                     }
                 }
                 return CommandResult.success();
