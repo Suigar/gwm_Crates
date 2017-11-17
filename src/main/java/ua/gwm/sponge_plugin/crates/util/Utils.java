@@ -349,6 +349,7 @@ public class Utils {
             return Optional.empty();
         }
         HologramsService holograms_service = optional_hologram_service.get();
+        location.getExtent().loadChunk(location.getChunkPosition(), true);
         Optional<HologramsService.Hologram> optional_hologram = holograms_service.
                 createHologram(location.add(GWMCrates.getInstance().getHologramOffset()), text);
         if (!optional_hologram.isPresent()) {

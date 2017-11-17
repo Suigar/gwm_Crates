@@ -61,7 +61,7 @@ import java.util.Optional;
 @Plugin(
         id = "gwm_crates",
         name = "GWMCrates",
-        version = "2.01",
+        version = "2.02",
         description = "Universal crates plugin for your server!",
         authors = {"GWM"/*
                 Nazar Kalinovskiy
@@ -72,7 +72,7 @@ import java.util.Optional;
                 Wire(@grewema)*/})
 public class GWMCrates {
 
-    public static final double CURRENT_VERSION = 2.01;
+    public static final double CURRENT_VERSION = 2.02;
 
     private static GWMCrates instance;
 
@@ -158,7 +158,7 @@ public class GWMCrates {
         if (check_updates) {
             checkUpdates();
         }
-        logger.info("PreInitialization complete!");
+        logger.info("\"PreInitialization\" complete!");
     }
 
     @Listener
@@ -174,30 +174,36 @@ public class GWMCrates {
         Sponge.getCommandManager().register(this, new GWMCratesCommand(),
                 "gwmcrates", "gwmcrate", "crates", "crate");
         register();
-        logger.info("Initialization complete!");
+        logger.info("\"Initialization\" complete!");
     }
 
     @Listener
     public void onPostInitialization(GamePostInitializationEvent event) {
         loadEconomy();
         loadHologramsService();
+        logger.info("\"PostInitialization\" complete!");
+    }
+
+    @Listener
+    public void onStarting(GameStartingServerEvent event) {
         loadSavedSuperObjects();
         Sponge.getScheduler().createTaskBuilder().
                 delayTicks(config.getNode("MANAGERS_LOAD_DELAY").getLong(20)).
                 execute(this::createManagers).submit(this);
-        logger.info("PostInitialization complete!");
+        logger.info("\"GameStarting\" complete!");
     }
 
     @Listener
     public void onStopping(GameStoppingServerEvent event) {
         deleteHolograms();
         save();
-        logger.info("Stopping complete!");
+        logger.info("\"GameStopping\" complete!");
     }
 
     @Listener
     public void reloadListener(GameReloadEvent event) {
         reload();
+        logger.info("\"GameReload\" complete!");
     }
 
     public void save() {
@@ -244,12 +250,17 @@ public class GWMCrates {
                 Case caze = manager.getCase();
                 if (caze instanceof BlockCase) {
                     BlockCase block_case = (BlockCase) caze;
-                    block_case.getCreatedHologram().ifPresent(HologramsService.Hologram::remove);
+                    Optional<HologramsService.Hologram> optional_hologram = block_case.getCreatedHologram();
+                    if (optional_hologram.isPresent()) {
+                        optional_hologram.get().remove();
+                    }
+                }
+                for (Animation1OpenManager.Information information : Animation1OpenManager.PLAYERS_OPENING_ANIMATION1.values()) {
+                    for (HologramsService.Hologram hologram : information.getHolograms()) {
+                        hologram.remove();
+                    }
                 }
             }
-            Animation1OpenManager.PLAYERS_OPENING_ANIMATION1.values().
-                    forEach(information -> information.getHolograms().
-                            forEach(HologramsService.Hologram::remove));
         } catch (Exception e) {
             if (debug) {
                 logger.warn("Exception deleting holograms (Ignore this if you have no holograms)!", e);
@@ -331,8 +342,10 @@ public class GWMCrates {
             if (saved_super_objects.containsKey(pair)) {
                 throw new RuntimeException("Saved Super Objects already contains Saved Super Object \"" + super_object_type + "\" with saved ID \"" + saved_id + "\"!");
             }
+            logger.info("Successfully loaded Saved Super Object \"" + super_object_type + "\" with saved ID \"" + saved_id + "\" and ID \"" + id + "\"!");
             saved_super_objects.put(pair, Utils.createSuperObject(node, super_object_type));
         });
+        System.out.println("All Saved Super Objects loaded!");
     }
 
     private void createManagers() {
@@ -352,6 +365,7 @@ public class GWMCrates {
                     }
                 }
             });
+            System.out.println("All managers created!");
         } catch (Exception e) {
             logger.warn("Exception creating managers!", e);
         }

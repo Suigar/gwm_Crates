@@ -44,10 +44,7 @@ public abstract class OpenManagerConfigurationDialog extends ConfigurationDialog
         try {
             ConfigurationNode node = getNode();
             ConfigurationNode open_sound_node = node.getNode("OPEN_SOUND");
-            String open_sound = open_sound_combo_box.getSelectedText();
-            if (!open_sound.equals("NO SOUND")) {
-                open_sound_node.setValue(open_sound);
-            }
+            open_sound_node.setValue(open_sound_combo_box.getSelectedText().equals("NO SOUND") ? null : open_sound_combo_box.getSelectedText());
         } catch (Exception e) {
             throw new RuntimeException("Exception saving Open Manager Configuration Dialog!", e);
         }

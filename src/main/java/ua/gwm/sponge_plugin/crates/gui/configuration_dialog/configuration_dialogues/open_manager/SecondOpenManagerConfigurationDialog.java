@@ -194,7 +194,7 @@ public class SecondOpenManagerConfigurationDialog extends OpenManagerConfigurati
             close_delay_node.setValue(close_delay_field.hasText() ? close_delay_field.getText() : null);
             forbid_close_node.setValue(forbid_close_check_box.isSelected());
             give_random_on_close_node.setValue(give_random_on_close_check_box.isSelected());
-            click_sound_node.setValue(click_sound_combo_box.getSelectedText().equals("NO SOUND") ? click_sound_combo_box.getSelectedText() : null);
+            click_sound_node.setValue(click_sound_combo_box.getSelectedText().equals("NO SOUND") ? null : click_sound_combo_box.getSelectedText());
         } catch (Exception e) {
             throw new RuntimeException("Exception saving Second Open Manager Configuration Dialog!", e);
         }
