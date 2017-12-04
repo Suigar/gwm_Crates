@@ -19,7 +19,7 @@ public abstract class ConfigurationDialog extends JDialog {
     private ConfigurationNode node;
 
     public ConfigurationDialog(SuperObjectType super_object_type, String type, ConfigurationNode node) {
-        super(GWMCratesGUI.getInstance(), "GWMCrates GUI v" + GWMCrates.CURRENT_VERSION + " Super Object \"" + super_object_type + "\" type \"" + type + "\" configuration!", true);
+        super(GWMCratesGUI.getInstance(), "GWMCrates GUI v" + GWMCrates.VERSION + " Super Object \"" + super_object_type + "\" type \"" + type + "\" configuration!", true);
         this.super_object_type = super_object_type;
         this.type = type;
         this.node = node;

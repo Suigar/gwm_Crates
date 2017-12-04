@@ -101,6 +101,10 @@ public class SecondGuiOpenManagerListener {
                 PlayerOpenedCrateEvent opened_event = new PlayerOpenedCrateEvent(player, manager, drop);
                 Sponge.getEventManager().post(opened_event);
                 SecondOpenManager.SECOND_GUI_INVENTORIES.remove(container);
+            } else {
+                PlayerOpenedCrateEvent opened_event = new PlayerOpenedCrateEvent(player, manager, null);
+                Sponge.getEventManager().post(opened_event);
+                SecondOpenManager.SECOND_GUI_INVENTORIES.remove(container);
             }
         }
     }

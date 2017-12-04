@@ -18,6 +18,7 @@ import org.spongepowered.api.event.Listener;
 import org.spongepowered.api.event.cause.Cause;
 import org.spongepowered.api.event.game.GameReloadEvent;
 import org.spongepowered.api.event.game.state.*;
+import org.spongepowered.api.plugin.Dependency;
 import org.spongepowered.api.plugin.Plugin;
 import org.spongepowered.api.plugin.PluginContainer;
 import org.spongepowered.api.service.economy.EconomyService;
@@ -61,18 +62,20 @@ import java.util.Optional;
 @Plugin(
         id = "gwm_crates",
         name = "GWMCrates",
-        version = "2.02",
+        version = "2.1",
         description = "Universal crates plugin for your server!",
         authors = {"GWM"/*
-                Nazar Kalinovskiy
-                My contacts:
-                email(gwm@tutanota.com),
-                Discord(GWM#2192),
-                Telegram(@grewema),
-                Wire(@grewema)*/})
+                         * Nazar Kalinovskiy
+                         * My contacts:
+                         * E-Mail(gwm@tutanota.com),
+                         * Discord(GWM#2192)*/},
+        dependencies = {
+                //@Dependency(id = "gwm_library"),
+                @Dependency(id = "holograms", optional = true)
+        })
 public class GWMCrates {
 
-    public static final double CURRENT_VERSION = 2.02;
+    public static final Version VERSION = new Version(null, 2, 1);
 
     private static GWMCrates instance;
 
@@ -89,6 +92,7 @@ public class GWMCrates {
     @ConfigDir(sharedRoot = false)
     private File config_directory;
     private File managers_directory;
+    private File logs_directory;
 
     @Inject
     private Logger logger;
@@ -115,10 +119,9 @@ public class GWMCrates {
     private Config timed_keys_delays_config;
     private Config saved_super_objects_config;
 
-    private boolean debug = false;
+    private boolean log_opened_crates = false;
     private boolean check_updates = true;
-    private double api_version = 6;
-    private Vector3d hologram_offset = new Vector3d(0.5, -1.2, 0.5);
+    private Vector3d hologram_offset = new Vector3d(0.5, 1, 0.5);
 
     @Listener
     public void onConstruct(GameConstructionEvent event) {
@@ -128,13 +131,14 @@ public class GWMCrates {
     @Listener
     public void onPreInitialization(GamePreInitializationEvent event) {
         managers_directory = new File(config_directory, "managers");
+        logs_directory = new File(config_directory, "logs");
         if (!config_directory.exists()) {
             logger.info("Config directory does not exist! Trying to create it...");
             try {
                 config_directory.mkdirs();
                 logger.info("Config directory successfully created!");
             } catch (Exception e) {
-                logger.warn("Failed creating config directory!", e);
+                logger.warn("Failed to create config directory!", e);
             }
         }
         if (!managers_directory.exists()) {
@@ -143,7 +147,16 @@ public class GWMCrates {
                 managers_directory.mkdirs();
                 logger.info("Managers directory successfully created!");
             } catch (Exception e) {
-                logger.warn("Failed creating managers config directory!", e);
+                logger.warn("Failed to create managers config directory!", e);
+            }
+        }
+        if (!logs_directory.exists()) {
+            logger.info("Logs directory does not exist! Trying to create it...");
+            try {
+                logs_directory.mkdirs();
+                logger.info("Logs directory successfully created!");
+            } catch (Exception e) {
+                logger.warn("Failed to create logs config directory!");
             }
         }
         config = new Config("config.conf", false);
@@ -173,7 +186,6 @@ public class GWMCrates {
         Sponge.getEventManager().registerListeners(this, new DebugCrateListener());
         Sponge.getCommandManager().register(this, new GWMCratesCommand(),
                 "gwmcrates", "gwmcrate", "crates", "crate");
-        register();
         logger.info("\"Initialization\" complete!");
     }
 
@@ -181,6 +193,7 @@ public class GWMCrates {
     public void onPostInitialization(GamePostInitializationEvent event) {
         loadEconomy();
         loadHologramsService();
+        register();
         logger.info("\"PostInitialization\" complete!");
     }
 
@@ -189,7 +202,7 @@ public class GWMCrates {
         loadSavedSuperObjects();
         Sponge.getScheduler().createTaskBuilder().
                 delayTicks(config.getNode("MANAGERS_LOAD_DELAY").getLong(20)).
-                execute(this::createManagers).submit(this);
+                execute(this::loadManagers).submit(this);
         logger.info("\"GameStarting\" complete!");
     }
 
@@ -197,6 +210,11 @@ public class GWMCrates {
     public void onStopping(GameStoppingServerEvent event) {
         deleteHolograms();
         save();
+        try {
+            DebugCrateListener.LOG_FILE_WRITER.close();
+        } catch (Exception e) {
+            logger.warn("Exception closing crate opening logger file writer!", e);
+        }
         logger.info("\"GameStopping\" complete!");
     }
 
@@ -237,7 +255,7 @@ public class GWMCrates {
         loadEconomy();
         loadHologramsService();
         loadSavedSuperObjects();
-        createManagers();
+        loadManagers();
         if (check_updates) {
             checkUpdates();
         }
@@ -262,9 +280,7 @@ public class GWMCrates {
                 }
             }
         } catch (Exception e) {
-            if (debug) {
-                logger.warn("Exception deleting holograms (Ignore this if you have no holograms)!", e);
-            }
+            logger.debug("Exception deleting holograms (Ignore this if you have no holograms)!", e);
         }
     }
 
@@ -311,9 +327,8 @@ public class GWMCrates {
 
     private void loadConfigValues() {
         try {
-            debug = config.getNode("DEBUG").getBoolean(false);
+            log_opened_crates = config.getNode("LOG_OPENED_CRATES").getBoolean(false);
             check_updates = config.getNode("CHECK_UPDATES").getBoolean(true);
-            api_version = config.getNode("API_VERSION").getDouble(6);
             hologram_offset = config.getNode("HOLOGRAM_OFFSET").getValue(TypeToken.of(Vector3d.class), new Vector3d(0.5, -1.2, 0.5));
         } catch (ObjectMappingException e) {
             logger.warn("Exception loading config values!", e);
@@ -345,10 +360,10 @@ public class GWMCrates {
             logger.info("Successfully loaded Saved Super Object \"" + super_object_type + "\" with saved ID \"" + saved_id + "\" and ID \"" + id + "\"!");
             saved_super_objects.put(pair, Utils.createSuperObject(node, super_object_type));
         });
-        System.out.println("All Saved Super Objects loaded!");
+        logger.info("All Saved Super Objects loaded!");
     }
 
-    private void createManagers() {
+    private void loadManagers() {
         try {
             Files.walk(managers_directory.toPath()).forEach(path -> {
                 File manager_file = path.toFile();
@@ -359,15 +374,15 @@ public class GWMCrates {
                         ConfigurationNode manager_node = manager_configuration_loader.load();
                         Manager manager = new Manager(manager_node);
                         created_managers.add(manager);
-                        logger.info("Manager \"" + manager.getName() + "\" successfully created!");
+                        logger.info("Manager \"" + manager.getId() + "\" (\"" + manager.getName() + "\") successfully loaded!");
                     } catch (Exception e) {
-                        logger.info("Exception creating manager " + manager_file.getName() + "!", e);
+                        logger.info("Failed to load manager \"" + manager_file.getName() + "\"!", e);
                     }
                 }
             });
-            System.out.println("All managers created!");
+            logger.info("All managers loaded!");
         } catch (Exception e) {
-            logger.warn("Exception creating managers!", e);
+            logger.warn("Failed to load managers!", e);
         }
     }
 
@@ -400,9 +415,9 @@ public class GWMCrates {
             try {
                 InputStreamReader reader = new InputStreamReader(new URL("https://ore.spongepowered.org/api/projects/gwm_crates").openStream());
                 JsonObject object = new Gson().fromJson(reader, JsonObject.class);
-                double version = object.get("recommended").getAsJsonObject().get("name").getAsJsonPrimitive().getAsDouble();
-                if (version > CURRENT_VERSION) {
-                    logger.warn("New version (" + version + ") available on Ore!");
+                Version ore_version = Version.parse(object.get("recommended").getAsJsonObject().get("name").getAsJsonPrimitive().getAsString());
+                if (ore_version.compareTo(VERSION) > 0) {
+                    logger.warn("New version (" + ore_version.toString() + ") available on Ore!");
                 }
             } catch (Exception e) {
                 logger.warn("Exception checking plugin updates on Ore!", e);
@@ -420,6 +435,10 @@ public class GWMCrates {
 
     public File getManagersDirectory() {
         return managers_directory;
+    }
+
+    public File getLogsDirectory() {
+        return logs_directory;
     }
 
     public Logger getLogger() {
@@ -474,16 +493,12 @@ public class GWMCrates {
         return timed_keys_delays_config;
     }
 
-    public boolean isDebugEnabled() {
-        return debug;
+    public boolean isLogOpenedCrates() {
+        return log_opened_crates;
     }
 
     public boolean isCheckUpdates() {
         return check_updates;
-    }
-
-    public double getApiVersion() {
-        return api_version;
     }
 
     public Vector3d getHologramOffset() {

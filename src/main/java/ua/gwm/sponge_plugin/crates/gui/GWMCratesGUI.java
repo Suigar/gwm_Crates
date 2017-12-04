@@ -110,7 +110,7 @@ public class GWMCratesGUI extends JFrame {
     private ArrayList<FlatSuperObjectPanel> drops = new ArrayList<FlatSuperObjectPanel>();
 
     public GWMCratesGUI() {
-        super("GWMCrates v" + GWMCrates.CURRENT_VERSION + " GUI");
+        super("GWMCrates v" + GWMCrates.VERSION + " GUI");
         setSize(800, 600);
         setResizable(false);
         setLocationRelativeTo(null);

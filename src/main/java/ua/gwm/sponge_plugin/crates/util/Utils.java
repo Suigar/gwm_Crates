@@ -4,11 +4,14 @@ import com.google.common.reflect.TypeToken;
 import de.randombyte.holograms.api.HologramsService;
 import ninja.leaping.configurate.ConfigurationNode;
 import org.apache.commons.lang3.StringUtils;
+import org.spongepowered.api.Platform;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.data.DataContainer;
 import org.spongepowered.api.data.DataQuery;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.meta.ItemEnchantment;
+import org.spongepowered.api.entity.Entity;
+import org.spongepowered.api.entity.EntityTypes;
 import org.spongepowered.api.entity.Transform;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.item.Enchantment;
@@ -36,6 +39,18 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 public class Utils {
+
+    public static int SPONGE_API_VERSION;
+
+    static {
+        try {
+            String version = Sponge.getPlatform().getContainer(Platform.Component.API).getVersion().get();
+            SPONGE_API_VERSION = Integer.valueOf(version.substring(0, version.indexOf('.')));
+            GWMCrates.getInstance().getLogger().info("Automatically detected API version: " + SPONGE_API_VERSION);
+        } catch (Exception e) {
+            GWMCrates.getInstance().getLogger().warn("Exception automatically detecting API version!", e);
+        }
+    }
 
     public static boolean itemStacksEquals(ItemStack item, ItemStack other) {
         ItemStack copy1 = item.copy();
@@ -249,12 +264,11 @@ public class Utils {
 
     public static void addItemStack(Player player, ItemStack item, int amount) {
         if (amount > 0) {
-            ItemStack copy = item.copy();
+            /*ItemStack copy = item.copy();
             copy.setQuantity(amount);
-            player.getInventory().offer(copy);
-            /*int max_stack_quantity = item.getMaxStackQuantity();
-            Inventory inventory = player.getInventory();
-            Iterator<Slot> slot_iterator = inventory.<Slot>slots().iterator();
+            player.getInventory().offer(copy);*/
+            int max_stack_quantity = item.getMaxStackQuantity();
+            Iterator<Slot> slot_iterator = UnsafeUtils.getPlayerGridInventoryIterator(player);
             while (slot_iterator.hasNext() && amount > 0) {
                 Slot slot = slot_iterator.next();
                 Optional<ItemStack> optional_inventory_item = slot.peek();
@@ -266,11 +280,11 @@ public class Utils {
                             int difference = max_stack_quantity - inventory_item_quantity;
                             if (amount >= difference) {
                                 inventory_item.setQuantity(max_stack_quantity);
-                                slot.offer(inventory_item);
+                                slot.set(inventory_item);
                                 amount -= difference;
                             } else {
                                 inventory_item.setQuantity(inventory_item_quantity + amount);
-                                slot.offer(inventory_item);
+                                slot.set(inventory_item);
                                 amount = 0;
                             }
                         }
@@ -279,12 +293,12 @@ public class Utils {
                     if (amount >= max_stack_quantity) {
                         ItemStack copy = item.copy();
                         copy.setQuantity(max_stack_quantity);
-                        slot.offer(copy);
+                        slot.set(copy);
                         amount -= max_stack_quantity;
                     } else {
                         ItemStack copy = item.copy();
                         copy.setQuantity(amount);
-                        slot.offer(copy);
+                        slot.set(copy);
                         amount = 0;
                     }
                 }
@@ -297,7 +311,7 @@ public class Utils {
                 Entity entity = world.createEntity(EntityTypes.ITEM, player_location.getPosition());
                 UnsafeUtils.spawnEntity(world, entity);
                 entity.offer(Keys.REPRESENTED_ITEM, copy.createSnapshot());
-            }*/
+            }
         } else if (amount < 0) {
             amount = -amount;
             Inventory inventory = player.getInventory();

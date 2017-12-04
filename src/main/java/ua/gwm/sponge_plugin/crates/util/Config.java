@@ -9,6 +9,7 @@ import ua.gwm.sponge_plugin.crates.GWMCrates;
 
 import java.io.File;
 import java.net.URL;
+import java.nio.file.Path;
 import java.util.concurrent.TimeUnit;
 
 public class Config {
@@ -68,9 +69,7 @@ public class Config {
     public void save() {
         try {
             loader.save(node);
-            if (GWMCrates.getInstance().isDebugEnabled()) {
-                GWMCrates.getInstance().getLogger().info("Config \"" + name + "\" successfully saved!");
-            }
+            GWMCrates.getInstance().getLogger().debug("Config \"" + name + "\" successfully saved!");
         } catch (Exception e) {
             GWMCrates.getInstance().getLogger().warn("Fail saving config \"" + name + "\"!", e);
         }
@@ -79,9 +78,7 @@ public class Config {
     public void reload() {
         try {
             node = loader.load();
-            if (GWMCrates.getInstance().isDebugEnabled()) {
-                GWMCrates.getInstance().getLogger().info("Config \"" + name + "\" successfully reloaded!");
-            }
+            GWMCrates.getInstance().getLogger().debug("Config \"" + name + "\" successfully reloaded!");
         } catch (Exception e) {
             GWMCrates.getInstance().getLogger().warn("Fail reloading config \"" + name + "\"!", e);
         }
