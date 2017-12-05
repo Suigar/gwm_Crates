@@ -1,15 +1,2 @@
-v2.1
-1. Reworked plugin versions format, which now looks like: 'prefix-x.y.z', where:
-'prefix' - optional update prefix ('beta' as example),
-'x' - major update (changes very rarely, only really major updates)
-'y' - minor update (changes often, almost at all updates (except small updates))
-'z' - small update (changes if update contain only bug-fixes/language fix, etc.)
-2. Plugin now automatically detect SPONGE API version.
-2.1 Deleted 'API_VERSION' parameter from 'config.conf'
-3. Fixed bug with not working 'super_saved_object.conf' default config on API5.
-4. Added crate opening log.
-4.1 Deleted 'DEBUG' parameter from 'config.conf`
-4.1 Added 'LOG_OPENED_CRATES' parameter to 'config.conf'
-4.2 Added 'CRATE_OPENING_LOG_MESSAGE' parameter to 'language.conf'
-5. Reworked method that gives items to player. This may fix 'lost items'.
-6. Removed GSON from plugin jar file, because GSON already present in Sponge.
+v. 2.1.1
+1. Fixed bug with MULTIPLE-AMOUNT Key.

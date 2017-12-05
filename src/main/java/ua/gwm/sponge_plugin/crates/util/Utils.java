@@ -345,7 +345,7 @@ public class Utils {
             if (optional_inventory_item.isPresent()) {
                 ItemStack inventory_item = optional_inventory_item.get();
                 if (Utils.itemStacksEquals(inventory_item, item)) {
-                    amount += item.getQuantity();
+                    amount += inventory_item.getQuantity();
                 }
             }
         }
