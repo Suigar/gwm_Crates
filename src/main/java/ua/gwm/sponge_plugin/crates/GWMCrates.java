@@ -62,7 +62,7 @@ import java.util.Optional;
 @Plugin(
         id = "gwm_crates",
         name = "GWMCrates",
-        version = "2.1.1",
+        version = "2.1.2",
         description = "Universal crates plugin for your server!",
         authors = {"GWM"/*
                          * Nazar Kalinovskiy
@@ -70,12 +70,11 @@ import java.util.Optional;
                          * E-Mail(gwm@tutanota.com),
                          * Discord(GWM#2192)*/},
         dependencies = {
-                //@Dependency(id = "gwm_library"),
                 @Dependency(id = "holograms", optional = true)
         })
 public class GWMCrates {
 
-    public static final Version VERSION = new Version(null, 2, 1, 1);
+    public static final Version VERSION = new Version(null, 2, 1, 2);
 
     private static GWMCrates instance;
 
@@ -145,7 +144,9 @@ public class GWMCrates {
             logger.info("Managers directory does not exist! Trying to create it...");
             try {
                 managers_directory.mkdirs();
-                logger.info("Managers directory successfully created!");
+                logger.info("Managers directory successfully created! Trying extract example manager...");
+                new Config("managers" + File.separator + "example_manager.conf", false);
+                logger.info("Example manager successfully extracted!");
             } catch (Exception e) {
                 logger.warn("Failed to create managers config directory!", e);
             }

@@ -4,6 +4,7 @@ import ninja.leaping.configurate.ConfigurationNode;
 import ninja.leaping.configurate.ConfigurationOptions;
 import ninja.leaping.configurate.hocon.HoconConfigurationLoader;
 import org.jetbrains.annotations.NotNull;
+import ua.gwm.sponge_plugin.crates.GWMCrates;
 
 import javax.swing.*;
 import java.io.BufferedWriter;
@@ -31,9 +32,10 @@ public class GUIOutput {
 
     public void setText(ConfigurationNode node) {
         try {
+            area.setText("");
             loader.save(node);
         } catch (Exception e) {
-
+            GWMCrates.getInstance().getLogger().warn("Failed to save node to GUI output area!", e);
         }
     }
 
@@ -62,7 +64,7 @@ public class GUIOutput {
                 builder.append(chars[i]);
                 i++;
             }
-            area.setText(builder.toString());
+            area.setText(area.getText() + builder.toString());
         }
     }
 }
