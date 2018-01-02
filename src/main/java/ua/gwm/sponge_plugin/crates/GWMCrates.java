@@ -59,7 +59,7 @@ import java.util.Optional;
 @Plugin(
         id = "gwm_crates",
         name = "GWMCrates",
-        version = "beta-2.2",
+        version = "beta-2.2.1",
         description = "Universal crates plugin for your server!",
         authors = {"GWM"/*
                          * Nazar Kalinovskiy
@@ -71,7 +71,7 @@ import java.util.Optional;
         })
 public class GWMCrates {
 
-    public static final Version VERSION = new Version("beta", 2, 2);
+    public static final Version VERSION = new Version("beta", 2, 2, 1);
 
     private static GWMCrates instance;
 

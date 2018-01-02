@@ -1,6 +1,2 @@
-v. beta-2.2
-1. Added "EMPTY" Drop.
-2. Added "PERMISSION" Open Manager.
-3. Added "PERMISSION" Preview.
-4. Removed compatibility with API5 and API6, repaired things not worked on API7.
-5. Fixed "FIRST" Open Manager GUI configurator.
+v. beta-2.2.1
+1. Repaired plugin, should finally work with API7.

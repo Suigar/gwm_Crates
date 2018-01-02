@@ -58,7 +58,7 @@ public class SecondGuiPreview extends Preview {
                 build(GWMCrates.getInstance())).orElseGet(() -> Inventory.builder().of(InventoryArchetypes.CHEST).
                 property(InventoryDimension.PROPERTY_NAME, dimension).
                 build(GWMCrates.getInstance()));
-        OrderedInventory ordered = inventory.query(QueryOperationTypes.INVENTORY_TYPE.of(OrderedInventory.class));
+        OrderedInventory ordered = Utils.castToOrdered(inventory);
         Iterator<Drop> drop_iterator = manager.getDrops().iterator();
         int size = 9 * dimension.getRows();
         for (int i = 0; i < size && drop_iterator.hasNext();) {

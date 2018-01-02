@@ -124,7 +124,7 @@ public class FirstOpenManager extends OpenManager {
                 build(GWMCrates.getInstance())).orElseGet(() -> Inventory.builder().of(InventoryArchetypes.CHEST).
                 build(GWMCrates.getInstance()));
         ArrayList<Drop> drop_list = new ArrayList<Drop>();
-        OrderedInventory ordered = inventory.query(QueryOperationTypes.INVENTORY_TYPE.of(OrderedInventory.class));
+        OrderedInventory ordered = Utils.castToOrdered(inventory);
         for (int i = 0; i < 10; i++) {
             ordered.getSlot(new SlotIndex(i)).get().set(decorative_items.get(i));
         }

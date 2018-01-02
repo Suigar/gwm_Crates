@@ -83,7 +83,7 @@ public class FirstGuiPreview extends Preview {
                 property(InventoryTitle.PROPERTY_NAME, new InventoryTitle(text)).
                 build(GWMCrates.getInstance())).orElseGet(() -> Inventory.builder().of(InventoryArchetypes.CHEST).
                 build(GWMCrates.getInstance()));
-        OrderedInventory ordered = inventory.query(QueryOperationTypes.INVENTORY_TYPE.of(OrderedInventory.class));
+        OrderedInventory ordered = Utils.castToOrdered(inventory);
         for (int i = 0; i < 10; i++) {
             ordered.getSlot(new SlotIndex(i)).get().set(decorative_items.get(i));
         }
@@ -119,7 +119,7 @@ public class FirstGuiPreview extends Preview {
 
         public DropChangeRunnable(Container container, List<Drop> drops, int index) {
             this.container = container;
-            this.inventory = container.first();
+            this.inventory = Utils.castToOrdered(container.first());
             this.drops = drops;
             this.index = index;
         }

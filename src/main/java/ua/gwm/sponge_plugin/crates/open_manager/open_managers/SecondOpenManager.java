@@ -120,7 +120,7 @@ public class SecondOpenManager extends OpenManager {
                 build(GWMCrates.getInstance())).orElseGet(() -> Inventory.builder().of(InventoryArchetypes.CHEST).
                 property(InventoryDimension.PROPERTY_NAME, new InventoryDimension(9, rows)).
                 build(GWMCrates.getInstance()));
-        OrderedInventory ordered = inventory.query(QueryOperationTypes.INVENTORY_TYPE.of(OrderedInventory.class));
+        OrderedInventory ordered = Utils.castToOrdered(inventory);
         int hidden_item_quantity = hidden_item.getQuantity();
         for (int i = 0; i < 9 * rows; i++) {
             int quantity = increase_hidden_item_quantity ? i + 1 : hidden_item_quantity;

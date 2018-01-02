@@ -16,12 +16,11 @@ import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.item.ItemTypes;
 import org.spongepowered.api.item.enchantment.Enchantment;
 import org.spongepowered.api.item.enchantment.EnchantmentType;
-import org.spongepowered.api.item.inventory.Container;
-import org.spongepowered.api.item.inventory.Inventory;
-import org.spongepowered.api.item.inventory.ItemStack;
-import org.spongepowered.api.item.inventory.Slot;
+import org.spongepowered.api.item.inventory.*;
 import org.spongepowered.api.item.inventory.entity.PlayerInventory;
 import org.spongepowered.api.item.inventory.property.SlotIndex;
+import org.spongepowered.api.item.inventory.query.QueryOperationTypes;
+import org.spongepowered.api.item.inventory.type.OrderedInventory;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.serializer.TextSerializers;
 import org.spongepowered.api.world.Location;
@@ -530,5 +529,21 @@ public class Utils {
 
     public static String intListToString(List<Integer> list) {
         return StringUtils.join(list, " ");
+    }
+
+    public static OrderedInventory castToOrdered(Inventory inventory) {
+        Inventory result = inventory.query(QueryOperationTypes.INVENTORY_TYPE.of(OrderedInventory.class));
+        if (result instanceof OrderedInventory) {
+            return (OrderedInventory) result;
+        }
+        if (result instanceof EmptyInventory) {
+            throw new RuntimeException("Inventory can not be casted to Ordered Inventory!");
+        }
+        for (Inventory sub_inventory : inventory) {
+            if (sub_inventory instanceof OrderedInventory) {
+                return (OrderedInventory) sub_inventory;
+            }
+        }
+        throw new RuntimeException("Inventory can not be casted to Ordered Inventory!");
     }
 }
