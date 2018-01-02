@@ -9,17 +9,18 @@ import org.spongepowered.api.Sponge;
 import org.spongepowered.api.data.DataContainer;
 import org.spongepowered.api.data.DataQuery;
 import org.spongepowered.api.data.key.Keys;
-import org.spongepowered.api.data.meta.ItemEnchantment;
 import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.entity.EntityTypes;
 import org.spongepowered.api.entity.Transform;
 import org.spongepowered.api.entity.living.player.Player;
-import org.spongepowered.api.item.Enchantment;
 import org.spongepowered.api.item.ItemTypes;
+import org.spongepowered.api.item.enchantment.Enchantment;
+import org.spongepowered.api.item.enchantment.EnchantmentType;
 import org.spongepowered.api.item.inventory.Container;
 import org.spongepowered.api.item.inventory.Inventory;
 import org.spongepowered.api.item.inventory.ItemStack;
 import org.spongepowered.api.item.inventory.Slot;
+import org.spongepowered.api.item.inventory.entity.PlayerInventory;
 import org.spongepowered.api.item.inventory.property.SlotIndex;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.serializer.TextSerializers;
@@ -144,9 +145,9 @@ public class Utils {
                 item.offer(Keys.ITEM_LORE, lore);
             }
             if (!enchantments_node.isVirtual()) {
-                List<ItemEnchantment> item_enchantments = new ArrayList<ItemEnchantment>();
+                List<Enchantment> item_enchantments = new ArrayList<Enchantment>();
                 for (ConfigurationNode enchantment_node : enchantments_node.getChildrenList()) {
-                    item_enchantments.add(parseEnchantments(enchantment_node));
+                    item_enchantments.add(parseEnchantment(enchantment_node));
                 }
                 item.offer(Keys.ITEM_ENCHANTMENTS, item_enchantments);
             }
@@ -159,16 +160,16 @@ public class Utils {
         }
     }
 
-    public static ItemEnchantment parseEnchantments(ConfigurationNode node) {
+    public static Enchantment parseEnchantment(ConfigurationNode node) {
         ConfigurationNode enchantment_node = node.getNode("ENCHANTMENT");
         ConfigurationNode level_node = node.getNode("LEVEL");
         if (enchantment_node.isVirtual()) {
             throw new RuntimeException("ENCHANTMENT node does not exist!");
         }
         try {
-            Enchantment enchantment = enchantment_node.getValue(TypeToken.of(Enchantment.class));
+            EnchantmentType type = enchantment_node.getValue(TypeToken.of(EnchantmentType.class));
             int level = level_node.getInt(1);
-            return new ItemEnchantment(enchantment, level);
+            return Enchantment.of(type, level);
         } catch (Exception e) {
             throw new RuntimeException("Exception parsing enchantment!", e);
         }
@@ -264,11 +265,8 @@ public class Utils {
 
     public static void addItemStack(Player player, ItemStack item, int amount) {
         if (amount > 0) {
-            /*ItemStack copy = item.copy();
-            copy.setQuantity(amount);
-            player.getInventory().offer(copy);*/
             int max_stack_quantity = item.getMaxStackQuantity();
-            Iterator<Slot> slot_iterator = UnsafeUtils.getPlayerGridInventoryIterator(player);
+            Iterator<Slot> slot_iterator = ((PlayerInventory) player.getInventory()).getMain().<Slot>slots().iterator();
             while (slot_iterator.hasNext() && amount > 0) {
                 Slot slot = slot_iterator.next();
                 Optional<ItemStack> optional_inventory_item = slot.peek();
@@ -309,7 +307,7 @@ public class Utils {
                 Location<World> player_location = player.getLocation();
                 World world = player_location.getExtent();
                 Entity entity = world.createEntity(EntityTypes.ITEM, player_location.getPosition());
-                UnsafeUtils.spawnEntity(world, entity);
+                world.spawnEntity(entity);
                 entity.offer(Keys.REPRESENTED_ITEM, copy.createSnapshot());
             }
         } else if (amount < 0) {

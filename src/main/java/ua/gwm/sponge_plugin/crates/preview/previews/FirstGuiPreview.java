@@ -10,6 +10,8 @@ import org.spongepowered.api.item.inventory.InventoryArchetypes;
 import org.spongepowered.api.item.inventory.ItemStack;
 import org.spongepowered.api.item.inventory.property.InventoryTitle;
 import org.spongepowered.api.item.inventory.property.SlotIndex;
+import org.spongepowered.api.item.inventory.query.QueryOperation;
+import org.spongepowered.api.item.inventory.query.QueryOperationTypes;
 import org.spongepowered.api.item.inventory.type.OrderedInventory;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.serializer.TextSerializers;
@@ -21,7 +23,6 @@ import ua.gwm.sponge_plugin.crates.open_manager.open_managers.FirstOpenManager;
 import ua.gwm.sponge_plugin.crates.preview.Preview;
 import ua.gwm.sponge_plugin.crates.util.Pair;
 import ua.gwm.sponge_plugin.crates.util.SuperObjectType;
-import ua.gwm.sponge_plugin.crates.util.UnsafeUtils;
 import ua.gwm.sponge_plugin.crates.util.Utils;
 
 import java.util.ArrayList;
@@ -82,7 +83,7 @@ public class FirstGuiPreview extends Preview {
                 property(InventoryTitle.PROPERTY_NAME, new InventoryTitle(text)).
                 build(GWMCrates.getInstance())).orElseGet(() -> Inventory.builder().of(InventoryArchetypes.CHEST).
                 build(GWMCrates.getInstance()));
-        OrderedInventory ordered = inventory.query(OrderedInventory.class);
+        OrderedInventory ordered = inventory.query(QueryOperationTypes.INVENTORY_TYPE.of(OrderedInventory.class));
         for (int i = 0; i < 10; i++) {
             ordered.getSlot(new SlotIndex(i)).get().set(decorative_items.get(i));
         }
@@ -98,7 +99,7 @@ public class FirstGuiPreview extends Preview {
         for (int i = 17; i < 27; i++) {
             ordered.getSlot(new SlotIndex(i)).get().set(decorative_items.get(i - 7));
         }
-        Container container = UnsafeUtils.openInventory(player, inventory).get();
+        Container container = player.openInventory(inventory).get();
         FIRST_GUI_CONTAINERS.put(container, new Pair<FirstGuiPreview, Manager>(this, manager));
         decorative_items_change_mode.ifPresent(mode -> Sponge.getScheduler().
                 createTaskBuilder().delayTicks(mode.getChangeDelay()).
@@ -129,12 +130,15 @@ public class FirstGuiPreview extends Preview {
                 return;
             }
             for (int i = 10; i < 16; i++) {
-                inventory.getSlot(new SlotIndex(i)).get().set(inventory.query(new SlotIndex(i + 1)).peek().orElse(ItemStack.of(ItemTypes.NONE, 1)));
+                inventory.getSlot(new SlotIndex(i)).get().
+                        set(inventory.getSlot(new SlotIndex(i + 1)).get().peek().
+                                orElse(ItemStack.of(ItemTypes.NONE, 1)));
             }
             if (index == drops.size()) {
                 index = 0;
             }
-            inventory.query(new SlotIndex(16)).set(drops.get(index).getDropItem().orElse(ItemStack.of(ItemTypes.NONE, 1)));
+            inventory.getSlot(new SlotIndex(16)).get().
+                    set(drops.get(index).getDropItem().orElse(ItemStack.of(ItemTypes.NONE, 1)));
             index++;
             Sponge.getScheduler().createTaskBuilder().delayTicks(scroll_delay).execute(this).submit(GWMCrates.getInstance());
         }

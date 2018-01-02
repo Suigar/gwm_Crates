@@ -1,3 +1,6 @@
-v. 2.1.2
-1. Plugin now extracts one example manager on first load (of ir 'managers' folder was deleted)
-2. Fixed bug with limitation of 8192 symbols in GUI output area.
+v. 2.2
+1. Added "EMPTY" Drop.
+2. Added "PERMISSION" Open Manager.
+3. Added "PERMISSION" Preview.
+4. Removed compatibility with API5 and API6, repaired things not worked on API7.
+5. Fixed "FIRST" Open Manager GUI configurator.

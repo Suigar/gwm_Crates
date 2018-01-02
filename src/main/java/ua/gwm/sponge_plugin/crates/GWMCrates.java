@@ -16,6 +16,7 @@ import org.spongepowered.api.Sponge;
 import org.spongepowered.api.config.ConfigDir;
 import org.spongepowered.api.event.Listener;
 import org.spongepowered.api.event.cause.Cause;
+import org.spongepowered.api.event.cause.EventContext;
 import org.spongepowered.api.event.game.GameReloadEvent;
 import org.spongepowered.api.event.game.state.*;
 import org.spongepowered.api.plugin.Dependency;
@@ -34,20 +35,16 @@ import ua.gwm.sponge_plugin.crates.gui.configuration_dialog.configuration_dialog
 import ua.gwm.sponge_plugin.crates.gui.configuration_dialog.configuration_dialogues.change_mode.RandomChangeModeConfigurationDialog;
 import ua.gwm.sponge_plugin.crates.gui.configuration_dialog.configuration_dialogues.drop.*;
 import ua.gwm.sponge_plugin.crates.gui.configuration_dialog.configuration_dialogues.key.*;
-import ua.gwm.sponge_plugin.crates.gui.configuration_dialog.configuration_dialogues.open_manager.Animation1OpenManagerConfigurationDialog;
-import ua.gwm.sponge_plugin.crates.gui.configuration_dialog.configuration_dialogues.open_manager.FirstOpenManagerConfigurationDialog;
-import ua.gwm.sponge_plugin.crates.gui.configuration_dialog.configuration_dialogues.open_manager.NoGuiOpenManagerConfigurationDialog;
-import ua.gwm.sponge_plugin.crates.gui.configuration_dialog.configuration_dialogues.open_manager.SecondOpenManagerConfigurationDialog;
+import ua.gwm.sponge_plugin.crates.gui.configuration_dialog.configuration_dialogues.open_manager.*;
 import ua.gwm.sponge_plugin.crates.gui.configuration_dialog.configuration_dialogues.preview.FirstPreviewConfigurationDialog;
+import ua.gwm.sponge_plugin.crates.gui.configuration_dialog.configuration_dialogues.preview.PermissionPreviewConfigurationDialog;
 import ua.gwm.sponge_plugin.crates.gui.configuration_dialog.configuration_dialogues.preview.SecondPreviewConfigurationDialog;
 import ua.gwm.sponge_plugin.crates.key.keys.*;
 import ua.gwm.sponge_plugin.crates.listener.*;
 import ua.gwm.sponge_plugin.crates.manager.Manager;
-import ua.gwm.sponge_plugin.crates.open_manager.open_managers.Animation1OpenManager;
-import ua.gwm.sponge_plugin.crates.open_manager.open_managers.FirstOpenManager;
-import ua.gwm.sponge_plugin.crates.open_manager.open_managers.NoGuiOpenManager;
-import ua.gwm.sponge_plugin.crates.open_manager.open_managers.SecondOpenManager;
+import ua.gwm.sponge_plugin.crates.open_manager.open_managers.*;
 import ua.gwm.sponge_plugin.crates.preview.previews.FirstGuiPreview;
+import ua.gwm.sponge_plugin.crates.preview.previews.PermissionPreview;
 import ua.gwm.sponge_plugin.crates.preview.previews.SecondGuiPreview;
 import ua.gwm.sponge_plugin.crates.util.*;
 
@@ -62,7 +59,7 @@ import java.util.Optional;
 @Plugin(
         id = "gwm_crates",
         name = "GWMCrates",
-        version = "2.1.2",
+        version = "beta-2.2",
         description = "Universal crates plugin for your server!",
         authors = {"GWM"/*
                          * Nazar Kalinovskiy
@@ -74,7 +71,7 @@ import java.util.Optional;
         })
 public class GWMCrates {
 
-    public static final Version VERSION = new Version(null, 2, 1, 2);
+    public static final Version VERSION = new Version("beta", 2, 2);
 
     private static GWMCrates instance;
 
@@ -168,7 +165,7 @@ public class GWMCrates {
         timed_cases_delays_config = new Config("timed_cases_delays.conf", true);
         timed_keys_delays_config = new Config("timed_keys_delays.conf", true);
         loadConfigValues();
-        default_cause = UnsafeUtils.createDefaultCause();
+        default_cause = Cause.of(EventContext.empty(), plugin_container);
         if (check_updates) {
             checkUpdates();
         }
@@ -249,7 +246,7 @@ public class GWMCrates {
         super_objects.clear();
         saved_super_objects.clear();
         loadConfigValues();
-        default_cause = UnsafeUtils.createDefaultCause();
+        default_cause = Cause.of(EventContext.empty(), plugin_container);
         register();
         optional_economy_service = Optional.empty();
         optional_holograms_service = Optional.empty();
@@ -303,13 +300,16 @@ public class GWMCrates {
         registration_event.register(SuperObjectType.OPEN_MANAGER, "FIRST", FirstOpenManager.class, Optional.of(FirstOpenManagerConfigurationDialog.class));
         registration_event.register(SuperObjectType.OPEN_MANAGER, "SECOND", SecondOpenManager.class, Optional.of(SecondOpenManagerConfigurationDialog.class));
         registration_event.register(SuperObjectType.OPEN_MANAGER, "ANIMATION1", Animation1OpenManager.class, Optional.of(Animation1OpenManagerConfigurationDialog.class));
+        registration_event.register(SuperObjectType.OPEN_MANAGER, "PERMISSION", PermissionOpenManager.class, Optional.of(PermissionOpenManagerConfigurationDialog.class));
         registration_event.register(SuperObjectType.PREVIEW, "FIRST", FirstGuiPreview.class, Optional.of(FirstPreviewConfigurationDialog.class));
         registration_event.register(SuperObjectType.PREVIEW, "SECOND", SecondGuiPreview.class, Optional.of(SecondPreviewConfigurationDialog.class));
+        registration_event.register(SuperObjectType.PREVIEW, "PERMISSION", PermissionPreview.class, Optional.of(PermissionPreviewConfigurationDialog.class));
         registration_event.register(SuperObjectType.DROP, "ITEM", ItemDrop.class, Optional.of(ItemDropConfigurationDialog.class));
         registration_event.register(SuperObjectType.DROP, "COMMANDS", CommandsDrop.class, Optional.of(CommandsDropConfigurationDialog.class));
         registration_event.register(SuperObjectType.DROP, "MULTI", MultiDrop.class, Optional.of(MultiDropConfigurationDialog.class));
         registration_event.register(SuperObjectType.DROP, "DELAY", DelayDrop.class, Optional.of(DelayDropConfigurationDialog.class));
         registration_event.register(SuperObjectType.DROP, "PERMISSION", PermissionDrop.class, Optional.of(PermissionDropConfigurationDialog.class));
+        registration_event.register(SuperObjectType.DROP, "EMPTY", EmptyDrop.class, Optional.of(EmptyDropConfigurationDialog.class));
         registration_event.register(SuperObjectType.DECORATIVE_ITEMS_CHANGE_MODE, "RANDOM", RandomChangeMode.class, Optional.of(RandomChangeModeConfigurationDialog.class));
         registration_event.register(SuperObjectType.DECORATIVE_ITEMS_CHANGE_MODE, "ORDERED", OrderedChangeMode.class, Optional.of(OrderedChangeModeConfigurationDialog.class));
         Sponge.getEventManager().post(registration_event);

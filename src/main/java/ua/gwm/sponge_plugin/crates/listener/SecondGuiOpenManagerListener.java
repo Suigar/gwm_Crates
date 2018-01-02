@@ -18,7 +18,6 @@ import ua.gwm.sponge_plugin.crates.event.PlayerOpenedCrateEvent;
 import ua.gwm.sponge_plugin.crates.manager.Manager;
 import ua.gwm.sponge_plugin.crates.open_manager.open_managers.SecondOpenManager;
 import ua.gwm.sponge_plugin.crates.util.Pair;
-import ua.gwm.sponge_plugin.crates.util.UnsafeUtils;
 import ua.gwm.sponge_plugin.crates.util.Utils;
 
 import java.util.HashSet;
@@ -71,7 +70,7 @@ public class SecondGuiOpenManagerListener {
                     Sponge.getScheduler().createTaskBuilder().delayTicks(open_manager.getCloseDelay()).execute(() -> {
                         Optional<Container> optional_open_inventory = player.getOpenInventory();
                         if (optional_open_inventory.isPresent() && container.equals(optional_open_inventory.get())) {
-                            UnsafeUtils.closeInventory(player);
+                            player.closeInventory();
                         }
                         SHOWN_GUI.remove(container);
                         SecondOpenManager.SECOND_GUI_INVENTORIES.remove(container);

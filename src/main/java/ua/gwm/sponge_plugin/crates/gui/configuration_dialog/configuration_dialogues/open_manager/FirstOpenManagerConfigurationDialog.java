@@ -55,7 +55,6 @@ public class FirstOpenManagerConfigurationDialog extends OpenManagerConfiguratio
         scroll_delays_label = new JLabel("Scroll delays");
         scroll_delays_label.setLocation(8, 190);
         scroll_delays_label.setSize(190, 20);
-        scroll_delays_field.setFunction(Optional.of(new CheckIntListFunction()));
         add(scroll_delays_label);
         scroll_delays_field = new AdvancedTextField("Enter scroll delays here...");
         scroll_delays_field.setLocation(8, 210);
@@ -137,7 +136,7 @@ public class FirstOpenManagerConfigurationDialog extends OpenManagerConfiguratio
                 scroll_delays_field.setText(Utils.intListToString(scroll_delays_node.getList(TypeToken.of(Integer.class))));
             }
             if (!clear_decorative_items_node.isVirtual()) {
-                clear_other_drops_check_box.setSelected(clear_decorative_items_node.getBoolean());
+                clear_decorative_items_check_box.setSelected(clear_decorative_items_node.getBoolean());
             }
             if (!clear_other_drops_node.isVirtual()) {
                 clear_other_drops_check_box.setSelected(clear_other_drops_node.getBoolean());

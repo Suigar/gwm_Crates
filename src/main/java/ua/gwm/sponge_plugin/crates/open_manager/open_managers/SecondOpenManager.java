@@ -12,6 +12,7 @@ import org.spongepowered.api.item.inventory.ItemStack;
 import org.spongepowered.api.item.inventory.property.InventoryDimension;
 import org.spongepowered.api.item.inventory.property.InventoryTitle;
 import org.spongepowered.api.item.inventory.property.SlotIndex;
+import org.spongepowered.api.item.inventory.query.QueryOperationTypes;
 import org.spongepowered.api.item.inventory.type.OrderedInventory;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.serializer.TextSerializers;
@@ -20,7 +21,6 @@ import ua.gwm.sponge_plugin.crates.event.PlayerOpenCrateEvent;
 import ua.gwm.sponge_plugin.crates.manager.Manager;
 import ua.gwm.sponge_plugin.crates.open_manager.OpenManager;
 import ua.gwm.sponge_plugin.crates.util.Pair;
-import ua.gwm.sponge_plugin.crates.util.UnsafeUtils;
 import ua.gwm.sponge_plugin.crates.util.Utils;
 
 import java.util.HashMap;
@@ -120,7 +120,7 @@ public class SecondOpenManager extends OpenManager {
                 build(GWMCrates.getInstance())).orElseGet(() -> Inventory.builder().of(InventoryArchetypes.CHEST).
                 property(InventoryDimension.PROPERTY_NAME, new InventoryDimension(9, rows)).
                 build(GWMCrates.getInstance()));
-        OrderedInventory ordered = inventory.query(OrderedInventory.class);
+        OrderedInventory ordered = inventory.query(QueryOperationTypes.INVENTORY_TYPE.of(OrderedInventory.class));
         int hidden_item_quantity = hidden_item.getQuantity();
         for (int i = 0; i < 9 * rows; i++) {
             int quantity = increase_hidden_item_quantity ? i + 1 : hidden_item_quantity;
@@ -128,7 +128,7 @@ public class SecondOpenManager extends OpenManager {
             copy.setQuantity(quantity);
             ordered.getSlot(new SlotIndex(i)).get().set(copy);
         }
-        Container container = UnsafeUtils.openInventory(player, inventory).get();
+        Container container = player.openInventory(inventory).get();
         getOpenSound().ifPresent(open_sound -> player.playSound(open_sound, player.getLocation().getPosition(), 1.));
         SECOND_GUI_INVENTORIES.put(container, new Pair<SecondOpenManager, Manager>(this, manager));
     }

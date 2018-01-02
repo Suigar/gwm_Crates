@@ -12,6 +12,7 @@ import org.spongepowered.api.item.inventory.InventoryArchetypes;
 import org.spongepowered.api.item.inventory.ItemStack;
 import org.spongepowered.api.item.inventory.property.InventoryTitle;
 import org.spongepowered.api.item.inventory.property.SlotIndex;
+import org.spongepowered.api.item.inventory.query.QueryOperationTypes;
 import org.spongepowered.api.item.inventory.type.OrderedInventory;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.serializer.TextSerializers;
@@ -123,7 +124,7 @@ public class FirstOpenManager extends OpenManager {
                 build(GWMCrates.getInstance())).orElseGet(() -> Inventory.builder().of(InventoryArchetypes.CHEST).
                 build(GWMCrates.getInstance()));
         ArrayList<Drop> drop_list = new ArrayList<Drop>();
-        OrderedInventory ordered = inventory.query(OrderedInventory.class);
+        OrderedInventory ordered = inventory.query(QueryOperationTypes.INVENTORY_TYPE.of(OrderedInventory.class));
         for (int i = 0; i < 10; i++) {
             ordered.getSlot(new SlotIndex(i)).get().set(decorative_items.get(i));
         }
@@ -135,7 +136,7 @@ public class FirstOpenManager extends OpenManager {
         for (int i = 17; i < 27; i++) {
             ordered.getSlot(new SlotIndex(i)).get().set(decorative_items.get(i - 7));
         }
-        Container container = UnsafeUtils.openInventory(player, inventory).get();
+        Container container = player.openInventory(inventory).get();
         getOpenSound().ifPresent(open_sound -> player.playSound(open_sound, player.getLocation().getPosition(), 1.));
         FIRST_GUI_CONTAINERS.put(container, new Pair<FirstOpenManager, Manager>(this, manager));
         decorative_items_change_mode.ifPresent(mode -> Sponge.getScheduler().
@@ -148,7 +149,8 @@ public class FirstOpenManager extends OpenManager {
             int finalI = i;
             Sponge.getScheduler().createTaskBuilder().delayTicks(wait_time).execute(() -> {
                 for (int j = 10; j < 16; j++) {
-                    ordered.getSlot(new SlotIndex(j)).get().set(inventory.query(new SlotIndex(j + 1)).peek().orElse(ItemStack.of(ItemTypes.NONE, 1)));
+                    ordered.getSlot(new SlotIndex(j)).get().set(ordered.getSlot(new SlotIndex(j + 1)).get().peek().
+                            orElse(ItemStack.of(ItemTypes.NONE, 1)));
                 }
                 Drop new_drop = Utils.chooseDropByLevel(manager.getDrops(), player, !(finalI == scroll_delays.size() - 5));
                 drop_list.add(new_drop);
@@ -183,7 +185,7 @@ public class FirstOpenManager extends OpenManager {
         Sponge.getScheduler().createTaskBuilder().delayTicks(wait_time + scroll_delays.get(scroll_delays.size() - 1) + close_delay).execute(() -> {
             Optional<Container> optional_open_inventory = player.getOpenInventory();
             if (optional_open_inventory.isPresent() && container.equals(optional_open_inventory.get())) {
-                UnsafeUtils.closeInventory(player);
+                player.closeInventory();
             }
             SHOWN_GUI.remove(container);
             FIRST_GUI_CONTAINERS.remove(container);

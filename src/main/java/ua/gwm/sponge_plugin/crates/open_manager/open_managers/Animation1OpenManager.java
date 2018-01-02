@@ -15,6 +15,7 @@ import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.serializer.TextSerializers;
 import org.spongepowered.api.util.Direction;
 import org.spongepowered.api.world.BlockChangeFlag;
+import org.spongepowered.api.world.BlockChangeFlags;
 import org.spongepowered.api.world.Location;
 import org.spongepowered.api.world.World;
 import ua.gwm.sponge_plugin.crates.GWMCrates;
@@ -23,7 +24,6 @@ import ua.gwm.sponge_plugin.crates.listener.Animation1Listener;
 import ua.gwm.sponge_plugin.crates.manager.Manager;
 import ua.gwm.sponge_plugin.crates.open_manager.OpenManager;
 import ua.gwm.sponge_plugin.crates.util.SuperObjectType;
-import ua.gwm.sponge_plugin.crates.util.UnsafeUtils;
 import ua.gwm.sponge_plugin.crates.util.Utils;
 
 import java.util.*;
@@ -105,43 +105,45 @@ public class Animation1OpenManager extends OpenManager {
                             world, loc_x + x, loc_y + y, loc_z + z);
                     BlockState loc_state = loc.getBlock();
                     original_block_states.put(loc, loc_state);
-                    UnsafeUtils.setBlockType(location, BlockTypes.AIR, BlockChangeFlag.NONE);
+                    location.setBlockType(BlockTypes.AIR, BlockChangeFlags.NONE);
                 }
             }
         }
         for (int x = -2; x <= 2; x++) {
             for (int z = -2; z <= 2; z++) {
-                UnsafeUtils.setBlockType(new Location<World>(world, loc_x + x, loc_y - 1, loc_z + z), floor_block_type, BlockChangeFlag.NONE);
+                new Location<World>(world, loc_x + x, loc_y - 1, loc_z + z).
+                        setBlockType(floor_block_type, BlockChangeFlags.NONE);
                 if (z == 2 || z == -2 || x == 2 || x == -2) {
-                    UnsafeUtils.setBlockType(new Location<World>(world, loc_x + x, loc_y , loc_z + z), fence_block_type, BlockChangeFlag.NONE);
+                    new Location<World>(world, loc_x + x, loc_y , loc_z + z).
+                            setBlockType(fence_block_type, BlockChangeFlags.NONE);
                 }
             }
         }
         HashSet<HologramsService.Hologram> holograms = new HashSet<HologramsService.Hologram>();
         Location<World> loc1 = new Location<World>(world, loc_x + 2, loc_y, loc_z);
-        UnsafeUtils.setBlock(loc1, BlockState.builder().
+        loc1.setBlock(BlockState.builder().
                         blockType(crate_block_type).
                         add(Keys.DIRECTION, Direction.WEST).
                         build(),
-                BlockChangeFlag.NONE);
+                BlockChangeFlags.NONE);
         Location<World> loc2 = new Location<World>(world, loc_x - 2, loc_y, loc_z);
-        UnsafeUtils.setBlock(loc2, BlockState.builder().
+        loc2.setBlock(BlockState.builder().
                         blockType(crate_block_type).
                         add(Keys.DIRECTION, Direction.EAST).
                         build(),
-                BlockChangeFlag.NONE);
+                BlockChangeFlags.NONE);
         Location<World> loc3 = new Location<World>(world, loc_x, loc_y, loc_z + 2);
-        UnsafeUtils.setBlock(loc3, BlockState.builder().
+        loc3.setBlock(BlockState.builder().
                         blockType(crate_block_type).
                         add(Keys.DIRECTION, Direction.NORTH).
                         build(),
-                BlockChangeFlag.NONE);
+                BlockChangeFlags.NONE);
         Location<World> loc4 = new Location<World>(world, loc_x, loc_y, loc_z - 2);
-        UnsafeUtils.setBlock(loc4, BlockState.builder().
+        loc4.setBlock(BlockState.builder().
                         blockType(crate_block_type).
                         add(Keys.DIRECTION, Direction.SOUTH).
                         build(),
-                BlockChangeFlag.NONE);
+                BlockChangeFlags.NONE);
         Utils.tryCreateHologram(loc1, hologram).ifPresent(holograms::add);
         Utils.tryCreateHologram(loc2, hologram).ifPresent(holograms::add);
         Utils.tryCreateHologram(loc3, hologram).ifPresent(holograms::add);

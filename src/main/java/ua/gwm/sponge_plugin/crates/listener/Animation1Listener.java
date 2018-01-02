@@ -13,12 +13,12 @@ import org.spongepowered.api.event.block.InteractBlockEvent;
 import org.spongepowered.api.event.command.SendCommandEvent;
 import org.spongepowered.api.event.entity.MoveEntityEvent;
 import org.spongepowered.api.world.BlockChangeFlag;
+import org.spongepowered.api.world.BlockChangeFlags;
 import org.spongepowered.api.world.Location;
 import org.spongepowered.api.world.World;
 import ua.gwm.sponge_plugin.crates.GWMCrates;
 import ua.gwm.sponge_plugin.crates.event.PlayerOpenedCrateEvent;
 import ua.gwm.sponge_plugin.crates.open_manager.open_managers.Animation1OpenManager;
-import ua.gwm.sponge_plugin.crates.util.UnsafeUtils;
 import ua.gwm.sponge_plugin.crates.util.Utils;
 
 import java.util.HashMap;
@@ -88,7 +88,7 @@ public class Animation1Listener {
         OPENED_PLAYERS.put(player, information.getOpenManager());
         Sponge.getScheduler().createTaskBuilder().delayTicks(information.getOpenManager().getCloseDelay()).execute(() -> {
             information.getOriginalBlockStates().forEach(((location, state) ->
-                UnsafeUtils.setBlock(location, state, BlockChangeFlag.NONE)));
+                location.setBlock(state, BlockChangeFlags.NONE)));
             information.getHolograms().forEach(HologramsService.Hologram::remove);
             Animation1OpenManager.PLAYERS_OPENING_ANIMATION1.remove(player);
             OPENED_PLAYERS.remove(player);

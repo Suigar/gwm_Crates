@@ -7,10 +7,10 @@ import org.spongepowered.api.block.BlockType;
 import org.spongepowered.api.block.BlockTypes;
 import org.spongepowered.api.effect.sound.SoundType;
 import org.spongepowered.api.effect.sound.SoundTypes;
-import org.spongepowered.api.item.Enchantment;
-import org.spongepowered.api.item.Enchantments;
 import org.spongepowered.api.item.ItemType;
 import org.spongepowered.api.item.ItemTypes;
+import org.spongepowered.api.item.enchantment.EnchantmentType;
+import org.spongepowered.api.item.enchantment.EnchantmentTypes;
 import ua.gwm.sponge_plugin.crates.GWMCrates;
 import ua.gwm.sponge_plugin.crates.util.SuperObjectType;
 
@@ -30,10 +30,10 @@ public class GWMCratesGUI extends JFrame {
 
     private static GWMCratesGUI instance;
 
-    public static List<String> ITEM_TYPES = new ArrayList<String>();
-    public static List<String> SOUND_TYPES = new ArrayList<String>();
-    public static List<String> ENCHANTMENTS = new ArrayList<String>();
-    public static List<String> BLOCK_TYPES = new ArrayList<String>();
+    public static List<String> ITEM_TYPES;
+    public static List<String> SOUND_TYPES;
+    public static List<String> ENCHANTMENTS;
+    public static List<String> BLOCK_TYPES;
 
     static {
         ITEM_TYPES = Arrays.stream(ItemTypes.class.getFields()).map(f -> {
@@ -54,10 +54,10 @@ public class GWMCratesGUI extends JFrame {
                 return null;
             }
         }).collect(Collectors.toList());
-        ENCHANTMENTS = Arrays.stream(Enchantments.class.getFields()).map(f -> {
+        ENCHANTMENTS = Arrays.stream(EnchantmentTypes.class.getFields()).map(f -> {
             try {
                 f.setAccessible(true);
-                return ((Enchantment) f.get(null)).getId().replaceFirst("minecraft:", "");
+                return ((EnchantmentType) f.get(null)).getId().replaceFirst("minecraft:", "");
             } catch (Exception e) {
                 GWMCrates.getInstance().getLogger().warn("Exception parsing Enchantments!", e);
                 return null;

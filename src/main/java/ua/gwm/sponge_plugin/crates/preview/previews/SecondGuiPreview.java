@@ -10,6 +10,7 @@ import org.spongepowered.api.item.inventory.ItemStack;
 import org.spongepowered.api.item.inventory.property.InventoryDimension;
 import org.spongepowered.api.item.inventory.property.InventoryTitle;
 import org.spongepowered.api.item.inventory.property.SlotIndex;
+import org.spongepowered.api.item.inventory.query.QueryOperationTypes;
 import org.spongepowered.api.item.inventory.type.OrderedInventory;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.serializer.TextSerializers;
@@ -18,7 +19,6 @@ import ua.gwm.sponge_plugin.crates.drop.Drop;
 import ua.gwm.sponge_plugin.crates.manager.Manager;
 import ua.gwm.sponge_plugin.crates.preview.Preview;
 import ua.gwm.sponge_plugin.crates.util.Pair;
-import ua.gwm.sponge_plugin.crates.util.UnsafeUtils;
 import ua.gwm.sponge_plugin.crates.util.Utils;
 
 import java.util.HashMap;
@@ -58,7 +58,7 @@ public class SecondGuiPreview extends Preview {
                 build(GWMCrates.getInstance())).orElseGet(() -> Inventory.builder().of(InventoryArchetypes.CHEST).
                 property(InventoryDimension.PROPERTY_NAME, dimension).
                 build(GWMCrates.getInstance()));
-        OrderedInventory ordered = inventory.query(OrderedInventory.class);
+        OrderedInventory ordered = inventory.query(QueryOperationTypes.INVENTORY_TYPE.of(OrderedInventory.class));
         Iterator<Drop> drop_iterator = manager.getDrops().iterator();
         int size = 9 * dimension.getRows();
         for (int i = 0; i < size && drop_iterator.hasNext();) {
@@ -70,7 +70,7 @@ public class SecondGuiPreview extends Preview {
             ordered.getSlot(new SlotIndex(i)).get().set(drop_item);
             i++;
         }
-        Container container = UnsafeUtils.openInventory(player, inventory).get();
+        Container container = player.openInventory(inventory).get();
         SECOND_GUI_CONTAINERS.put(container, new Pair<SecondGuiPreview, Manager>(this, manager));
     }
 }
