@@ -1,4 +1,4 @@
-v. 2.2
+v. beta-2.2
 1. Added "EMPTY" Drop.
 2. Added "PERMISSION" Open Manager.
 3. Added "PERMISSION" Preview.
