@@ -1,2 +1,2 @@
-v. beta-2.2.1
-1. Repaired plugin, should finally work with API7.
+v. beta-2.2.2
+1. Fixed bug with SECOND Open Manager.

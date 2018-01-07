@@ -41,7 +41,7 @@ public class SecondGuiOpenManagerListener {
             Optional<Player> optional_player = event.getCause().first(Player.class);
             if (!optional_player.isPresent()) return;
             Player player = optional_player.get();
-            OrderedInventory ordered = (OrderedInventory) container.iterator().next();
+            OrderedInventory ordered = Utils.castToOrdered(container.iterator().next());
             Pair<SecondOpenManager, Manager> pair = SecondOpenManager.SECOND_GUI_INVENTORIES.get(container);
             SecondOpenManager open_manager = pair.getKey();
             Manager manager = pair.getValue();

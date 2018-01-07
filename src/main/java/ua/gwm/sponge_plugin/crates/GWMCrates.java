@@ -14,9 +14,13 @@ import ninja.leaping.configurate.objectmapping.ObjectMappingException;
 import org.slf4j.Logger;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.config.ConfigDir;
+import org.spongepowered.api.data.key.Keys;
+import org.spongepowered.api.entity.living.Agent;
+import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.event.Listener;
 import org.spongepowered.api.event.cause.Cause;
 import org.spongepowered.api.event.cause.EventContext;
+import org.spongepowered.api.event.entity.ai.SetAITargetEvent;
 import org.spongepowered.api.event.game.GameReloadEvent;
 import org.spongepowered.api.event.game.state.*;
 import org.spongepowered.api.plugin.Dependency;
@@ -59,7 +63,7 @@ import java.util.Optional;
 @Plugin(
         id = "gwm_crates",
         name = "GWMCrates",
-        version = "beta-2.2.1",
+        version = "beta-2.2.2",
         description = "Universal crates plugin for your server!",
         authors = {"GWM"/*
                          * Nazar Kalinovskiy
@@ -71,7 +75,7 @@ import java.util.Optional;
         })
 public class GWMCrates {
 
-    public static final Version VERSION = new Version("beta", 2, 2, 1);
+    public static final Version VERSION = new Version("beta", 2, 2, 2);
 
     private static GWMCrates instance;
 
