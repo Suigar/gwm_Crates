@@ -2,14 +2,11 @@ package ua.gwm.sponge_plugin.crates.listener;
 
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.event.Listener;
-import org.spongepowered.api.event.filter.IsCancelled;
 import org.spongepowered.api.text.serializer.TextSerializers;
-import org.spongepowered.api.util.Tristate;
 import org.spongepowered.api.world.Location;
 import org.spongepowered.api.world.World;
 import ua.gwm.sponge_plugin.crates.GWMCrates;
 import ua.gwm.sponge_plugin.crates.drop.Drop;
-import ua.gwm.sponge_plugin.crates.event.PlayerOpenCrateEvent;
 import ua.gwm.sponge_plugin.crates.event.PlayerOpenedCrateEvent;
 import ua.gwm.sponge_plugin.crates.manager.Manager;
 import ua.gwm.sponge_plugin.crates.util.LanguageUtils;
@@ -63,7 +60,7 @@ public class DebugCrateListener {
                 String drop_name = drop == null ? "null" : drop.getId().orElse("Unknown ID");
                 Location<World> location = player.getLocation();
                 String player_location = location.getExtent().getName() + ' ' + location.getBlockX() + ' ' + location.getBlockY() + ' ' + location.getBlockZ();
-                LOG_FILE_WRITER.write(LanguageUtils.getPhrase("CRATE_OPENING_LOG_MESSAGE",
+                LOG_FILE_WRITER.write(LanguageUtils.getPhrase("MANAGER_OPENING_LOG_MESSAGE",
                         new Pair("%TIME%", time),
                         new Pair("%PLAYER%", player_name),
                         new Pair("%PLAYER_UUID%", player_uuid),

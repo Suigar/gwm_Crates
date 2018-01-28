@@ -1,2 +1,7 @@
-v. beta-2.2.2
-1. Fixed bug with SECOND Open Manager.
+v. 2.3
+1. Added '/gwmcrates list' command
+2. Added '/gwmcrates info [manager]' command
+3. Renamed 'CRATE_OPENING_LOG_MESSAGE' to 'MANAGER_OPENING_LOG_MESSAGE' in 'language.conf'
+4. Changed (failed to load manager) message type from 'info' to 'warn'
+5. Added '%VERSION%' placeholder to 'HELP_MESSAGE'
+6. Added 'CUSTOM_INFO' parameter to managers.

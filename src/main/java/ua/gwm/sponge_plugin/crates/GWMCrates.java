@@ -14,13 +14,9 @@ import ninja.leaping.configurate.objectmapping.ObjectMappingException;
 import org.slf4j.Logger;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.config.ConfigDir;
-import org.spongepowered.api.data.key.Keys;
-import org.spongepowered.api.entity.living.Agent;
-import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.event.Listener;
 import org.spongepowered.api.event.cause.Cause;
 import org.spongepowered.api.event.cause.EventContext;
-import org.spongepowered.api.event.entity.ai.SetAITargetEvent;
 import org.spongepowered.api.event.game.GameReloadEvent;
 import org.spongepowered.api.event.game.state.*;
 import org.spongepowered.api.plugin.Dependency;
@@ -63,7 +59,7 @@ import java.util.Optional;
 @Plugin(
         id = "gwm_crates",
         name = "GWMCrates",
-        version = "beta-2.2.2",
+        version = "2.3",
         description = "Universal crates plugin for your server!",
         authors = {"GWM"/*
                          * Nazar Kalinovskiy
@@ -75,9 +71,9 @@ import java.util.Optional;
         })
 public class GWMCrates {
 
-    public static final Version VERSION = new Version("beta", 2, 2, 2);
+    public static final Version VERSION = new Version(null, 2, 3);
 
-    private static GWMCrates instance;
+    private static GWMCrates instance = null;
 
     public static GWMCrates getInstance() {
         if (instance == null) {
@@ -234,7 +230,7 @@ public class GWMCrates {
         timed_cases_delays_config.save();
         timed_keys_delays_config.save();
         saved_super_objects_config.save();
-        logger.info("All plugin configs has been saved!");
+        logger.info("All plugin configs have been saved!");
     }
 
     public void reload() {
@@ -381,7 +377,7 @@ public class GWMCrates {
                         created_managers.add(manager);
                         logger.info("Manager \"" + manager.getId() + "\" (\"" + manager.getName() + "\") successfully loaded!");
                     } catch (Exception e) {
-                        logger.info("Failed to load manager \"" + manager_file.getName() + "\"!", e);
+                        logger.warn("Failed to load manager \"" + manager_file.getName() + "\"!", e);
                     }
                 }
             });

@@ -4,7 +4,6 @@ import com.google.common.reflect.TypeToken;
 import de.randombyte.holograms.api.HologramsService;
 import ninja.leaping.configurate.ConfigurationNode;
 import org.apache.commons.lang3.StringUtils;
-import org.spongepowered.api.Platform;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.data.DataContainer;
 import org.spongepowered.api.data.DataQuery;
@@ -39,18 +38,6 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 public class Utils {
-
-    public static int SPONGE_API_VERSION;
-
-    static {
-        try {
-            String version = Sponge.getPlatform().getContainer(Platform.Component.API).getVersion().get();
-            SPONGE_API_VERSION = Integer.valueOf(version.substring(0, version.indexOf('.')));
-            GWMCrates.getInstance().getLogger().info("Automatically detected API version: " + SPONGE_API_VERSION);
-        } catch (Exception e) {
-            GWMCrates.getInstance().getLogger().warn("Exception automatically detecting API version!", e);
-        }
-    }
 
     public static boolean itemStacksEquals(ItemStack item, ItemStack other) {
         ItemStack copy1 = item.copy();

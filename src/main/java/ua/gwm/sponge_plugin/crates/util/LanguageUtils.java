@@ -12,6 +12,10 @@ import java.util.stream.Collectors;
 
 public class LanguageUtils {
 
+    public static boolean exists(String path) {
+        return !GWMCrates.getInstance().getLanguageConfig().getNode(path).isVirtual();
+    }
+
     public static String getPhrase(String path, Pair<String, ?>... pairs) {
         ConfigurationNode node = GWMCrates.getInstance().getLanguageConfig().getNode(path.toUpperCase());
         try {

@@ -1,6 +1,8 @@
 package ua.gwm.sponge_plugin.crates.manager;
 
 import ninja.leaping.configurate.ConfigurationNode;
+import org.spongepowered.api.text.Text;
+import org.spongepowered.api.text.serializer.TextSerializers;
 import ua.gwm.sponge_plugin.crates.caze.Case;
 import ua.gwm.sponge_plugin.crates.drop.Drop;
 import ua.gwm.sponge_plugin.crates.key.Key;
@@ -22,6 +24,7 @@ public class Manager {
     private Optional<Preview> preview = Optional.empty();
     private boolean send_open_message = true;
     private Optional<String> custom_open_message = Optional.empty();
+    private Optional<Text> custom_info = Optional.empty();
 
     public Manager(ConfigurationNode node) {
         ConfigurationNode id_node = node.getNode("ID");
@@ -33,6 +36,7 @@ public class Manager {
         ConfigurationNode preview_node = node.getNode("PREVIEW");
         ConfigurationNode send_open_message_node = node.getNode("SEND_OPEN_MESSAGE");
         ConfigurationNode custom_open_message_node = node.getNode("CUSTOM_OPEN_MESSAGE");
+        ConfigurationNode custom_info_node = node.getNode("CUSTOM_INFO");
         if (id_node.isVirtual()) {
             throw new RuntimeException("ID node does not exist!");
         }
@@ -66,6 +70,9 @@ public class Manager {
         send_open_message = send_open_message_node.getBoolean(true);
         if (!custom_open_message_node.isVirtual()) {
             custom_open_message = Optional.of(custom_open_message_node.getString());
+        }
+        if (!custom_info_node.isVirtual()) {
+            custom_info = Optional.of(TextSerializers.FORMATTING_CODE.deserialize(custom_info_node.getString()));
         }
     }
 
@@ -150,5 +157,13 @@ public class Manager {
 
     public void setCustomOpenMessage(Optional<String> custom_open_message) {
         this.custom_open_message = custom_open_message;
+    }
+
+    public Optional<Text> getCustomInfo() {
+        return custom_info;
+    }
+
+    public void setCustomInfo(Optional<Text> custom_info) {
+        this.custom_info = custom_info;
     }
 }

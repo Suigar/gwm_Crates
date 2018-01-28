@@ -22,17 +22,16 @@ import ua.gwm.sponge_plugin.crates.key.Key;
 import ua.gwm.sponge_plugin.crates.manager.Manager;
 import ua.gwm.sponge_plugin.crates.open_manager.OpenManager;
 import ua.gwm.sponge_plugin.crates.preview.Preview;
-import ua.gwm.sponge_plugin.crates.util.Utils;
 import ua.gwm.sponge_plugin.crates.util.LanguageUtils;
 import ua.gwm.sponge_plugin.crates.util.Pair;
+import ua.gwm.sponge_plugin.crates.util.SuperObject;
+import ua.gwm.sponge_plugin.crates.util.Utils;
 
 import javax.annotation.Nullable;
 import java.math.BigDecimal;
-import java.util.Collections;
-import java.util.List;
-import java.util.Optional;
-import java.util.UUID;
+import java.util.*;
 
+//Someday I will rework it... Someday... I will...
 public class GWMCratesCommand implements CommandCallable {
 
     @Override
@@ -501,6 +500,83 @@ public class GWMCratesCommand implements CommandCallable {
                     }
                 }
             }
+            case "list": {
+                if (!source.hasPermission("gwm_crates.command.list")) {
+                    source.sendMessage(LanguageUtils.getText("HAVE_NOT_PERMISSION"));
+                    return CommandResult.success();
+                }
+                Iterator<Manager> manager_iterator = GWMCrates.getInstance().getCreatedManagers().iterator();
+                Text.Builder message_builder = Text.builder();
+                boolean has_next = manager_iterator.hasNext();
+                while (has_next) {
+                    Manager next = manager_iterator.next();
+                    if (has_next = manager_iterator.hasNext()) {
+                        message_builder.append(LanguageUtils.getText("MANAGER_LIST_FORMAT",
+                                new Pair<String, String>("%MANAGER_ID%", next.getId()),
+                                new Pair<String, String>("%MANAGER_NAME%", next.getName())));
+                    } else {
+                        message_builder.append(LanguageUtils.getText("LAST_MANAGER_LIST_FORMAT",
+                                new Pair<String, String>("%MANAGER_ID%", next.getId()),
+                                new Pair<String, String>("%MANAGER_NAME%", next.getName())));
+                    }
+                }
+                if (LanguageUtils.exists("MANAGER_LIST_HEADER")) {
+                    source.sendMessage(LanguageUtils.getText("MANAGER_LIST_HEADER"));
+                }
+                source.sendMessage(message_builder.build());
+                if (LanguageUtils.exists("MANAGER_LIST_FOOTER")) {
+                    source.sendMessage(LanguageUtils.getText("MANAGER_LIST_FOOTER"));
+                }
+                return CommandResult.success();
+            }
+            case "info": {
+                if (args.length != 2) {
+                    sendHelp(source);
+                    return CommandResult.empty();
+                }
+                String manager_id = args[1].toLowerCase();
+                Optional<Manager> optional_manager = Utils.getManager(manager_id);
+                if (!optional_manager.isPresent()) {
+                    source.sendMessages(LanguageUtils.getText("MANAGER_NOT_EXIST",
+                            new Pair<String, String>("%MANAGER_ID%", manager_id)));
+                    return CommandResult.success();
+                }
+                Manager manager = optional_manager.get();
+                if (!source.hasPermission("gwm_crates.command.info." + manager_id)) {
+                    source.sendMessage(LanguageUtils.getText("HAVE_NOT_PERMISSION"));
+                    return CommandResult.success();
+                }
+                Optional<Text> optional_custom_info = manager.getCustomInfo();
+                if (optional_custom_info.isPresent()) {
+                    source.sendMessage(optional_custom_info.get());
+                    return CommandResult.success();
+                }
+                StringBuilder drops_builder = new StringBuilder();
+                List<Drop> drop_list = manager.getDrops();
+                for (int i = 0; i < drop_list.size(); i++) {
+                    Drop drop = drop_list.get(i);
+                    if (i != drop_list.size() - 1) {
+                        drops_builder.append(LanguageUtils.getPhrase("DROP_LIST_FORMAT",
+                                new Pair<>("%ID%", drop.getId().orElse("Unknown ID"))));
+                    } else {
+                        drops_builder.append(LanguageUtils.getPhrase("LAST_DROP_LIST_FORMAT",
+                                new Pair<>("%ID%", drop.getId().orElse("Unknown ID"))));
+                    }
+                }
+                source.sendMessages(LanguageUtils.getTextList("MANAGER_INFO_MESSAGE",
+                        new Pair<>("%MANAGER_ID%", manager.getId()),
+                        new Pair<>("%MANAGER_NAME%", manager.getName()),
+                        new Pair<>("%CASE_TYPE%", manager.getCase().getType()),
+                        new Pair<>("%KEY_TYPE%", manager.getKey().getType()),
+                        new Pair<>("%OPEN_MANAGER_TYPE%", manager.getOpenManager().getType()),
+                        new Pair<>("%PREVIEW_TYPE%", manager.getPreview().
+                                map(SuperObject::getType).orElse("No preview")),
+                        new Pair<>("%SEND_OPEN_MESSAGE%", manager.isSendOpenMessage()),
+                        new Pair<>("%CUSTOM_OPEN_MESSAGE%", manager.getCustomOpenMessage().
+                                orElse("No custom open message")),
+                        new Pair<>("%DROPS%", drops_builder.toString())));
+                return CommandResult.success();
+            }
             default: {
                 sendHelp(source);
                 return CommandResult.empty();
@@ -509,7 +585,9 @@ public class GWMCratesCommand implements CommandCallable {
     }
 
     private void sendHelp(CommandSource source) {
-        LanguageUtils.getTextList("HELP_MESSAGE").forEach(source::sendMessage);
+        LanguageUtils.getTextList("HELP_MESSAGE",
+                new Pair<>("%VERSION%", GWMCrates.VERSION.toString())).
+                forEach(source::sendMessage);
     }
 
     @Override
