@@ -9,9 +9,11 @@ import ua.gwm.sponge_plugin.crates.key.Key;
 import ua.gwm.sponge_plugin.crates.open_manager.OpenManager;
 import ua.gwm.sponge_plugin.crates.preview.Preview;
 import ua.gwm.sponge_plugin.crates.util.SuperObjectType;
-import ua.gwm.sponge_plugin.crates.util.Utils;
+import ua.gwm.sponge_plugin.crates.util.CratesUtils;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Optional;
 
 public class Manager {
 
@@ -57,15 +59,15 @@ public class Manager {
         }
         id = id_node.getString();
         name = name_node.getString();
-        caze = (Case) Utils.createSuperObject(case_node, SuperObjectType.CASE);
-        key = (Key) Utils.createSuperObject(key_node, SuperObjectType.KEY);
+        caze = (Case) CratesUtils.createSuperObject(case_node, SuperObjectType.CASE);
+        key = (Key) CratesUtils.createSuperObject(key_node, SuperObjectType.KEY);
         drops = new ArrayList<Drop>();
         for (ConfigurationNode drop_node : drops_node.getChildrenList()) {
-            drops.add((Drop) Utils.createSuperObject(drop_node, SuperObjectType.DROP));
+            drops.add((Drop) CratesUtils.createSuperObject(drop_node, SuperObjectType.DROP));
         }
-        open_manager = (OpenManager) Utils.createSuperObject(open_manager_node, SuperObjectType.OPEN_MANAGER);
+        open_manager = (OpenManager) CratesUtils.createSuperObject(open_manager_node, SuperObjectType.OPEN_MANAGER);
         if (!preview_node.isVirtual()) {
-            preview = Optional.of((Preview) Utils.createSuperObject(preview_node, SuperObjectType.PREVIEW));
+            preview = Optional.of((Preview) CratesUtils.createSuperObject(preview_node, SuperObjectType.PREVIEW));
         }
         send_open_message = send_open_message_node.getBoolean(true);
         if (!custom_open_message_node.isVirtual()) {

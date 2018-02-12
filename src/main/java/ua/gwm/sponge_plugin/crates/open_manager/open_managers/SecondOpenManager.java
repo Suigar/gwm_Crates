@@ -12,7 +12,6 @@ import org.spongepowered.api.item.inventory.ItemStack;
 import org.spongepowered.api.item.inventory.property.InventoryDimension;
 import org.spongepowered.api.item.inventory.property.InventoryTitle;
 import org.spongepowered.api.item.inventory.property.SlotIndex;
-import org.spongepowered.api.item.inventory.query.QueryOperationTypes;
 import org.spongepowered.api.item.inventory.type.OrderedInventory;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.serializer.TextSerializers;
@@ -20,8 +19,8 @@ import ua.gwm.sponge_plugin.crates.GWMCrates;
 import ua.gwm.sponge_plugin.crates.event.PlayerOpenCrateEvent;
 import ua.gwm.sponge_plugin.crates.manager.Manager;
 import ua.gwm.sponge_plugin.crates.open_manager.OpenManager;
-import ua.gwm.sponge_plugin.crates.util.Pair;
-import ua.gwm.sponge_plugin.crates.util.Utils;
+import ua.gwm.sponge_plugin.crates.util.CratesUtils;
+import ua.gwm.sponge_plugin.library.utils.Pair;
 
 import java.util.HashMap;
 import java.util.Optional;
@@ -60,7 +59,7 @@ public class SecondOpenManager extends OpenManager {
             if (hidden_item_node.isVirtual()) {
                 throw new RuntimeException("HIDDEN_ITEM node does not exist!");
             }
-            hidden_item = Utils.parseItem(hidden_item_node);
+            hidden_item = CratesUtils.parseItem(hidden_item_node);
             increase_hidden_item_quantity = increase_hidden_item_quantity_node.getBoolean(true);
             rows = rows_node.getInt(3);
             if (rows < 1 || rows > 6) {
@@ -120,7 +119,7 @@ public class SecondOpenManager extends OpenManager {
                 build(GWMCrates.getInstance())).orElseGet(() -> Inventory.builder().of(InventoryArchetypes.CHEST).
                 property(InventoryDimension.PROPERTY_NAME, new InventoryDimension(9, rows)).
                 build(GWMCrates.getInstance()));
-        OrderedInventory ordered = Utils.castToOrdered(inventory);
+        OrderedInventory ordered = CratesUtils.castToOrdered(inventory);
         int hidden_item_quantity = hidden_item.getQuantity();
         for (int i = 0; i < 9 * rows; i++) {
             int quantity = increase_hidden_item_quantity ? i + 1 : hidden_item_quantity;

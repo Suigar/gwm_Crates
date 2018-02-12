@@ -4,7 +4,7 @@ import com.google.common.reflect.TypeToken;
 import ninja.leaping.configurate.ConfigurationNode;
 import ninja.leaping.configurate.SimpleConfigurationNode;
 import ua.gwm.sponge_plugin.crates.util.CheckIntegerFunction;
-import ua.gwm.sponge_plugin.crates.util.Utils;
+import ua.gwm.sponge_plugin.crates.util.CratesUtils;
 
 import javax.swing.*;
 import java.awt.*;
@@ -51,7 +51,7 @@ public class ItemPanel extends JPanel {
         item_type_label.setLocation(5, 8);
         item_type_label.setSize(180, 20);
         add(item_type_label);
-        item_type_combo_box = new AdvancedComboBox(Utils.getItemTypes(true));
+        item_type_combo_box = new AdvancedComboBox(CratesUtils.getItemTypes(true));
         item_type_combo_box.setLocation(5, 28);
         item_type_combo_box.setSize(180, 20);
         add(item_type_combo_box);
@@ -172,7 +172,7 @@ public class ItemPanel extends JPanel {
                 display_name_field.setText(display_name_node.getString());
             }
             if (!lore_node.isVirtual()) {
-                lore_text_area.setText(Utils.listToString(lore_node.getList(TypeToken.of(String.class))));
+                lore_text_area.setText(CratesUtils.listToString(lore_node.getList(TypeToken.of(String.class))));
             }
             if (!enchantments_node.isVirtual()) {
                 for (ConfigurationNode enchantment_node : enchantments_node.getChildrenList()) {
@@ -217,7 +217,7 @@ public class ItemPanel extends JPanel {
             sub_id_node.setValue(sub_id_field.hasText() ? sub_id_field.getText() : null);
             durability_node.setValue(durability_field.hasText() ? durability_field.getText() : null);
             display_name_node.setValue(display_name_field.hasText() ? display_name_field.getText() : null);
-            lore_node.setValue(lore_text_area.hasText() ? Utils.stringToList(lore_text_area.getText()) : null);
+            lore_node.setValue(lore_text_area.hasText() ? CratesUtils.stringToList(lore_text_area.getText()) : null);
             if (!enchantments.isEmpty()) {
                 List<ConfigurationNode> enchantments_node_list = new ArrayList<ConfigurationNode>();
                 for (GUIEnchantment enchantment : enchantments) {

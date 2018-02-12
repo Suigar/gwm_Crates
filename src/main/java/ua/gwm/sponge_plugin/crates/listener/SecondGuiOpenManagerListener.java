@@ -17,8 +17,8 @@ import ua.gwm.sponge_plugin.crates.drop.Drop;
 import ua.gwm.sponge_plugin.crates.event.PlayerOpenedCrateEvent;
 import ua.gwm.sponge_plugin.crates.manager.Manager;
 import ua.gwm.sponge_plugin.crates.open_manager.open_managers.SecondOpenManager;
-import ua.gwm.sponge_plugin.crates.util.Pair;
-import ua.gwm.sponge_plugin.crates.util.Utils;
+import ua.gwm.sponge_plugin.crates.util.CratesUtils;
+import ua.gwm.sponge_plugin.library.utils.Pair;
 
 import java.util.HashSet;
 import java.util.Objects;
@@ -41,15 +41,15 @@ public class SecondGuiOpenManagerListener {
             Optional<Player> optional_player = event.getCause().first(Player.class);
             if (!optional_player.isPresent()) return;
             Player player = optional_player.get();
-            OrderedInventory ordered = Utils.castToOrdered(container.iterator().next());
+            OrderedInventory ordered = CratesUtils.castToOrdered(container.iterator().next());
             Pair<SecondOpenManager, Manager> pair = SecondOpenManager.SECOND_GUI_INVENTORIES.get(container);
             SecondOpenManager open_manager = pair.getKey();
             Manager manager = pair.getValue();
             for (SlotTransaction transaction : event.getTransactions()) {
                 Slot slot = transaction.getSlot();
-                if (Utils.isFirstInventory(container, slot)) {
+                if (CratesUtils.isFirstInventory(container, slot)) {
                     SHOWN_GUI.add(container);
-                    Drop drop = Utils.chooseDropByLevel(manager.getDrops(), player, false);
+                    Drop drop = CratesUtils.chooseDropByLevel(manager.getDrops(), player, false);
                     ItemStack drop_item = drop.getDropItem().orElse(ItemStack.of(ItemTypes.NONE, 1));
                     Sponge.getScheduler().createTaskBuilder().delayTicks(1).execute(() -> slot.set(drop_item)).
                             submit(GWMCrates.getInstance());
@@ -58,7 +58,7 @@ public class SecondGuiOpenManagerListener {
                             for (Slot next : ordered.<Slot>slots()) {
                                 if (!Objects.equals(next.getProperty(SlotIndex.class, "slotindex").get().getValue(),
                                         slot.getProperty(SlotIndex.class, "slotindex").get().getValue())) {
-                                    next.set(Utils.chooseDropByLevel(manager.getDrops(), player, true).getDropItem().orElse(ItemStack.of(ItemTypes.NONE, 1)));
+                                    next.set(CratesUtils.chooseDropByLevel(manager.getDrops(), player, true).getDropItem().orElse(ItemStack.of(ItemTypes.NONE, 1)));
                                 }
                             }
                         }).submit(GWMCrates.getInstance());
@@ -95,7 +95,7 @@ public class SecondGuiOpenManagerListener {
             if (open_manager.isForbidClose()) {
                 event.setCancelled(true);
             } else if (open_manager.isGiveRandomOnClose()) {
-                Drop drop = Utils.chooseDropByLevel(manager.getDrops(), player, false);
+                Drop drop = CratesUtils.chooseDropByLevel(manager.getDrops(), player, false);
                 drop.apply(player);
                 PlayerOpenedCrateEvent opened_event = new PlayerOpenedCrateEvent(player, manager, drop);
                 Sponge.getEventManager().post(opened_event);

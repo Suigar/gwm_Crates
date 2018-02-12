@@ -6,7 +6,7 @@ import ua.gwm.sponge_plugin.crates.gui.AdvancedTextField;
 import ua.gwm.sponge_plugin.crates.gui.configuration_dialog.ConfigurationDialog;
 import ua.gwm.sponge_plugin.crates.util.CheckIntListFunction;
 import ua.gwm.sponge_plugin.crates.util.SuperObjectType;
-import ua.gwm.sponge_plugin.crates.util.Utils;
+import ua.gwm.sponge_plugin.crates.util.CratesUtils;
 
 import javax.swing.*;
 import java.util.Optional;
@@ -49,7 +49,7 @@ public abstract class ChangeModeConfigurationDialog extends ConfigurationDialog 
                 change_delay_field.setText(String.valueOf(change_delay_node.getInt()));
             }
             if (!ignored_indices_node.isVirtual()) {
-                ignored_indices_field.setText(Utils.intListToString(ignored_indices_node.getList(TypeToken.of(Integer.class))));
+                ignored_indices_field.setText(CratesUtils.intListToString(ignored_indices_node.getList(TypeToken.of(Integer.class))));
             }
         } catch (Exception e) {
             throw new RuntimeException("Exception loading Change Mode Configuration Dialog!", e);
@@ -64,7 +64,7 @@ public abstract class ChangeModeConfigurationDialog extends ConfigurationDialog 
             ConfigurationNode change_delay_node = node.getNode("CHANGE_DELAY");
             ConfigurationNode ignored_indices_node = node.getNode("IGNORED_INDICES");
             change_delay_node.setValue(change_delay_field.hasText() ? change_delay_field.getText() : null);
-            ignored_indices_node.setValue(ignored_indices_field.hasText() ? Utils.stringToIntList(ignored_indices_field.getText()) : null);
+            ignored_indices_node.setValue(ignored_indices_field.hasText() ? CratesUtils.stringToIntList(ignored_indices_field.getText()) : null);
          } catch (Exception e) {
             throw new RuntimeException("Exception saving Change Mode Configuration Dialog!", e);
         }

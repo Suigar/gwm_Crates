@@ -6,7 +6,7 @@ import org.spongepowered.api.command.source.ConsoleSource;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.item.inventory.ItemStack;
 import ua.gwm.sponge_plugin.crates.drop.Drop;
-import ua.gwm.sponge_plugin.crates.util.Utils;
+import ua.gwm.sponge_plugin.crates.util.CratesUtils;
 
 import java.math.BigDecimal;
 import java.util.*;
@@ -24,7 +24,7 @@ public class CommandsDrop extends Drop {
             }
             commands = new ArrayList<Command>();
             for (ConfigurationNode command_node : commands_node.getChildrenList()) {
-                commands.add(Utils.parseCommand(command_node));
+                commands.add(CratesUtils.parseCommand(command_node));
             }
         } catch (Exception e) {
             throw new RuntimeException("Exception creating Commands Drop!", e);

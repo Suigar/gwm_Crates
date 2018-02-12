@@ -10,7 +10,6 @@ import org.spongepowered.api.item.inventory.ItemStack;
 import org.spongepowered.api.item.inventory.property.InventoryDimension;
 import org.spongepowered.api.item.inventory.property.InventoryTitle;
 import org.spongepowered.api.item.inventory.property.SlotIndex;
-import org.spongepowered.api.item.inventory.query.QueryOperationTypes;
 import org.spongepowered.api.item.inventory.type.OrderedInventory;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.serializer.TextSerializers;
@@ -18,8 +17,8 @@ import ua.gwm.sponge_plugin.crates.GWMCrates;
 import ua.gwm.sponge_plugin.crates.drop.Drop;
 import ua.gwm.sponge_plugin.crates.manager.Manager;
 import ua.gwm.sponge_plugin.crates.preview.Preview;
-import ua.gwm.sponge_plugin.crates.util.Pair;
-import ua.gwm.sponge_plugin.crates.util.Utils;
+import ua.gwm.sponge_plugin.crates.util.CratesUtils;
+import ua.gwm.sponge_plugin.library.utils.Pair;
 
 import java.util.HashMap;
 import java.util.Iterator;
@@ -51,14 +50,14 @@ public class SecondGuiPreview extends Preview {
 
     @Override
     public void preview(Player player, Manager manager) {
-        InventoryDimension dimension = new InventoryDimension(9, Utils.getInventoryHeight(manager.getDrops().size()));
+        InventoryDimension dimension = new InventoryDimension(9, CratesUtils.getInventoryHeight(manager.getDrops().size()));
         Inventory inventory = display_name.map(text -> Inventory.builder().of(InventoryArchetypes.CHEST).
                 property(InventoryDimension.PROPERTY_NAME, dimension).
                 property(InventoryTitle.PROPERTY_NAME, new InventoryTitle(text)).
                 build(GWMCrates.getInstance())).orElseGet(() -> Inventory.builder().of(InventoryArchetypes.CHEST).
                 property(InventoryDimension.PROPERTY_NAME, dimension).
                 build(GWMCrates.getInstance()));
-        OrderedInventory ordered = Utils.castToOrdered(inventory);
+        OrderedInventory ordered = CratesUtils.castToOrdered(inventory);
         Iterator<Drop> drop_iterator = manager.getDrops().iterator();
         int size = 9 * dimension.getRows();
         for (int i = 0; i < size && drop_iterator.hasNext();) {

@@ -5,7 +5,7 @@ import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.item.inventory.ItemStack;
 import ua.gwm.sponge_plugin.crates.drop.Drop;
 import ua.gwm.sponge_plugin.crates.util.SuperObjectType;
-import ua.gwm.sponge_plugin.crates.util.Utils;
+import ua.gwm.sponge_plugin.crates.util.CratesUtils;
 
 import java.math.BigDecimal;
 import java.util.*;
@@ -25,7 +25,7 @@ public class MultiDrop extends Drop {
             }
             drops = new ArrayList<Drop>();
             for (ConfigurationNode drop_node : drops_node.getChildrenList()) {
-                drops.add((Drop) Utils.createSuperObject(drop_node, SuperObjectType.DROP));
+                drops.add((Drop) CratesUtils.createSuperObject(drop_node, SuperObjectType.DROP));
             }
             give_all = give_all_node.getBoolean(true);
         } catch (Exception e) {
@@ -45,7 +45,7 @@ public class MultiDrop extends Drop {
         if (give_all) {
             drops.forEach(drop -> drop.apply(player));
         } else {
-            Utils.chooseDropByLevel(drops, player, false).apply(player);
+            CratesUtils.chooseDropByLevel(drops, player, false).apply(player);
         }
     }
 

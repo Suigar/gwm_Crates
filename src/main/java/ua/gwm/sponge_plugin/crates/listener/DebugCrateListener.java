@@ -9,8 +9,7 @@ import ua.gwm.sponge_plugin.crates.GWMCrates;
 import ua.gwm.sponge_plugin.crates.drop.Drop;
 import ua.gwm.sponge_plugin.crates.event.PlayerOpenedCrateEvent;
 import ua.gwm.sponge_plugin.crates.manager.Manager;
-import ua.gwm.sponge_plugin.crates.util.LanguageUtils;
-import ua.gwm.sponge_plugin.crates.util.Pair;
+import ua.gwm.sponge_plugin.library.utils.Pair;
 
 import java.io.BufferedWriter;
 import java.io.File;
@@ -46,7 +45,7 @@ public class DebugCrateListener {
                         deserialize(optional_custom_open_message.get().
                                 replace("%MANAGER%", manager.getName())));
             } else {
-                player.sendMessage(LanguageUtils.getText("SUCCESSFULLY_OPENED_MANAGER",
+                player.sendMessage(GWMCrates.getInstance().getLanguage().getText("SUCCESSFULLY_OPENED_MANAGER",
                         new Pair<String, String>("%MANAGER%", manager.getName())));
             }
         }
@@ -60,7 +59,7 @@ public class DebugCrateListener {
                 String drop_name = drop == null ? "null" : drop.getId().orElse("Unknown ID");
                 Location<World> location = player.getLocation();
                 String player_location = location.getExtent().getName() + ' ' + location.getBlockX() + ' ' + location.getBlockY() + ' ' + location.getBlockZ();
-                LOG_FILE_WRITER.write(LanguageUtils.getPhrase("MANAGER_OPENING_LOG_MESSAGE",
+                LOG_FILE_WRITER.write(GWMCrates.getInstance().getLanguage().getPhrase("MANAGER_OPENING_LOG_MESSAGE",
                         new Pair("%TIME%", time),
                         new Pair("%PLAYER%", player_name),
                         new Pair("%PLAYER_UUID%", player_uuid),

@@ -4,7 +4,7 @@ import ninja.leaping.configurate.ConfigurationNode;
 import org.spongepowered.api.entity.living.player.Player;
 import ua.gwm.sponge_plugin.crates.key.Key;
 import ua.gwm.sponge_plugin.crates.util.SuperObjectType;
-import ua.gwm.sponge_plugin.crates.util.Utils;
+import ua.gwm.sponge_plugin.crates.util.CratesUtils;
 
 import java.math.BigDecimal;
 import java.util.Optional;
@@ -22,7 +22,7 @@ public class MultipleAmountKey extends Key {
             if (child_key_node.isVirtual()) {
                 throw new RuntimeException("CHILD_KEY node does not exist!");
             }
-            child_key = (Key) Utils.createSuperObject(child_key_node, SuperObjectType.KEY);
+            child_key = (Key) CratesUtils.createSuperObject(child_key_node, SuperObjectType.KEY);
             amount = amount_node.getInt(1);
         } catch (Exception e) {
             throw new RuntimeException("Exception creating Multiple Amount Key!", e);

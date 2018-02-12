@@ -7,7 +7,7 @@ import ua.gwm.sponge_plugin.crates.gui.configuration_dialog.configuration_dialog
 import ua.gwm.sponge_plugin.crates.util.CheckIntListFunction;
 import ua.gwm.sponge_plugin.crates.util.CheckIntegerFunction;
 import ua.gwm.sponge_plugin.crates.util.SuperObjectType;
-import ua.gwm.sponge_plugin.crates.util.Utils;
+import ua.gwm.sponge_plugin.crates.util.CratesUtils;
 
 import javax.swing.*;
 import java.util.Optional;
@@ -98,7 +98,7 @@ public class FirstOpenManagerConfigurationDialog extends OpenManagerConfiguratio
         scroll_sound_label.setLocation(8, 380);
         scroll_sound_label.setSize(190, 20);
         add(scroll_sound_label);
-        scroll_sound_combo_box = new AdvancedComboBox(Utils.getSoundTypes(true));
+        scroll_sound_combo_box = new AdvancedComboBox(CratesUtils.getSoundTypes(true));
         scroll_sound_combo_box.setLocation(8, 400);
         scroll_sound_combo_box.setSize(190, 20);
         add(scroll_sound_combo_box);
@@ -106,7 +106,7 @@ public class FirstOpenManagerConfigurationDialog extends OpenManagerConfiguratio
         win_sound_label.setLocation(8, 430);
         win_sound_label.setSize(190, 20);
         add(win_sound_label);
-        win_sound_combo_box = new AdvancedComboBox(Utils.getSoundTypes(true));
+        win_sound_combo_box = new AdvancedComboBox(CratesUtils.getSoundTypes(true));
         win_sound_combo_box.setLocation(8, 450);
         win_sound_combo_box.setSize(190, 20);
         add(win_sound_combo_box);
@@ -133,7 +133,7 @@ public class FirstOpenManagerConfigurationDialog extends OpenManagerConfiguratio
                 display_name_field.setText(display_name_node.getString());
             }
             if (!scroll_delays_node.isVirtual()) {
-                scroll_delays_field.setText(Utils.intListToString(scroll_delays_node.getList(TypeToken.of(Integer.class))));
+                scroll_delays_field.setText(CratesUtils.intListToString(scroll_delays_node.getList(TypeToken.of(Integer.class))));
             }
             if (!clear_decorative_items_node.isVirtual()) {
                 clear_decorative_items_check_box.setSelected(clear_decorative_items_node.getBoolean());
@@ -177,7 +177,7 @@ public class FirstOpenManagerConfigurationDialog extends OpenManagerConfiguratio
             ConfigurationNode win_sound_node = node.getNode("WIN_SOUND");
             ConfigurationNode decorative_items_change_mode_node = node.getNode("DECORATIVE_ITEMS_CHANGE_MODE");
             display_name_node.setValue(display_name_field.hasText() ? display_name_field.getFocusTraversalKeysEnabled() : null);
-            scroll_delays_node.setValue(scroll_delays_field.hasText() ? Utils.stringToIntList(scroll_delays_field.getText()) : null);
+            scroll_delays_node.setValue(scroll_delays_field.hasText() ? CratesUtils.stringToIntList(scroll_delays_field.getText()) : null);
             clear_decorative_items_node.setValue(clear_decorative_items_check_box.isSelected());
             clear_other_drops_node.setValue(clear_other_drops_check_box.isSelected());
             close_delay_node.setValue(close_delay_field.hasText() ? close_delay_field.getText() : null);

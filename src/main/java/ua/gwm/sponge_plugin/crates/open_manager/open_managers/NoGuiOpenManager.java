@@ -9,7 +9,7 @@ import ua.gwm.sponge_plugin.crates.event.PlayerOpenCrateEvent;
 import ua.gwm.sponge_plugin.crates.event.PlayerOpenedCrateEvent;
 import ua.gwm.sponge_plugin.crates.manager.Manager;
 import ua.gwm.sponge_plugin.crates.open_manager.OpenManager;
-import ua.gwm.sponge_plugin.crates.util.Utils;
+import ua.gwm.sponge_plugin.crates.util.CratesUtils;
 
 import java.util.Optional;
 
@@ -28,7 +28,7 @@ public class NoGuiOpenManager extends OpenManager {
         PlayerOpenCrateEvent open_event = new PlayerOpenCrateEvent(player, manager);
         Sponge.getEventManager().post(open_event);
         if (open_event.isCancelled()) return;
-        Drop drop = Utils.chooseDropByLevel(manager.getDrops(), player, false);
+        Drop drop = CratesUtils.chooseDropByLevel(manager.getDrops(), player, false);
         drop.apply(player);
         getOpenSound().ifPresent(open_sound -> player.playSound(open_sound, player.getLocation().getPosition(), 1.));
         PlayerOpenedCrateEvent opened_event = new PlayerOpenedCrateEvent(player, manager, drop);

@@ -12,7 +12,6 @@ import org.spongepowered.api.item.inventory.InventoryArchetypes;
 import org.spongepowered.api.item.inventory.ItemStack;
 import org.spongepowered.api.item.inventory.property.InventoryTitle;
 import org.spongepowered.api.item.inventory.property.SlotIndex;
-import org.spongepowered.api.item.inventory.query.QueryOperationTypes;
 import org.spongepowered.api.item.inventory.type.OrderedInventory;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.serializer.TextSerializers;
@@ -23,7 +22,9 @@ import ua.gwm.sponge_plugin.crates.event.PlayerOpenCrateEvent;
 import ua.gwm.sponge_plugin.crates.event.PlayerOpenedCrateEvent;
 import ua.gwm.sponge_plugin.crates.manager.Manager;
 import ua.gwm.sponge_plugin.crates.open_manager.OpenManager;
-import ua.gwm.sponge_plugin.crates.util.*;
+import ua.gwm.sponge_plugin.crates.util.SuperObjectType;
+import ua.gwm.sponge_plugin.crates.util.CratesUtils;
+import ua.gwm.sponge_plugin.library.utils.Pair;
 
 import java.util.*;
 
@@ -64,7 +65,7 @@ public class FirstOpenManager extends OpenManager {
             }
             decorative_items = new ArrayList<ItemStack>();
             for (ConfigurationNode decorative_item_node : decorative_items_node.getChildrenList()) {
-                decorative_items.add(Utils.parseItem(decorative_item_node));
+                decorative_items.add(CratesUtils.parseItem(decorative_item_node));
             }
             if (decorative_items.size() != 20) {
                 throw new RuntimeException("DECORATIVE_ITEMS size must be 20 instead of " + decorative_items.size() + "!");
@@ -87,7 +88,7 @@ public class FirstOpenManager extends OpenManager {
                 win_sound = Optional.of(win_sound_node.getValue(TypeToken.of(SoundType.class)));
             }
             if (!decorative_items_change_mode_node.isVirtual()) {
-                decorative_items_change_mode = Optional.of((DecorativeItemsChangeMode) Utils.createSuperObject(decorative_items_change_mode_node, SuperObjectType.DECORATIVE_ITEMS_CHANGE_MODE));
+                decorative_items_change_mode = Optional.of((DecorativeItemsChangeMode) CratesUtils.createSuperObject(decorative_items_change_mode_node, SuperObjectType.DECORATIVE_ITEMS_CHANGE_MODE));
             }
         } catch (Exception e) {
             throw new RuntimeException("Exception creating First Gui Open Manager!", e);
@@ -124,12 +125,12 @@ public class FirstOpenManager extends OpenManager {
                 build(GWMCrates.getInstance())).orElseGet(() -> Inventory.builder().of(InventoryArchetypes.CHEST).
                 build(GWMCrates.getInstance()));
         ArrayList<Drop> drop_list = new ArrayList<Drop>();
-        OrderedInventory ordered = Utils.castToOrdered(inventory);
+        OrderedInventory ordered = CratesUtils.castToOrdered(inventory);
         for (int i = 0; i < 10; i++) {
             ordered.getSlot(new SlotIndex(i)).get().set(decorative_items.get(i));
         }
         for (int i = 10; i < 17; i++) {
-            Drop new_drop = Utils.chooseDropByLevel(manager.getDrops(), player, true);
+            Drop new_drop = CratesUtils.chooseDropByLevel(manager.getDrops(), player, true);
             drop_list.add(new_drop);
             ordered.getSlot(new SlotIndex(i)).get().set(new_drop.getDropItem().orElse(ItemStack.of(ItemTypes.NONE, 1)));
         }
@@ -152,7 +153,7 @@ public class FirstOpenManager extends OpenManager {
                     ordered.getSlot(new SlotIndex(j)).get().set(ordered.getSlot(new SlotIndex(j + 1)).get().peek().
                             orElse(ItemStack.of(ItemTypes.NONE, 1)));
                 }
-                Drop new_drop = Utils.chooseDropByLevel(manager.getDrops(), player, !(finalI == scroll_delays.size() - 5));
+                Drop new_drop = CratesUtils.chooseDropByLevel(manager.getDrops(), player, !(finalI == scroll_delays.size() - 5));
                 drop_list.add(new_drop);
                 ordered.getSlot(new SlotIndex(16)).get().set(new_drop.getDropItem().orElse(ItemStack.of(ItemTypes.NONE, 1)));
                 scroll_sound.ifPresent(sound -> player.playSound(sound, player.getLocation().getPosition(), 1.));

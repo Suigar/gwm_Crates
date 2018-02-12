@@ -21,7 +21,7 @@ public class PlayerOpenedCrateEvent extends AbstractEvent{
 
     @Override
     public Cause getCause() {
-        return GWMCrates.getInstance().getDefaultCause();
+        return GWMCrates.getInstance().getCause();
     }
 
     public Player getPlayer() {

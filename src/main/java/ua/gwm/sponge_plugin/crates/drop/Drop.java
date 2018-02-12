@@ -5,7 +5,7 @@ import ninja.leaping.configurate.ConfigurationNode;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.item.inventory.ItemStack;
 import ua.gwm.sponge_plugin.crates.util.SuperObject;
-import ua.gwm.sponge_plugin.crates.util.Utils;
+import ua.gwm.sponge_plugin.crates.util.CratesUtils;
 
 import java.math.BigDecimal;
 import java.util.HashMap;
@@ -34,7 +34,7 @@ public abstract class Drop extends SuperObject {
                 price = Optional.of(new BigDecimal(price_node.getString("0")));
             }
             if (!drop_item_node.isVirtual()) {
-                drop_item = Optional.of(Utils.parseItem(drop_item_node));
+                drop_item = Optional.of(CratesUtils.parseItem(drop_item_node));
             }
             if (!fake_level_node.isVirtual()) {
                 fake_level = Optional.of(fake_level_node.getInt(1));

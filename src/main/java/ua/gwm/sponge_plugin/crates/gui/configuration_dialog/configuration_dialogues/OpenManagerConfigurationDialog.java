@@ -4,7 +4,7 @@ import ninja.leaping.configurate.ConfigurationNode;
 import ua.gwm.sponge_plugin.crates.gui.AdvancedComboBox;
 import ua.gwm.sponge_plugin.crates.gui.configuration_dialog.ConfigurationDialog;
 import ua.gwm.sponge_plugin.crates.util.SuperObjectType;
-import ua.gwm.sponge_plugin.crates.util.Utils;
+import ua.gwm.sponge_plugin.crates.util.CratesUtils;
 
 import javax.swing.*;
 
@@ -19,7 +19,7 @@ public abstract class OpenManagerConfigurationDialog extends ConfigurationDialog
         open_sound_label.setLocation(8, 60);
         open_sound_label.setSize(190, 20);
         add(open_sound_label);
-        open_sound_combo_box = new AdvancedComboBox(Utils.getSoundTypes(true));
+        open_sound_combo_box = new AdvancedComboBox(CratesUtils.getSoundTypes(true));
         open_sound_combo_box.setLocation(8, 80);
         open_sound_combo_box.setSize(190, 20);
         add(open_sound_combo_box);

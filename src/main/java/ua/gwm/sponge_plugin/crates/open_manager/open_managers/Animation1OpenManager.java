@@ -14,7 +14,6 @@ import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.serializer.TextSerializers;
 import org.spongepowered.api.util.Direction;
-import org.spongepowered.api.world.BlockChangeFlag;
 import org.spongepowered.api.world.BlockChangeFlags;
 import org.spongepowered.api.world.Location;
 import org.spongepowered.api.world.World;
@@ -24,7 +23,7 @@ import ua.gwm.sponge_plugin.crates.listener.Animation1Listener;
 import ua.gwm.sponge_plugin.crates.manager.Manager;
 import ua.gwm.sponge_plugin.crates.open_manager.OpenManager;
 import ua.gwm.sponge_plugin.crates.util.SuperObjectType;
-import ua.gwm.sponge_plugin.crates.util.Utils;
+import ua.gwm.sponge_plugin.crates.util.CratesUtils;
 
 import java.util.*;
 
@@ -67,7 +66,7 @@ public class Animation1OpenManager extends OpenManager {
                 close_delay = close_delay_node.getLong();
             }
             if (!open_manager_node.isVirtual()) {
-                open_manager = (OpenManager) Utils.createSuperObject(node, SuperObjectType.OPEN_MANAGER);
+                open_manager = (OpenManager) CratesUtils.createSuperObject(node, SuperObjectType.OPEN_MANAGER);
             }
         } catch (Exception e) {
             GWMCrates.getInstance().getLogger().info("Exception creating Animation1 Open Manager!");
@@ -144,10 +143,10 @@ public class Animation1OpenManager extends OpenManager {
                         add(Keys.DIRECTION, Direction.SOUTH).
                         build(),
                 BlockChangeFlags.NONE);
-        Utils.tryCreateHologram(loc1, hologram).ifPresent(holograms::add);
-        Utils.tryCreateHologram(loc2, hologram).ifPresent(holograms::add);
-        Utils.tryCreateHologram(loc3, hologram).ifPresent(holograms::add);
-        Utils.tryCreateHologram(loc4, hologram).ifPresent(holograms::add);
+        CratesUtils.tryCreateHologram(loc1, hologram).ifPresent(holograms::add);
+        CratesUtils.tryCreateHologram(loc2, hologram).ifPresent(holograms::add);
+        CratesUtils.tryCreateHologram(loc3, hologram).ifPresent(holograms::add);
+        CratesUtils.tryCreateHologram(loc4, hologram).ifPresent(holograms::add);
         getOpenSound().ifPresent(sound -> player.playSound(sound, player.getLocation().getPosition(), 1.));
         PLAYERS_OPENING_ANIMATION1.put(player, new Information(this, manager,
                 new HashMap<Location<World>, Boolean>(){{

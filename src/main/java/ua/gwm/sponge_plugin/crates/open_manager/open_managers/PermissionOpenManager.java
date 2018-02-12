@@ -3,11 +3,10 @@ package ua.gwm.sponge_plugin.crates.open_manager.open_managers;
 import ninja.leaping.configurate.ConfigurationNode;
 import org.spongepowered.api.effect.sound.SoundType;
 import org.spongepowered.api.entity.living.player.Player;
-import ua.gwm.sponge_plugin.crates.drop.Drop;
 import ua.gwm.sponge_plugin.crates.manager.Manager;
 import ua.gwm.sponge_plugin.crates.open_manager.OpenManager;
 import ua.gwm.sponge_plugin.crates.util.SuperObjectType;
-import ua.gwm.sponge_plugin.crates.util.Utils;
+import ua.gwm.sponge_plugin.crates.util.CratesUtils;
 
 import java.util.Optional;
 
@@ -33,8 +32,8 @@ public class PermissionOpenManager extends OpenManager {
                 throw new RuntimeException("OPEN_MANAGER2 node does not exist!");
             }
             permission = permission_node.getString();
-            open_manager1 = (OpenManager) Utils.createSuperObject(open_manager1_node, SuperObjectType.OPEN_MANAGER);
-            open_manager2 = (OpenManager) Utils.createSuperObject(open_manager2_node, SuperObjectType.OPEN_MANAGER);
+            open_manager1 = (OpenManager) CratesUtils.createSuperObject(open_manager1_node, SuperObjectType.OPEN_MANAGER);
+            open_manager2 = (OpenManager) CratesUtils.createSuperObject(open_manager2_node, SuperObjectType.OPEN_MANAGER);
 
         } catch (Exception e) {
             throw new RuntimeException("Exception creating Permission Open Manager!", e);

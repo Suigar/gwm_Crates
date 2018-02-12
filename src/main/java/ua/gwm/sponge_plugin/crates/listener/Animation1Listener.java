@@ -12,14 +12,13 @@ import org.spongepowered.api.event.Order;
 import org.spongepowered.api.event.block.InteractBlockEvent;
 import org.spongepowered.api.event.command.SendCommandEvent;
 import org.spongepowered.api.event.entity.MoveEntityEvent;
-import org.spongepowered.api.world.BlockChangeFlag;
 import org.spongepowered.api.world.BlockChangeFlags;
 import org.spongepowered.api.world.Location;
 import org.spongepowered.api.world.World;
 import ua.gwm.sponge_plugin.crates.GWMCrates;
 import ua.gwm.sponge_plugin.crates.event.PlayerOpenedCrateEvent;
 import ua.gwm.sponge_plugin.crates.open_manager.open_managers.Animation1OpenManager;
-import ua.gwm.sponge_plugin.crates.util.Utils;
+import ua.gwm.sponge_plugin.crates.util.CratesUtils;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -35,7 +34,7 @@ public class Animation1Listener {
         if (!entity.getType().equals(EntityTypes.PLAYER)) return;
         Player player = (Player) entity;
         if (!Animation1OpenManager.PLAYERS_OPENING_ANIMATION1.containsKey(player) || OPENED_PLAYERS.containsKey(player)) return;
-        if (Utils.isLocationChanged(event.getFromTransform(), event.getToTransform(), true)) {
+        if (CratesUtils.isLocationChanged(event.getFromTransform(), event.getToTransform(), true)) {
             event.setCancelled(true);
         }
     }

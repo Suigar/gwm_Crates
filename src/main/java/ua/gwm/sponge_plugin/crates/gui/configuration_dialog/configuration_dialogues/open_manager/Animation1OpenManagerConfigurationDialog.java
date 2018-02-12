@@ -8,7 +8,7 @@ import ua.gwm.sponge_plugin.crates.gui.SuperObjectPanel;
 import ua.gwm.sponge_plugin.crates.gui.configuration_dialog.configuration_dialogues.OpenManagerConfigurationDialog;
 import ua.gwm.sponge_plugin.crates.util.CheckIntegerFunction;
 import ua.gwm.sponge_plugin.crates.util.SuperObjectType;
-import ua.gwm.sponge_plugin.crates.util.Utils;
+import ua.gwm.sponge_plugin.crates.util.CratesUtils;
 
 import javax.swing.*;
 import java.util.Optional;
@@ -33,7 +33,7 @@ public class Animation1OpenManagerConfigurationDialog extends OpenManagerConfigu
         floor_block_type_label.setLocation(8, 110);
         floor_block_type_label.setSize(190, 20);
         add(floor_block_type_label);
-        floor_block_type_combo_box = new AdvancedComboBox(Utils.getBlockTypes(false));
+        floor_block_type_combo_box = new AdvancedComboBox(CratesUtils.getBlockTypes(false));
         floor_block_type_combo_box.setLocation(8, 130);
         floor_block_type_combo_box.setSize(190, 20);
         add(floor_block_type_combo_box);
@@ -41,7 +41,7 @@ public class Animation1OpenManagerConfigurationDialog extends OpenManagerConfigu
         fence_block_type_label.setLocation(8, 160);
         fence_block_type_label.setSize(190, 20);
         add(fence_block_type_label);
-        fence_block_type_combo_box = new AdvancedComboBox(Utils.getBlockTypes(false));
+        fence_block_type_combo_box = new AdvancedComboBox(CratesUtils.getBlockTypes(false));
         fence_block_type_combo_box.setLocation(8, 180);
         fence_block_type_combo_box.setSize(190, 20);
         add(fence_block_type_combo_box);
@@ -49,7 +49,7 @@ public class Animation1OpenManagerConfigurationDialog extends OpenManagerConfigu
         crate_block_type_label.setLocation(8, 210);
         crate_block_type_label.setSize(190, 20);
         add(crate_block_type_label);
-        crate_block_type_combo_box = new AdvancedComboBox(Utils.getBlockTypes(false));
+        crate_block_type_combo_box = new AdvancedComboBox(CratesUtils.getBlockTypes(false));
         crate_block_type_combo_box.setLocation(8, 230);
         crate_block_type_combo_box.setSize(190, 20);
         add(crate_block_type_combo_box);

@@ -2,7 +2,7 @@ package ua.gwm.sponge_plugin.crates.gui;
 
 import ninja.leaping.configurate.ConfigurationNode;
 import ua.gwm.sponge_plugin.crates.util.SuperObjectType;
-import ua.gwm.sponge_plugin.crates.util.Utils;
+import ua.gwm.sponge_plugin.crates.util.CratesUtils;
 
 import javax.swing.*;
 import java.util.function.Supplier;
@@ -20,7 +20,7 @@ public class AdvancedConfigurationButton extends ConfigurationButton {
         addActionListener(e -> {
             String type = this.type_supplier.get();
             if (type != null) {
-                Utils.createGUIConfigurationDialog(this.super_object_type, type, this.node_supplier.get());
+                CratesUtils.createGUIConfigurationDialog(this.super_object_type, type, this.node_supplier.get());
             } else {
                 JOptionPane.showMessageDialog(null, "Super Object \"" + this.super_object_type.toString() + "\" type not selected!", "Error!", JOptionPane.WARNING_MESSAGE);
             }

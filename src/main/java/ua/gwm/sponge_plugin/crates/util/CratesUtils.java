@@ -31,13 +31,15 @@ import ua.gwm.sponge_plugin.crates.gui.GWMCratesGUI;
 import ua.gwm.sponge_plugin.crates.gui.configuration_dialog.ConfigurationDialog;
 import ua.gwm.sponge_plugin.crates.gui.configuration_dialog.configuration_dialogues.SavedSuperObjectConfigurationDialog;
 import ua.gwm.sponge_plugin.crates.manager.Manager;
+import ua.gwm.sponge_plugin.library.utils.LibraryUtils;
+import ua.gwm.sponge_plugin.library.utils.Pair;
 
 import javax.swing.*;
 import java.lang.reflect.Constructor;
 import java.util.*;
 import java.util.stream.Collectors;
 
-public class Utils {
+public class CratesUtils {
 
     public static boolean itemStacksEquals(ItemStack item, ItemStack other) {
         ItemStack copy1 = item.copy();
@@ -45,43 +47,6 @@ public class Utils {
         copy1.setQuantity(1);
         copy2.setQuantity(1);
         return copy1.equalTo(copy2);
-    }
-
-    public static int getRandomIntLevel(int min, int max) {
-        Random random = new Random();
-        while (random.nextBoolean() && min < max) {
-            min++;
-        }
-        return min;
-    }
-
-    public static Location<World> parseLocation(ConfigurationNode node) {
-        ConfigurationNode x_node = node.getNode("X");
-        ConfigurationNode y_node = node.getNode("Y");
-        ConfigurationNode z_node = node.getNode("Z");
-        ConfigurationNode world_node = node.getNode("WORLD_NAME");
-        if (x_node.isVirtual()) {
-            throw new RuntimeException("X node does not exist!");
-        }
-        if (y_node.isVirtual()) {
-            throw new RuntimeException("Y node does not exist!");
-        }
-        if (z_node.isVirtual()) {
-            throw new RuntimeException("Z node does not exist!");
-        }
-        if (world_node.isVirtual()) {
-            throw new RuntimeException("WORLD_NAME node does not exist!");
-        }
-        double x = x_node.getDouble();
-        double y = y_node.getDouble();
-        double z = z_node.getDouble();
-        String world_name = world_node.getString();
-        Optional<World> optional_world = Sponge.getServer().getWorld(world_name);
-        if (!optional_world.isPresent()) {
-            throw new RuntimeException("World \"" + world_name + "\" does not exist!");
-        }
-        World world = optional_world.get();
-        return new Location<World>(world, x, y, z);
     }
 
     public static ItemStack parseItem(ConfigurationNode node) {
@@ -241,7 +206,7 @@ public class Utils {
             }
         }
         while (true) {
-            int level = Utils.getRandomIntLevel(1, max_level);
+            int level = LibraryUtils.getRandomIntLevel(1, max_level);
             if (sorted_drops.containsKey(level)) {
                 List<Drop> actual_drops = sorted_drops.get(level);
                 return actual_drops.get(new Random().nextInt(actual_drops.size()));
@@ -305,7 +270,7 @@ public class Utils {
                 Optional<ItemStack> optional_inventory_item = slot.peek();
                 if (optional_inventory_item.isPresent()) {
                     ItemStack inventory_item = optional_inventory_item.get();
-                    if (Utils.itemStacksEquals(inventory_item, item)) {
+                    if (CratesUtils.itemStacksEquals(inventory_item, item)) {
                         int item_quantity = inventory_item.getQuantity();
                         if (item_quantity > amount) {
                             item.setQuantity(item_quantity - amount);
@@ -328,7 +293,7 @@ public class Utils {
             Optional<ItemStack> optional_inventory_item = slot.peek();
             if (optional_inventory_item.isPresent()) {
                 ItemStack inventory_item = optional_inventory_item.get();
-                if (Utils.itemStacksEquals(inventory_item, item)) {
+                if (CratesUtils.itemStacksEquals(inventory_item, item)) {
                     amount += inventory_item.getQuantity();
                 }
             }

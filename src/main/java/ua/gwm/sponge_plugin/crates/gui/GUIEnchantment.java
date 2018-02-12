@@ -1,6 +1,6 @@
 package ua.gwm.sponge_plugin.crates.gui;
 
-import ua.gwm.sponge_plugin.crates.util.Utils;
+import ua.gwm.sponge_plugin.crates.util.CratesUtils;
 
 import javax.swing.*;
 import java.awt.*;
@@ -15,7 +15,7 @@ public class GUIEnchantment extends JPanel {
         setLayout(new BoxLayout(this, BoxLayout.X_AXIS));
         delete_button = new DeleteButton();
         add(delete_button);
-        enchantment_combo_box = new AdvancedComboBox(Utils.getEnchantments(false));
+        enchantment_combo_box = new AdvancedComboBox(CratesUtils.getEnchantments(false));
         enchantment_combo_box.setPreferredSize(new Dimension(100, 20));
         enchantment_combo_box.setMaximumSize(new Dimension(100, 20));
         add(enchantment_combo_box);

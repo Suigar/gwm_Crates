@@ -7,7 +7,7 @@ import org.spongepowered.api.item.inventory.ItemStack;
 import ua.gwm.sponge_plugin.crates.GWMCrates;
 import ua.gwm.sponge_plugin.crates.drop.Drop;
 import ua.gwm.sponge_plugin.crates.util.SuperObjectType;
-import ua.gwm.sponge_plugin.crates.util.Utils;
+import ua.gwm.sponge_plugin.crates.util.CratesUtils;
 
 import java.math.BigDecimal;
 import java.util.Optional;
@@ -26,7 +26,7 @@ public class DelayDrop extends Drop {
             if (child_drop_node.isVirtual()) {
                 throw new RuntimeException("CHILD_DROP node does not exist!");
             }
-            child_drop = (Drop) Utils.createSuperObject(child_drop_node, SuperObjectType.DROP);
+            child_drop = (Drop) CratesUtils.createSuperObject(child_drop_node, SuperObjectType.DROP);
             if (delay_node.isVirtual()) {
                 throw new RuntimeException("DELAY node does not exist!");
             }

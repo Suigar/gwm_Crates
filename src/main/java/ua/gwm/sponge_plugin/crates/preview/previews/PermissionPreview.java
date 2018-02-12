@@ -2,11 +2,10 @@ package ua.gwm.sponge_plugin.crates.preview.previews;
 
 import ninja.leaping.configurate.ConfigurationNode;
 import org.spongepowered.api.entity.living.player.Player;
-import ua.gwm.sponge_plugin.crates.drop.Drop;
 import ua.gwm.sponge_plugin.crates.manager.Manager;
 import ua.gwm.sponge_plugin.crates.preview.Preview;
 import ua.gwm.sponge_plugin.crates.util.SuperObjectType;
-import ua.gwm.sponge_plugin.crates.util.Utils;
+import ua.gwm.sponge_plugin.crates.util.CratesUtils;
 
 import java.util.Optional;
 
@@ -32,8 +31,8 @@ public class PermissionPreview extends Preview {
                 throw new RuntimeException("PREVIEW2 node does not exist!");
             }
             permission = permission_node.getString();
-            preview1 = (Preview) Utils.createSuperObject(preview1_node, SuperObjectType.PREVIEW);
-            preview2 = (Preview) Utils.createSuperObject(preview2_node, SuperObjectType.PREVIEW);
+            preview1 = (Preview) CratesUtils.createSuperObject(preview1_node, SuperObjectType.PREVIEW);
+            preview2 = (Preview) CratesUtils.createSuperObject(preview2_node, SuperObjectType.PREVIEW);
 
         } catch (Exception e) {
             throw new RuntimeException("Exception creating Permission Preview!", e);

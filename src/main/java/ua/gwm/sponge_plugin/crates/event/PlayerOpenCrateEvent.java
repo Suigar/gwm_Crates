@@ -30,7 +30,7 @@ public class PlayerOpenCrateEvent extends AbstractEvent implements Cancellable {
 
     @Override
     public Cause getCause() {
-        return GWMCrates.getInstance().getDefaultCause();
+        return GWMCrates.getInstance().getCause();
     }
 
     public Player getPlayer() {

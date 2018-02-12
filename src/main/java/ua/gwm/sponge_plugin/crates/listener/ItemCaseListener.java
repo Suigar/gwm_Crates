@@ -12,9 +12,8 @@ import ua.gwm.sponge_plugin.crates.key.Key;
 import ua.gwm.sponge_plugin.crates.manager.Manager;
 import ua.gwm.sponge_plugin.crates.open_manager.OpenManager;
 import ua.gwm.sponge_plugin.crates.preview.Preview;
-import ua.gwm.sponge_plugin.crates.util.Utils;
-import ua.gwm.sponge_plugin.crates.util.LanguageUtils;
-import ua.gwm.sponge_plugin.crates.util.Pair;
+import ua.gwm.sponge_plugin.crates.util.CratesUtils;
+import ua.gwm.sponge_plugin.library.utils.Pair;
 
 import java.util.Optional;
 
@@ -30,16 +29,16 @@ public class ItemCaseListener {
             Case caze = manager.getCase();
             if (!(caze instanceof ItemCase)) continue;
             ItemStack case_item = ((ItemCase) caze).getItem();
-            if (!Utils.itemStacksEquals(item, case_item)) continue;
+            if (!CratesUtils.itemStacksEquals(item, case_item)) continue;
             event.setCancelled(true);
             OpenManager open_manager = manager.getOpenManager();
             if (!open_manager.canOpen(player, manager)) {
-                player.sendMessage(LanguageUtils.getText("CAN_NOT_OPEN_CASE"));
+                player.sendMessage(GWMCrates.getInstance().getLanguage().getText("CAN_NOT_OPEN_CASE"));
                 return;
             }
             Key key = manager.getKey();
             if (key.get(player) < 1) {
-                player.sendMessage(LanguageUtils.getText("HAVE_NOT_KEY"));
+                player.sendMessage(GWMCrates.getInstance().getLanguage().getText("HAVE_NOT_KEY"));
                 return;
             }
             caze.add(player, -1);
@@ -61,22 +60,22 @@ public class ItemCaseListener {
             Case caze = manager.getCase();
             if (!(caze instanceof ItemCase)) continue;
             ItemStack case_item = ((ItemCase) caze).getItem();
-            if (!Utils.itemStacksEquals(item, case_item)) continue;
+            if (!CratesUtils.itemStacksEquals(item, case_item)) continue;
             event.setCancelled(true);
             if (!((ItemCase) caze).isStartPreviewOnLeftClick()) return;
             Optional<Preview> optional_preview = manager.getPreview();
             if (!optional_preview.isPresent()) {
-                player.sendMessage(LanguageUtils.getText("PREVIEW_NOT_AVAILABLE",
+                player.sendMessage(GWMCrates.getInstance().getLanguage().getText("PREVIEW_NOT_AVAILABLE",
                         new Pair<String, String>("%MANAGER%", manager.getName())));
                 return;
             }
             Preview preview = optional_preview.get();
             if (!player.hasPermission("gwm_crates.preview." + manager_id)) {
-                player.sendMessage(LanguageUtils.getText("HAVE_NOT_PERMISSION"));
+                player.sendMessage(GWMCrates.getInstance().getLanguage().getText("HAVE_NOT_PERMISSION"));
                 return;
             }
             preview.preview(player, manager);
-            player.sendMessage(LanguageUtils.getText("PREVIEW_STARTED",
+            player.sendMessage(GWMCrates.getInstance().getLanguage().getText("PREVIEW_STARTED",
                     new Pair<String, String>("%MANAGER%", manager.getName())));
             break;
         }

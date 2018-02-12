@@ -4,7 +4,7 @@ import ninja.leaping.configurate.ConfigurationNode;
 import org.spongepowered.api.entity.living.player.Player;
 import ua.gwm.sponge_plugin.crates.key.Key;
 import ua.gwm.sponge_plugin.crates.util.SuperObjectType;
-import ua.gwm.sponge_plugin.crates.util.Utils;
+import ua.gwm.sponge_plugin.crates.util.CratesUtils;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
@@ -26,7 +26,7 @@ public class MultiKey extends Key {
             }
             keys = new ArrayList<Key>();
             for (ConfigurationNode key_node : keys_node.getChildrenList()) {
-                keys.add((Key) Utils.createSuperObject(key_node, SuperObjectType.KEY));
+                keys.add((Key) CratesUtils.createSuperObject(key_node, SuperObjectType.KEY));
             }
             all_keys_needed = all_keys_needed_node.getBoolean(false);
         } catch (Exception e) {

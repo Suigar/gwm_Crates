@@ -2,8 +2,6 @@ package ua.gwm.sponge_plugin.crates;
 
 import com.flowpowered.math.vector.Vector3d;
 import com.google.common.reflect.TypeToken;
-import com.google.gson.Gson;
-import com.google.gson.JsonObject;
 import com.google.inject.Inject;
 import de.randombyte.holograms.api.HologramsService;
 import ninja.leaping.configurate.ConfigurationNode;
@@ -46,11 +44,13 @@ import ua.gwm.sponge_plugin.crates.open_manager.open_managers.*;
 import ua.gwm.sponge_plugin.crates.preview.previews.FirstGuiPreview;
 import ua.gwm.sponge_plugin.crates.preview.previews.PermissionPreview;
 import ua.gwm.sponge_plugin.crates.preview.previews.SecondGuiPreview;
-import ua.gwm.sponge_plugin.crates.util.*;
+import ua.gwm.sponge_plugin.crates.util.CratesUtils;
+import ua.gwm.sponge_plugin.crates.util.SuperObject;
+import ua.gwm.sponge_plugin.crates.util.SuperObjectStorage;
+import ua.gwm.sponge_plugin.crates.util.SuperObjectType;
+import ua.gwm.sponge_plugin.library.utils.*;
 
 import java.io.File;
-import java.io.InputStreamReader;
-import java.net.URL;
 import java.nio.file.Files;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -59,7 +59,7 @@ import java.util.Optional;
 @Plugin(
         id = "gwm_crates",
         name = "GWMCrates",
-        version = "2.3",
+        version = "2.3.1",
         description = "Universal crates plugin for your server!",
         authors = {"GWM"/*
                          * Nazar Kalinovskiy
@@ -67,11 +67,12 @@ import java.util.Optional;
                          * E-Mail(gwm@tutanota.com),
                          * Discord(GWM#2192)*/},
         dependencies = {
+                @Dependency(id = "gwm_library"),
                 @Dependency(id = "holograms", optional = true)
         })
-public class GWMCrates {
+public class GWMCrates extends SpongePlugin {
 
-    public static final Version VERSION = new Version(null, 2, 3);
+    public static final Version VERSION = new Version(null, 2, 3, 1);
 
     private static GWMCrates instance = null;
 
@@ -82,7 +83,7 @@ public class GWMCrates {
         return instance;
     }
 
-    private Cause default_cause;
+    private Cause cause;
 
     @Inject
     @ConfigDir(sharedRoot = false)
@@ -115,6 +116,8 @@ public class GWMCrates {
     private Config timed_keys_delays_config;
     private Config saved_super_objects_config;
 
+    private Language language;
+
     private boolean log_opened_crates = false;
     private boolean check_updates = true;
     private Vector3d hologram_offset = new Vector3d(0.5, 1, 0.5);
@@ -141,9 +144,7 @@ public class GWMCrates {
             logger.info("Managers directory does not exist! Trying to create it...");
             try {
                 managers_directory.mkdirs();
-                logger.info("Managers directory successfully created! Trying extract example manager...");
-                new Config("managers" + File.separator + "example_manager.conf", false);
-                logger.info("Example manager successfully extracted!");
+                logger.info("Managers directory successfully created!");
             } catch (Exception e) {
                 logger.warn("Failed to create managers config directory!", e);
             }
@@ -157,15 +158,16 @@ public class GWMCrates {
                 logger.warn("Failed to create logs config directory!");
             }
         }
-        config = new Config("config.conf", false);
-        language_config = new Config("language.conf", false);
-        saved_super_objects_config = new Config("saved_super_objects.conf", false);
-        virtual_cases_config = new Config("virtual_cases.conf", true);
-        virtual_keys_config = new Config("virtual_keys.conf", true);
-        timed_cases_delays_config = new Config("timed_cases_delays.conf", true);
-        timed_keys_delays_config = new Config("timed_keys_delays.conf", true);
+        cause = Cause.of(EventContext.empty(), plugin_container);
+        config = new Config(this, "config.conf", false);
+        language_config = new Config(this, "language.conf", false);
+        saved_super_objects_config = new Config(this, "saved_super_objects.conf", false);
+        virtual_cases_config = new Config(this, "virtual_cases.conf", true);
+        virtual_keys_config = new Config(this, "virtual_keys.conf", true);
+        timed_cases_delays_config = new Config(this, "timed_cases_delays.conf", true);
+        timed_keys_delays_config = new Config(this, "timed_keys_delays.conf", true);
         loadConfigValues();
-        default_cause = Cause.of(EventContext.empty(), plugin_container);
+        language = new Language(this);
         if (check_updates) {
             checkUpdates();
         }
@@ -236,6 +238,7 @@ public class GWMCrates {
     public void reload() {
         deleteHolograms();
         created_managers.clear();
+        cause = Cause.of(EventContext.empty(), plugin_container);
         config.reload();
         language_config.reload();
         virtual_cases_config.reload();
@@ -246,7 +249,7 @@ public class GWMCrates {
         super_objects.clear();
         saved_super_objects.clear();
         loadConfigValues();
-        default_cause = Cause.of(EventContext.empty(), plugin_container);
+        language = new Language(this);
         register();
         optional_economy_service = Optional.empty();
         optional_holograms_service = Optional.empty();
@@ -316,7 +319,7 @@ public class GWMCrates {
         for (SuperObjectStorage super_object_storage : registration_event.getSuperObjectStorage()) {
             SuperObjectType super_object_type = super_object_storage.getSuperObjectType();
             String type = super_object_storage.getType();
-            if (Utils.getSuperObjectStorage(super_object_type, type).isPresent()) {
+            if (CratesUtils.getSuperObjectStorage(super_object_type, type).isPresent()) {
                 logger.warn("Super Objects already contains Super Object \"" + super_object_type + "\" with type \"" + type + "\"!");
             } else {
                 super_objects.add(super_object_storage);
@@ -359,7 +362,7 @@ public class GWMCrates {
                 throw new RuntimeException("Saved Super Objects already contains Saved Super Object \"" + super_object_type + "\" with saved ID \"" + saved_id + "\"!");
             }
             logger.info("Successfully loaded Saved Super Object \"" + super_object_type + "\" with saved ID \"" + saved_id + "\" and ID \"" + id + "\"!");
-            saved_super_objects.put(pair, Utils.createSuperObject(node, super_object_type));
+            saved_super_objects.put(pair, CratesUtils.createSuperObject(node, super_object_type));
         });
         logger.info("All Saved Super Objects loaded!");
     }
@@ -411,23 +414,14 @@ public class GWMCrates {
         return false;
     }
 
-    private void checkUpdates() {
-        Sponge.getScheduler().createTaskBuilder().async().execute(() -> {
-            try {
-                InputStreamReader reader = new InputStreamReader(new URL("https://ore.spongepowered.org/api/projects/gwm_crates").openStream());
-                JsonObject object = new Gson().fromJson(reader, JsonObject.class);
-                Version ore_version = Version.parse(object.get("recommended").getAsJsonObject().get("name").getAsJsonPrimitive().getAsString());
-                if (ore_version.compareTo(VERSION) > 0) {
-                    logger.warn("New version (" + ore_version.toString() + ") available on Ore!");
-                }
-            } catch (Exception e) {
-                logger.warn("Exception checking plugin updates on Ore!", e);
-            }
-        }).submit(this);
+    @Override
+    public Version getVersion() {
+        return VERSION;
     }
 
-    public Cause getDefaultCause() {
-        return default_cause;
+    @Override
+    public Cause getCause() {
+        return cause;
     }
 
     public File getConfigDirectory() {
@@ -442,8 +436,14 @@ public class GWMCrates {
         return logs_directory;
     }
 
+    @Override
     public Logger getLogger() {
         return logger;
+    }
+
+    @Override
+    public PluginContainer getContainer() {
+        return plugin_container;
     }
 
     public Optional<EconomyService> getEconomyService() {
@@ -470,12 +470,19 @@ public class GWMCrates {
         return created_managers;
     }
 
+    @Override
     public Config getConfig() {
         return config;
     }
 
+    @Override
     public Config getLanguageConfig() {
         return language_config;
+    }
+
+    @Override
+    public Language getLanguage() {
+        return language;
     }
 
     public Config getVirtualCasesConfig() {

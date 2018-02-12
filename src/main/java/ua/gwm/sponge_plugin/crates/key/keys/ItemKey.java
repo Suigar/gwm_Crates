@@ -4,7 +4,7 @@ import ninja.leaping.configurate.ConfigurationNode;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.item.inventory.ItemStack;
 import ua.gwm.sponge_plugin.crates.key.Key;
-import ua.gwm.sponge_plugin.crates.util.Utils;
+import ua.gwm.sponge_plugin.crates.util.CratesUtils;
 
 import java.math.BigDecimal;
 import java.util.Optional;
@@ -20,7 +20,7 @@ public class ItemKey extends Key {
             if (item_node.isVirtual()) {
                 throw new RuntimeException("ITEM node does not exist!");
             }
-            item = Utils.parseItem(item_node);
+            item = CratesUtils.parseItem(item_node);
         } catch (Exception e) {
             throw new RuntimeException("Exception creating Item Key!", e);
         }
@@ -33,12 +33,12 @@ public class ItemKey extends Key {
 
     @Override
     public void add(Player player, int amount) {
-        Utils.addItemStack(player, item, amount);
+        CratesUtils.addItemStack(player, item, amount);
     }
 
     @Override
     public int get(Player player) {
-        return Utils.getItemStackAmount(player, item);
+        return CratesUtils.getItemStackAmount(player, item);
     }
 
     public ItemStack getItem() {

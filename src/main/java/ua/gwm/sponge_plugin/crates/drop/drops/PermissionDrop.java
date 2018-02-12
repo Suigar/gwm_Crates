@@ -5,7 +5,7 @@ import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.item.inventory.ItemStack;
 import ua.gwm.sponge_plugin.crates.drop.Drop;
 import ua.gwm.sponge_plugin.crates.util.SuperObjectType;
-import ua.gwm.sponge_plugin.crates.util.Utils;
+import ua.gwm.sponge_plugin.crates.util.CratesUtils;
 
 import java.math.BigDecimal;
 import java.util.Optional;
@@ -32,8 +32,8 @@ public class PermissionDrop extends Drop {
                 throw new RuntimeException("DROP2 node does not exist!");
             }
             permission = permission_node.getString();
-            drop1 = (Drop) Utils.createSuperObject(drop1_node, SuperObjectType.DROP);
-            drop2 = (Drop) Utils.createSuperObject(drop2_node, SuperObjectType.DROP);
+            drop1 = (Drop) CratesUtils.createSuperObject(drop1_node, SuperObjectType.DROP);
+            drop2 = (Drop) CratesUtils.createSuperObject(drop2_node, SuperObjectType.DROP);
 
         } catch (Exception e) {
             throw new RuntimeException("Exception creating Permission Drop!", e);

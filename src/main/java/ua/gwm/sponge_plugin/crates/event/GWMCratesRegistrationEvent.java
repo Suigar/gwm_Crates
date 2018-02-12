@@ -23,7 +23,7 @@ public class GWMCratesRegistrationEvent extends AbstractEvent {
     }
     @Override
     public Cause getCause() {
-        return GWMCrates.getInstance().getDefaultCause();
+        return GWMCrates.getInstance().getCause();
     }
 
     public Set<SuperObjectStorage> getSuperObjectStorage() {

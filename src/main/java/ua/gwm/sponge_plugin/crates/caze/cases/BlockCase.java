@@ -9,7 +9,8 @@ import org.spongepowered.api.world.Location;
 import org.spongepowered.api.world.World;
 import ua.gwm.sponge_plugin.crates.GWMCrates;
 import ua.gwm.sponge_plugin.crates.caze.Case;
-import ua.gwm.sponge_plugin.crates.util.Utils;
+import ua.gwm.sponge_plugin.crates.util.CratesUtils;
+import ua.gwm.sponge_plugin.library.utils.LibraryUtils;
 
 import java.math.BigDecimal;
 import java.util.Optional;
@@ -30,11 +31,11 @@ public class BlockCase extends Case {
             if (location_node.isVirtual()) {
                 throw new RuntimeException("LOCATION node does not exist!");
             }
-            location = Utils.parseLocation(location_node);
+            location = LibraryUtils.parseLocation(location_node);
             if (!hologram_node.isVirtual()) {
                 hologram = Optional.of(TextSerializers.FORMATTING_CODE.deserialize(hologram_node.getString()));
             }
-            created_hologram = Utils.tryCreateHologram(location, hologram);
+            created_hologram = CratesUtils.tryCreateHologram(location, hologram);
             start_preview_on_left_click = start_preview_on_left_click_node.getBoolean(false);
         } catch (Exception e) {
             GWMCrates.getInstance().getLogger().warn("Exception creating Block Case!", e);

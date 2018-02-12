@@ -6,7 +6,7 @@ import ua.gwm.sponge_plugin.crates.gui.AdvancedTextField;
 import ua.gwm.sponge_plugin.crates.gui.ItemPanel;
 import ua.gwm.sponge_plugin.crates.gui.configuration_dialog.configuration_dialogues.OpenManagerConfigurationDialog;
 import ua.gwm.sponge_plugin.crates.util.CheckIntegerFunction;
-import ua.gwm.sponge_plugin.crates.util.Utils;
+import ua.gwm.sponge_plugin.crates.util.CratesUtils;
 
 import javax.swing.*;
 import java.awt.*;
@@ -115,7 +115,7 @@ public class SecondOpenManagerConfigurationDialog extends OpenManagerConfigurati
         click_sound_label.setLocation(8, 430);
         click_sound_label.setSize(190, 20);
         add(click_sound_label);
-        click_sound_combo_box = new AdvancedComboBox(Utils.getSoundTypes(true));
+        click_sound_combo_box = new AdvancedComboBox(CratesUtils.getSoundTypes(true));
         click_sound_combo_box.setLocation(8, 450);
         click_sound_combo_box.setSize(190, 20);
         add(click_sound_combo_box);
