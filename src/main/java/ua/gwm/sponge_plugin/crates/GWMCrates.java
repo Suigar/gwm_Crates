@@ -54,12 +54,13 @@ import java.io.File;
 import java.nio.file.Files;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Optional;
 
 @Plugin(
         id = "gwm_crates",
         name = "GWMCrates",
-        version = "2.3.1",
+        version = "2.3.2",
         description = "Universal crates plugin for your server!",
         authors = {"GWM"/*
                          * Nazar Kalinovskiy
@@ -72,7 +73,7 @@ import java.util.Optional;
         })
 public class GWMCrates extends SpongePlugin {
 
-    public static final Version VERSION = new Version(null, 2, 3, 1);
+    public static final Version VERSION = new Version(null, 2, 3, 2);
 
     private static GWMCrates instance = null;
 
@@ -121,6 +122,7 @@ public class GWMCrates extends SpongePlugin {
     private boolean log_opened_crates = false;
     private boolean check_updates = true;
     private Vector3d hologram_offset = new Vector3d(0.5, 1, 0.5);
+    private double multiline_holograms_distance = 0.2;
 
     @Listener
     public void onConstruct(GameConstructionEvent event) {
@@ -269,15 +271,11 @@ public class GWMCrates extends SpongePlugin {
                 Case caze = manager.getCase();
                 if (caze instanceof BlockCase) {
                     BlockCase block_case = (BlockCase) caze;
-                    Optional<HologramsService.Hologram> optional_hologram = block_case.getCreatedHologram();
-                    if (optional_hologram.isPresent()) {
-                        optional_hologram.get().remove();
-                    }
+                    Optional<List<HologramsService.Hologram>> optional_hologram = block_case.getCreatedHologram();
+                    optional_hologram.ifPresent(holograms -> holograms.forEach(HologramsService.Hologram::remove));
                 }
                 for (Animation1OpenManager.Information information : Animation1OpenManager.PLAYERS_OPENING_ANIMATION1.values()) {
-                    for (HologramsService.Hologram hologram : information.getHolograms()) {
-                        hologram.remove();
-                    }
+                    information.getHolograms().forEach(HologramsService.Hologram::remove);
                 }
             }
         } catch (Exception e) {
@@ -334,6 +332,7 @@ public class GWMCrates extends SpongePlugin {
             log_opened_crates = config.getNode("LOG_OPENED_CRATES").getBoolean(false);
             check_updates = config.getNode("CHECK_UPDATES").getBoolean(true);
             hologram_offset = config.getNode("HOLOGRAM_OFFSET").getValue(TypeToken.of(Vector3d.class), new Vector3d(0.5, -1.2, 0.5));
+            multiline_holograms_distance = config.getNode("MULTILINE_HOLOGRAMS_DISTANCE").getDouble(0.2);
         } catch (ObjectMappingException e) {
             logger.warn("Exception loading config values!", e);
         }
@@ -376,9 +375,13 @@ public class GWMCrates extends SpongePlugin {
                         ConfigurationLoader<CommentedConfigurationNode> manager_configuration_loader =
                                 HoconConfigurationLoader.builder().setFile(manager_file).build();
                         ConfigurationNode manager_node = manager_configuration_loader.load();
-                        Manager manager = new Manager(manager_node);
-                        created_managers.add(manager);
-                        logger.info("Manager \"" + manager.getId() + "\" (\"" + manager.getName() + "\") successfully loaded!");
+                        if (manager_node.getNode("LOAD").getBoolean(true)) {
+                            Manager manager = new Manager(manager_node);
+                            created_managers.add(manager);
+                            logger.info("Manager \"" + manager.getId() + "\" (\"" + manager.getName() + "\") successfully loaded!");
+                        } else {
+                            logger.info("Skipping manager file \"" + manager_file.getName() + "\"!");
+                        }
                     } catch (Exception e) {
                         logger.warn("Failed to load manager \"" + manager_file.getName() + "\"!", e);
                     }
@@ -511,5 +514,9 @@ public class GWMCrates extends SpongePlugin {
 
     public Vector3d getHologramOffset() {
         return hologram_offset;
+    }
+
+    public double getMultilineHologramsDistance() {
+        return multiline_holograms_distance;
     }
 }

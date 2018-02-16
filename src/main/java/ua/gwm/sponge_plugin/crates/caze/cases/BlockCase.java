@@ -1,5 +1,6 @@
 package ua.gwm.sponge_plugin.crates.caze.cases;
 
+import com.google.common.reflect.TypeToken;
 import de.randombyte.holograms.api.HologramsService;
 import ninja.leaping.configurate.ConfigurationNode;
 import org.spongepowered.api.entity.living.player.Player;
@@ -13,14 +14,16 @@ import ua.gwm.sponge_plugin.crates.util.CratesUtils;
 import ua.gwm.sponge_plugin.library.utils.LibraryUtils;
 
 import java.math.BigDecimal;
+import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 public class BlockCase extends Case {
 
     private Location<World> location;
-    private Optional<Text> hologram = Optional.empty();
+    private Optional<List<Text>> hologram = Optional.empty();
     private boolean start_preview_on_left_click = false;
-    private Optional<HologramsService.Hologram> created_hologram = Optional.empty();
+    private Optional<List<HologramsService.Hologram>> created_holograms = Optional.empty();
 
     public BlockCase(ConfigurationNode node) {
         super(node);
@@ -33,16 +36,19 @@ public class BlockCase extends Case {
             }
             location = LibraryUtils.parseLocation(location_node);
             if (!hologram_node.isVirtual()) {
-                hologram = Optional.of(TextSerializers.FORMATTING_CODE.deserialize(hologram_node.getString()));
+                hologram = Optional.of(hologram_node.getList(TypeToken.of(String.class)).
+                        stream().
+                        map(TextSerializers.FORMATTING_CODE::deserialize).
+                        collect(Collectors.toList()));
             }
-            created_hologram = CratesUtils.tryCreateHologram(location, hologram);
+            created_holograms = CratesUtils.tryCreateHolograms(location, hologram);
             start_preview_on_left_click = start_preview_on_left_click_node.getBoolean(false);
         } catch (Exception e) {
             GWMCrates.getInstance().getLogger().warn("Exception creating Block Case!", e);
         }
     }
 
-    public BlockCase(Optional<String> id, Optional<BigDecimal> price, Location<World> location, Optional<Text> hologram,
+    public BlockCase(Optional<String> id, Optional<BigDecimal> price, Location<World> location, Optional<List<Text>> hologram,
                      boolean start_preview_on_left_click) {
         super("BLOCK", id, price);
         this.location = location;
@@ -67,11 +73,11 @@ public class BlockCase extends Case {
         this.location = location;
     }
 
-    public Optional<Text> getHologram() {
+    public Optional<List<Text>> getHologram() {
         return hologram;
     }
 
-    public void setHologram(Optional<Text> hologram) {
+    public void setHologram(Optional<List<Text>> hologram) {
         this.hologram = hologram;
     }
 
@@ -83,11 +89,11 @@ public class BlockCase extends Case {
         this.start_preview_on_left_click = start_preview_on_left_click;
     }
 
-    public Optional<HologramsService.Hologram> getCreatedHologram() {
-        return created_hologram;
+    public Optional<List<HologramsService.Hologram>> getCreatedHologram() {
+        return created_holograms;
     }
 
-    public void setCreatedHologram(Optional<HologramsService.Hologram> created_hologram) {
-        this.created_hologram = created_hologram;
+    public void setCreatedHologram(Optional<List<HologramsService.Hologram>> created_hologram) {
+        this.created_holograms = created_hologram;
     }
 }

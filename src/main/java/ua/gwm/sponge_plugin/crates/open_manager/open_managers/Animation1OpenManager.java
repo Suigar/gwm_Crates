@@ -22,10 +22,11 @@ import ua.gwm.sponge_plugin.crates.event.PlayerOpenCrateEvent;
 import ua.gwm.sponge_plugin.crates.listener.Animation1Listener;
 import ua.gwm.sponge_plugin.crates.manager.Manager;
 import ua.gwm.sponge_plugin.crates.open_manager.OpenManager;
-import ua.gwm.sponge_plugin.crates.util.SuperObjectType;
 import ua.gwm.sponge_plugin.crates.util.CratesUtils;
+import ua.gwm.sponge_plugin.crates.util.SuperObjectType;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 public class Animation1OpenManager extends OpenManager {
 
@@ -35,7 +36,7 @@ public class Animation1OpenManager extends OpenManager {
     private BlockType fence_block_type;
     private BlockType crate_block_type;
     private OpenManager open_manager = new NoGuiOpenManager(Optional.empty(), Optional.empty());
-    private Optional<Text> hologram = Optional.empty();
+    private Optional<List<Text>> hologram = Optional.empty();
     private long close_delay = 0;
 
     public Animation1OpenManager(ConfigurationNode node) {
@@ -60,7 +61,10 @@ public class Animation1OpenManager extends OpenManager {
             fence_block_type = fence_block_type_node.getValue(TypeToken.of(BlockType.class));
             crate_block_type = crate_block_type_node.getValue(TypeToken.of(BlockType.class));
             if (!hologram_node.isVirtual()) {
-                hologram = Optional.of(TextSerializers.FORMATTING_CODE.deserialize(hologram_node.getString()));
+                hologram = Optional.of(hologram_node.getList(TypeToken.of(String.class)).
+                        stream().
+                        map(TextSerializers.FORMATTING_CODE::deserialize).
+                        collect(Collectors.toList()));
             }
             if (!close_delay_node.isVirtual()) {
                 close_delay = close_delay_node.getLong();
@@ -75,7 +79,7 @@ public class Animation1OpenManager extends OpenManager {
 
     public Animation1OpenManager(Optional<String> id, Optional<SoundType> open_sound, BlockType floor_block_type,
                                  BlockType fence_block_type, BlockType crate_block_type, OpenManager open_manager,
-                                 Optional<Text> hologram, int close_delay) {
+                                 Optional<List<Text>> hologram, int close_delay) {
         super("ANIMATION1", id, open_sound);
         this.floor_block_type = floor_block_type;
         this.fence_block_type = fence_block_type;
@@ -143,10 +147,10 @@ public class Animation1OpenManager extends OpenManager {
                         add(Keys.DIRECTION, Direction.SOUTH).
                         build(),
                 BlockChangeFlags.NONE);
-        CratesUtils.tryCreateHologram(loc1, hologram).ifPresent(holograms::add);
-        CratesUtils.tryCreateHologram(loc2, hologram).ifPresent(holograms::add);
-        CratesUtils.tryCreateHologram(loc3, hologram).ifPresent(holograms::add);
-        CratesUtils.tryCreateHologram(loc4, hologram).ifPresent(holograms::add);
+        CratesUtils.tryCreateHolograms(loc1, hologram).ifPresent(holograms::addAll);
+        CratesUtils.tryCreateHolograms(loc2, hologram).ifPresent(holograms::addAll);
+        CratesUtils.tryCreateHolograms(loc3, hologram).ifPresent(holograms::addAll);
+        CratesUtils.tryCreateHolograms(loc4, hologram).ifPresent(holograms::addAll);
         getOpenSound().ifPresent(sound -> player.playSound(sound, player.getLocation().getPosition(), 1.));
         PLAYERS_OPENING_ANIMATION1.put(player, new Information(this, manager,
                 new HashMap<Location<World>, Boolean>(){{
@@ -203,11 +207,11 @@ public class Animation1OpenManager extends OpenManager {
         this.crate_block_type = crate_block_type;
     }
 
-    public Optional<Text> getHologram() {
+    public Optional<List<Text>> getHologram() {
         return hologram;
     }
 
-    public void setHologram(Optional<Text> hologram) {
+    public void setHologram(Optional<List<Text>> hologram) {
         this.hologram = hologram;
     }
 

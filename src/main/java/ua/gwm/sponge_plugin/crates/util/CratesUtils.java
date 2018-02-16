@@ -4,7 +4,6 @@ import com.google.common.reflect.TypeToken;
 import de.randombyte.holograms.api.HologramsService;
 import ninja.leaping.configurate.ConfigurationNode;
 import org.apache.commons.lang3.StringUtils;
-import org.spongepowered.api.Sponge;
 import org.spongepowered.api.data.DataContainer;
 import org.spongepowered.api.data.DataQuery;
 import org.spongepowered.api.data.key.Keys;
@@ -301,11 +300,11 @@ public class CratesUtils {
         return amount;
     }
 
-    public static Optional<HologramsService.Hologram> tryCreateHologram(Location<World> location, Optional<Text> optional_text) {
-        if (!optional_text.isPresent()) {
+    public static Optional<List<HologramsService.Hologram>> tryCreateHolograms(Location<World> location, Optional<List<Text>> optional_text_list) {
+        if (!optional_text_list.isPresent()) {
             return Optional.empty();
         }
-        Text text = optional_text.get();
+        List<Text> text_list = optional_text_list.get();
         Optional<HologramsService> optional_hologram_service = GWMCrates.getInstance().getHologramsService();
         if (!optional_hologram_service.isPresent()) {
             GWMCrates.getInstance().getLogger().warn("Unable to create hologram, Holograms Service not found!");
@@ -313,8 +312,8 @@ public class CratesUtils {
         }
         HologramsService holograms_service = optional_hologram_service.get();
         location.getExtent().loadChunk(location.getChunkPosition(), true);
-        Optional<HologramsService.Hologram> optional_hologram = holograms_service.
-                createHologram(location.add(GWMCrates.getInstance().getHologramOffset()), text);
+        Optional<List<HologramsService.Hologram>> optional_hologram = holograms_service.
+                createMultilineHologram(location.add(GWMCrates.getInstance().getHologramOffset()), text_list, GWMCrates.getInstance().getMultilineHologramsDistance());
         if (!optional_hologram.isPresent()) {
             GWMCrates.getInstance().getLogger().warn("Holograms Service found, but hologram can not be created! :-(");
             return Optional.empty();
