@@ -24,6 +24,7 @@ import ua.gwm.sponge_plugin.crates.manager.Manager;
 import ua.gwm.sponge_plugin.crates.open_manager.OpenManager;
 import ua.gwm.sponge_plugin.crates.util.CratesUtils;
 import ua.gwm.sponge_plugin.crates.util.SuperObjectType;
+import ua.gwm.sponge_plugin.library.utils.LibraryUtils;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -147,10 +148,10 @@ public class Animation1OpenManager extends OpenManager {
                         add(Keys.DIRECTION, Direction.SOUTH).
                         build(),
                 BlockChangeFlags.NONE);
-        CratesUtils.tryCreateHolograms(loc1, hologram).ifPresent(holograms::addAll);
-        CratesUtils.tryCreateHolograms(loc2, hologram).ifPresent(holograms::addAll);
-        CratesUtils.tryCreateHolograms(loc3, hologram).ifPresent(holograms::addAll);
-        CratesUtils.tryCreateHolograms(loc4, hologram).ifPresent(holograms::addAll);
+        LibraryUtils.tryCreateHolograms(loc1, hologram).ifPresent(holograms::addAll);
+        LibraryUtils.tryCreateHolograms(loc2, hologram).ifPresent(holograms::addAll);
+        LibraryUtils.tryCreateHolograms(loc3, hologram).ifPresent(holograms::addAll);
+        LibraryUtils.tryCreateHolograms(loc4, hologram).ifPresent(holograms::addAll);
         getOpenSound().ifPresent(sound -> player.playSound(sound, player.getLocation().getPosition(), 1.));
         PLAYERS_OPENING_ANIMATION1.put(player, new Information(this, manager,
                 new HashMap<Location<World>, Boolean>(){{

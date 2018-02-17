@@ -1,4 +1,2 @@
-v. 2.3.2
-1. BLOCK case and ANIMATION1 Open Manager now can have multi lines holograms.
-1.1 'HOLOGRAM' parameter in BLOCK case and ANIMATION1 Open Manager now require list instead of string.
-2. Added 'MULTILINE_HOLOGRAMS_DISTANCE' parameter config.
+v. 2.3.3
+1. GWMLibrary is now used to create holograms!

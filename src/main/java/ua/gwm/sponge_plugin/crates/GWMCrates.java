@@ -60,7 +60,7 @@ import java.util.Optional;
 @Plugin(
         id = "gwm_crates",
         name = "GWMCrates",
-        version = "2.3.2",
+        version = "2.3.3",
         description = "Universal crates plugin for your server!",
         authors = {"GWM"/*
                          * Nazar Kalinovskiy
@@ -73,7 +73,7 @@ import java.util.Optional;
         })
 public class GWMCrates extends SpongePlugin {
 
-    public static final Version VERSION = new Version(null, 2, 3, 2);
+    public static final Version VERSION = new Version(null, 2, 3, 3);
 
     private static GWMCrates instance = null;
 
@@ -106,8 +106,7 @@ public class GWMCrates extends SpongePlugin {
 
     private HashSet<Manager> created_managers = new HashSet<Manager>();
 
-    private Optional<EconomyService> optional_economy_service = Optional.empty();
-    private Optional<HologramsService> optional_holograms_service = Optional.empty();
+    private Optional<EconomyService> economy_service = Optional.empty();
 
     private Config config;
     private Config language_config;
@@ -119,8 +118,8 @@ public class GWMCrates extends SpongePlugin {
 
     private Language language;
 
-    private boolean log_opened_crates = false;
     private boolean check_updates = true;
+    private boolean log_opened_crates = false;
     private Vector3d hologram_offset = new Vector3d(0.5, 1, 0.5);
     private double multiline_holograms_distance = 0.2;
 
@@ -194,7 +193,6 @@ public class GWMCrates extends SpongePlugin {
     @Listener
     public void onPostInitialization(GamePostInitializationEvent event) {
         loadEconomy();
-        loadHologramsService();
         register();
         logger.info("\"PostInitialization\" complete!");
     }
@@ -253,10 +251,8 @@ public class GWMCrates extends SpongePlugin {
         loadConfigValues();
         language = new Language(this);
         register();
-        optional_economy_service = Optional.empty();
-        optional_holograms_service = Optional.empty();
+        economy_service = Optional.empty();
         loadEconomy();
-        loadHologramsService();
         loadSavedSuperObjects();
         loadManagers();
         if (check_updates) {
@@ -394,8 +390,8 @@ public class GWMCrates extends SpongePlugin {
     }
 
     private boolean loadEconomy() {
-        optional_economy_service = Sponge.getServiceManager().provide(EconomyService.class);
-        if (optional_economy_service.isPresent()) {
+        economy_service = Sponge.getServiceManager().provide(EconomyService.class);
+        if (economy_service.isPresent()) {
             logger.info("Economy Service found!");
             return true;
         }
@@ -403,20 +399,6 @@ public class GWMCrates extends SpongePlugin {
         logger.info("Please install plugin that provides Economy Service, if you want use economical features.");
         return false;
     }
-
-    private boolean loadHologramsService() {
-        try {
-            optional_holograms_service = Sponge.getServiceManager().provide(HologramsService.class);
-            if (optional_holograms_service.isPresent()) {
-                logger.info("Holograms Service found!");
-                return true;
-            }
-        } catch (NoClassDefFoundError ignored) {}
-        logger.warn("Holograms Service does not found!");
-        logger.info("Please install \"Holograms\" plugin (https://ore.spongepowered.org/RandomByte/Holograms) if you want use holograms!");
-        return false;
-    }
-
     @Override
     public Version getVersion() {
         return VERSION;
@@ -450,11 +432,7 @@ public class GWMCrates extends SpongePlugin {
     }
 
     public Optional<EconomyService> getEconomyService() {
-        return optional_economy_service;
-    }
-
-    public Optional<HologramsService> getHologramsService() {
-        return optional_holograms_service;
+        return economy_service;
     }
 
     public PluginContainer getPluginContainer() {

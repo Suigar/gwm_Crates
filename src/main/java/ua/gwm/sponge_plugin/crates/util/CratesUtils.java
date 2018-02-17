@@ -1,7 +1,6 @@
 package ua.gwm.sponge_plugin.crates.util;
 
 import com.google.common.reflect.TypeToken;
-import de.randombyte.holograms.api.HologramsService;
 import ninja.leaping.configurate.ConfigurationNode;
 import org.apache.commons.lang3.StringUtils;
 import org.spongepowered.api.data.DataContainer;
@@ -298,27 +297,6 @@ public class CratesUtils {
             }
         }
         return amount;
-    }
-
-    public static Optional<List<HologramsService.Hologram>> tryCreateHolograms(Location<World> location, Optional<List<Text>> optional_text_list) {
-        if (!optional_text_list.isPresent()) {
-            return Optional.empty();
-        }
-        List<Text> text_list = optional_text_list.get();
-        Optional<HologramsService> optional_hologram_service = GWMCrates.getInstance().getHologramsService();
-        if (!optional_hologram_service.isPresent()) {
-            GWMCrates.getInstance().getLogger().warn("Unable to create hologram, Holograms Service not found!");
-            return Optional.empty();
-        }
-        HologramsService holograms_service = optional_hologram_service.get();
-        location.getExtent().loadChunk(location.getChunkPosition(), true);
-        Optional<List<HologramsService.Hologram>> optional_hologram = holograms_service.
-                createMultilineHologram(location.add(GWMCrates.getInstance().getHologramOffset()), text_list, GWMCrates.getInstance().getMultilineHologramsDistance());
-        if (!optional_hologram.isPresent()) {
-            GWMCrates.getInstance().getLogger().warn("Holograms Service found, but hologram can not be created! :-(");
-            return Optional.empty();
-        }
-        return optional_hologram;
     }
 
     public static SuperObject createSuperObject(ConfigurationNode node, SuperObjectType super_object_type) {

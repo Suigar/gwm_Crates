@@ -10,7 +10,6 @@ import org.spongepowered.api.world.Location;
 import org.spongepowered.api.world.World;
 import ua.gwm.sponge_plugin.crates.GWMCrates;
 import ua.gwm.sponge_plugin.crates.caze.Case;
-import ua.gwm.sponge_plugin.crates.util.CratesUtils;
 import ua.gwm.sponge_plugin.library.utils.LibraryUtils;
 
 import java.math.BigDecimal;
@@ -41,7 +40,7 @@ public class BlockCase extends Case {
                         map(TextSerializers.FORMATTING_CODE::deserialize).
                         collect(Collectors.toList()));
             }
-            created_holograms = CratesUtils.tryCreateHolograms(location, hologram);
+            created_holograms = LibraryUtils.tryCreateHolograms(location, hologram);
             start_preview_on_left_click = start_preview_on_left_click_node.getBoolean(false);
         } catch (Exception e) {
             GWMCrates.getInstance().getLogger().warn("Exception creating Block Case!", e);
