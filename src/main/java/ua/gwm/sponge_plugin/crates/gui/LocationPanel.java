@@ -65,7 +65,7 @@ public class LocationPanel extends JPanel {
 
     public void load(ConfigurationNode node) {
         try {
-            ConfigurationNode world_node = node.getNode("WORLD");
+            ConfigurationNode world_node = node.getNode("WORLD_NAME");
             ConfigurationNode x_node = node.getNode("X");
             ConfigurationNode y_node = node.getNode("Y");
             ConfigurationNode z_node = node.getNode("Z");
@@ -89,7 +89,7 @@ public class LocationPanel extends JPanel {
     public ConfigurationNode save() {
         try {
             ConfigurationNode node = SimpleConfigurationNode.root();
-            ConfigurationNode world_node = node.getNode("WORLD");
+            ConfigurationNode world_node = node.getNode("WORLD_NAME");
             ConfigurationNode x_node = node.getNode("X");
             ConfigurationNode y_node = node.getNode("Y");
             ConfigurationNode z_node = node.getNode("Z");

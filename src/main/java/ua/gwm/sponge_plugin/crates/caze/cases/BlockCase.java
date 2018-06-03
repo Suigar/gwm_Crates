@@ -40,7 +40,9 @@ public class BlockCase extends Case {
                         map(TextSerializers.FORMATTING_CODE::deserialize).
                         collect(Collectors.toList()));
             }
-            created_holograms = LibraryUtils.tryCreateHolograms(location, hologram);
+            created_holograms = LibraryUtils.tryCreateHolograms(location, hologram,
+                    GWMCrates.getInstance().getHologramOffset(),
+                    GWMCrates.getInstance().getMultilineHologramsDistance());
             start_preview_on_left_click = start_preview_on_left_click_node.getBoolean(false);
         } catch (Exception e) {
             GWMCrates.getInstance().getLogger().warn("Exception creating Block Case!", e);
